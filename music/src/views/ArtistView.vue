@@ -16,6 +16,7 @@ import { useAccent } from "@/composables/useAccent.ts";
 import { useBackdrop } from "@/composables/useBackdrop.ts";
 import { useCatalog } from "@/composables/useCatalog.ts";
 import { recurringArtists } from "@/services/stats";
+import { markerColor } from "@/utils/color.ts";
 import {
   formatDate,
   formatIssue,
@@ -76,6 +77,19 @@ const albums = computed(() => {
       b.count - a.count || a.album.name.localeCompare(b.album.name, "en"),
   );
 });
+
+/**
+ * Colour of an issue's dot on the rail: its liveliest cover colour.
+ * @param playlist - The issue
+ * @returns A vivid colour
+ */
+function dotColor(playlist: (typeof catalog.playlists)[number]): string {
+  const index = catalog.issues.indexOf(playlist);
+  return markerColor(
+    playlist.palette,
+    index < 0 ? 1 : index / Math.max(1, catalog.issues.length - 1),
+  );
+}
 
 useAccent(() => last.value?.palette);
 useBackdrop(() => profile.value?.imageUrl ?? last.value?.coverUrl);
@@ -175,7 +189,7 @@ useBackdrop(() => profile.value?.imageUrl ?? last.value?.coverUrl);
           class="rail__item"
           :style="{
             '--i': Math.min(index, 10),
-            '--dot': entry.playlist.palette[0] ?? 'var(--c1)',
+            '--dot': dotColor(entry.playlist),
           }"
         >
           <span class="rail__dot" aria-hidden="true" />
@@ -337,6 +351,7 @@ useBackdrop(() => profile.value?.imageUrl ?? last.value?.coverUrl);
   inline-size: 3px;
   border-radius: 3px;
   background: linear-gradient(var(--c1), var(--c2), var(--c3));
+  box-shadow: 0 0 12px color-mix(in oklab, var(--c2) 50%, transparent);
 }
 .rail__item {
   position: relative;
@@ -349,15 +364,27 @@ useBackdrop(() => profile.value?.imageUrl ?? last.value?.coverUrl);
     transform: translateY(14px);
   }
 }
+/* Centred on the rail (x = 9.5px from the list edge) and on the card's middle. */
 .rail__dot {
   position: absolute;
-  inset: 28px auto auto -27px;
-  inline-size: 17px;
-  block-size: 17px;
+  inset: 50% auto auto -29.5px;
+  inline-size: 22px;
+  block-size: 22px;
   border-radius: 50%;
-  background: var(--dot);
+  background: radial-gradient(
+    circle at 35% 30%,
+    color-mix(in oklab, var(--dot) 55%, #fff),
+    var(--dot) 70%
+  );
   border: 3px solid var(--bg);
-  box-shadow: 0 0 12px var(--dot);
+  box-shadow:
+    0 0 0 2px color-mix(in oklab, var(--dot) 45%, transparent),
+    0 0 18px var(--dot);
+  transform: translateY(-50%);
+  transition: transform 250ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.rail__item:hover .rail__dot {
+  transform: translateY(-50%) scale(1.2);
 }
 .issue {
   display: grid;

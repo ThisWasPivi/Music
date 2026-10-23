@@ -8,6 +8,7 @@ import type { Playlist } from "@music/shared";
 import { useI18n } from "vue-i18n";
 
 import CoverImage from "@/components/ui/CoverImage.vue";
+import { markerColor } from "@/utils/color.ts";
 import { formatIssue, formatLongDuration } from "@/utils/format.ts";
 
 defineProps<{
@@ -21,7 +22,7 @@ const { t } = useI18n();
 <template>
   <article
     class="card glass"
-    :style="{ '--card': playlist.palette[0] ?? 'var(--c1)' }"
+    :style="{ '--card': markerColor(playlist.palette, 0.5) }"
   >
     <CoverImage
       :src="playlist.coverUrl"

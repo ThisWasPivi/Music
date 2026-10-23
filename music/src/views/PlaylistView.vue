@@ -47,7 +47,7 @@ useBackdrop(() => playlist.value?.coverUrl);
 <template>
   <NotFoundView v-if="!playlist" />
   <div v-else class="stack">
-    <section class="head" aria-labelledby="playlist-title">
+    <section class="head glass" aria-labelledby="playlist-title">
       <a
         :href="playlist.url"
         target="_blank"
@@ -126,7 +126,8 @@ useBackdrop(() => playlist.value?.coverUrl);
 .head {
   display: grid;
   gap: 24px;
-  align-items: end;
+  align-items: center;
+  padding: clamp(16px, 2.6vw, 28px);
 }
 @media (min-width: 760px) {
   .head {

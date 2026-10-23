@@ -63,6 +63,8 @@ const root = ref<HTMLElement | null>(null);
 const trigger = ref<HTMLButtonElement | null>(null);
 const search = ref<HTMLInputElement | null>(null);
 const list = ref<HTMLElement | null>(null);
+const panel = ref<HTMLElement | null>(null);
+const position = ref<Record<string, string>>({});
 
 const withSearch = computed(() => props.searchable ?? props.options.length > 7);
 const selected = computed(
@@ -83,7 +85,34 @@ const visible = computed(() =>
  * @returns Nothing
  */
 function onOutside(event: PointerEvent): void {
-  if (root.value && !root.value.contains(event.target as Node)) close(false);
+  const target = event.target as Node;
+  if (!root.value?.contains(target) && !panel.value?.contains(target))
+    close(false);
+}
+
+/*
+ * The panel is teleported to <body>: inside a glass panel its backdrop blur
+ * could only see that panel, not the page behind it. So it is placed with
+ * fixed coordinates taken from the trigger.
+ */
+
+/**
+ * Places the panel under the trigger, flipping above when there is no room.
+ * @returns Nothing
+ */
+function place(): void {
+  const rect = trigger.value?.getBoundingClientRect();
+  if (!rect) return;
+  const width = Math.min(320, window.innerWidth - 32);
+  const left = props.alignEnd ? rect.right - width : rect.left;
+  const below = window.innerHeight - rect.bottom > 300 || rect.top < 300;
+  position.value = {
+    left: `${Math.max(16, Math.min(left, window.innerWidth - width - 16))}px`,
+    width: `${width}px`,
+    ...(below
+      ? { top: `${rect.bottom + 8}px` }
+      : { bottom: `${window.innerHeight - rect.top + 8}px` }),
+  };
 }
 
 /**
@@ -91,6 +120,7 @@ function onOutside(event: PointerEvent): void {
  * @returns Resolves once the menu has focus
  */
 async function openMenu(): Promise<void> {
+  place();
   open.value = true;
   query.value = "";
   active.value = Math.max(
@@ -98,6 +128,8 @@ async function openMenu(): Promise<void> {
     visible.value.indexOf(selected.value as SelectOption<T>),
   );
   document.addEventListener("pointerdown", onOutside);
+  window.addEventListener("scroll", place, { passive: true, capture: true });
+  window.addEventListener("resize", place);
   await nextTick();
   (withSearch.value ? search.value : list.value)?.focus();
   scrollActive();
@@ -112,6 +144,8 @@ function close(refocus = true): void {
   if (!open.value) return;
   open.value = false;
   document.removeEventListener("pointerdown", onOutside);
+  window.removeEventListener("scroll", place, { capture: true });
+  window.removeEventListener("resize", place);
   if (refocus) trigger.value?.focus();
 }
 
@@ -165,7 +199,11 @@ function onKey(event: KeyboardEvent): void {
 }
 
 watch(query, () => (active.value = 0));
-onBeforeUnmount(() => document.removeEventListener("pointerdown", onOutside));
+onBeforeUnmount(() => {
+  document.removeEventListener("pointerdown", onOutside);
+  window.removeEventListener("scroll", place, { capture: true });
+  window.removeEventListener("resize", place);
+});
 </script>
 
 <template>
@@ -201,108 +239,112 @@ onBeforeUnmount(() => document.removeEventListener("pointerdown", onOutside));
       </svg>
     </button>
 
-    <Transition name="pop">
-      <div
-        v-if="open"
-        class="select__panel"
-        :class="{ 'select__panel--end': alignEnd }"
-        @keydown="onKey"
-      >
-        <div v-if="withSearch" class="select__search">
-          <svg viewBox="0 0 16 16" aria-hidden="true">
-            <circle
-              cx="7"
-              cy="7"
-              r="4.5"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="1.6"
-            />
-            <path
-              d="m10.5 10.5 3 3"
-              stroke="currentColor"
-              stroke-width="1.6"
-              stroke-linecap="round"
-            />
-          </svg>
-          <input
-            :id="`${id}-search`"
-            ref="search"
-            v-model="query"
-            type="search"
-            role="combobox"
-            autocomplete="off"
-            :placeholder="t('select.search')"
-            :aria-label="t('select.searchIn', { label })"
-            :aria-controls="`${id}-list`"
-            aria-expanded="true"
-            :aria-activedescendant="
-              visible.length > 0 ? `${id}-option-${active}` : undefined
-            "
-          />
-        </div>
-        <ul
-          :id="`${id}-list`"
-          ref="list"
-          role="listbox"
-          :aria-label="label"
-          :tabindex="withSearch ? -1 : 0"
-          :aria-activedescendant="
-            !withSearch && visible.length > 0
-              ? `${id}-option-${active}`
-              : undefined
-          "
-          class="select__list"
+    <Teleport to="body">
+      <Transition name="pop">
+        <div
+          v-if="open"
+          ref="panel"
+          class="select__panel glass-pop"
+          :class="{ 'select__panel--end': alignEnd }"
+          :style="position"
+          @keydown="onKey"
         >
-          <li
-            v-for="(option, index) in visible"
-            :id="`${id}-option-${index}`"
-            :key="String(option.value)"
-            role="option"
-            :data-index="index"
-            :aria-selected="option.value === modelValue"
-            class="select__option"
-            :class="{ 'select__option--active': index === active }"
-            @pointerenter="active = index"
-            @click="pick(option)"
-          >
-            <img
-              v-if="option.image"
-              :src="option.image"
-              alt=""
-              loading="lazy"
-              class="select__image"
-              :class="{ 'select__image--round': option.round }"
-            />
-            <span class="select__label">{{ option.label }}</span>
-            <span v-if="option.hint" class="select__hint">{{
-              option.hint
-            }}</span>
-            <svg
-              v-if="option.value === modelValue"
-              class="select__check"
-              viewBox="0 0 12 12"
-              aria-hidden="true"
-            >
-              <path
-                d="m2.5 6.5 2.5 2.5 4.5-5"
+          <div v-if="withSearch" class="select__search">
+            <svg viewBox="0 0 16 16" aria-hidden="true">
+              <circle
+                cx="7"
+                cy="7"
+                r="4.5"
                 fill="none"
                 stroke="currentColor"
-                stroke-width="1.8"
+                stroke-width="1.6"
+              />
+              <path
+                d="m10.5 10.5 3 3"
+                stroke="currentColor"
+                stroke-width="1.6"
                 stroke-linecap="round"
               />
             </svg>
-          </li>
-          <li
-            v-if="visible.length === 0"
-            class="select__empty"
-            role="presentation"
+            <input
+              :id="`${id}-search`"
+              ref="search"
+              v-model="query"
+              type="search"
+              role="combobox"
+              autocomplete="off"
+              :placeholder="t('select.search')"
+              :aria-label="t('select.searchIn', { label })"
+              :aria-controls="`${id}-list`"
+              aria-expanded="true"
+              :aria-activedescendant="
+                visible.length > 0 ? `${id}-option-${active}` : undefined
+              "
+            />
+          </div>
+          <ul
+            :id="`${id}-list`"
+            ref="list"
+            role="listbox"
+            :aria-label="label"
+            :tabindex="withSearch ? -1 : 0"
+            :aria-activedescendant="
+              !withSearch && visible.length > 0
+                ? `${id}-option-${active}`
+                : undefined
+            "
+            class="select__list"
           >
-            {{ t("select.noResults") }}
-          </li>
-        </ul>
-      </div>
-    </Transition>
+            <li
+              v-for="(option, index) in visible"
+              :id="`${id}-option-${index}`"
+              :key="String(option.value)"
+              role="option"
+              :data-index="index"
+              :aria-selected="option.value === modelValue"
+              class="select__option"
+              :class="{ 'select__option--active': index === active }"
+              @pointerenter="active = index"
+              @click="pick(option)"
+            >
+              <img
+                v-if="option.image"
+                :src="option.image"
+                alt=""
+                loading="lazy"
+                class="select__image"
+                :class="{ 'select__image--round': option.round }"
+              />
+              <span class="select__label">{{ option.label }}</span>
+              <span v-if="option.hint" class="select__hint">{{
+                option.hint
+              }}</span>
+              <svg
+                v-if="option.value === modelValue"
+                class="select__check"
+                viewBox="0 0 12 12"
+                aria-hidden="true"
+              >
+                <path
+                  d="m2.5 6.5 2.5 2.5 4.5-5"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                />
+              </svg>
+            </li>
+            <li
+              v-if="visible.length === 0"
+              class="select__empty"
+              role="presentation"
+            >
+              {{ t("select.noResults") }}
+            </li>
+          </ul>
+        </div>
+      </Transition>
+    </Teleport>
   </div>
 </template>
 
@@ -358,21 +400,13 @@ onBeforeUnmount(() => document.removeEventListener("pointerdown", onOutside));
   transform: rotate(180deg);
 }
 .select__panel {
-  position: absolute;
-  inset: calc(100% + 8px) auto auto 0;
-  z-index: 50;
-  inline-size: min(320px, calc(100vw - 32px));
+  position: fixed;
+  z-index: 60;
   padding: 8px;
   border-radius: 18px;
-  border: 1px solid var(--glass-border);
-  background: var(--glass-strong);
-  backdrop-filter: blur(24px) saturate(1.5);
-  -webkit-backdrop-filter: blur(24px) saturate(1.5);
-  box-shadow: var(--shadow);
   transform-origin: top left;
 }
 .select__panel--end {
-  inset: calc(100% + 8px) 0 auto auto;
   transform-origin: top right;
 }
 .select__search {

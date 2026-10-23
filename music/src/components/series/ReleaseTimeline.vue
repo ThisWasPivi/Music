@@ -11,7 +11,13 @@ import { useI18n } from "vue-i18n";
 import { useRouter } from "vue-router";
 
 import type { Release } from "@/services/stats";
-import { vivid } from "@/utils/color.ts";
+import { useThemeStore } from "@/stores/theme.ts";
+import {
+  hexToHsl,
+  hslToHex,
+  markerColor,
+  withContrast,
+} from "@/utils/color.ts";
 import { formatDate } from "@/utils/format.ts";
 
 const props = withDefaults(
@@ -27,12 +33,17 @@ const props = withDefaults(
 
 const { t } = useI18n();
 const router = useRouter();
+const theme = useThemeStore();
 const id = useId();
 const WIDTH = 1000;
-const HEIGHT = 150;
+const HEIGHT = 200;
 const PAD = 30;
-const AXIS_Y = 78;
-const RADIUS = 11;
+const AXIS_Y = 100;
+const RADIUS = 10;
+/* Label lanes, nearest first: above, below, further above, further below. */
+const LANES = [-30, 30, -58, 58] as const;
+/* Minimum horizontal room, in viewBox units, between two labels in a lane. */
+const LABEL_ROOM = 26;
 /* The axis draws itself left to right; each ball appears as the line reaches it. */
 const SWEEP_MS = 1400;
 
@@ -55,19 +66,38 @@ function x(iso: string): number {
   );
 }
 
-const points = computed(() =>
-  props.releases.map((release, index) => {
-    const [first = "#7c3aed", second = first] = release.playlist.palette;
+const points = computed(() => {
+  const lastInLane: number[] = LANES.map(() => Number.NEGATIVE_INFINITY);
+  const total = Math.max(1, props.releases.length - 1);
+  return props.releases.map((release, index) => {
+    const px = x(release.releasedAt);
+    /* First lane with room for this label; when all are full, the emptiest. */
+    let lane = LANES.findIndex(
+      (_, laneIndex) => px - (lastInLane[laneIndex] ?? 0) >= LABEL_ROOM,
+    );
+    if (lane === -1) lane = lastInLane.indexOf(Math.min(...lastInLane));
+    lastInLane[lane] = px;
+    const color = markerColor(release.playlist.palette, index / total);
+    const hsl = hexToHsl(color);
     return {
       release,
-      x: x(release.releasedAt),
-      above: index % 2 === 0,
+      x: px,
+      offset: LANES[lane] ?? LANES[0],
       label:
         release.playlist.number === null
           ? "R"
           : String(release.playlist.number),
-      inner: vivid(second),
-      outer: vivid(first),
+      color,
+      /* Label text in the ball's colour, darkened or lightened to stay readable on the page. */
+      text: withContrast(
+        color,
+        theme.resolved === "dark" ? "#1a1924" : "#e2e4ec",
+        4.5,
+      ),
+      light: hslToHex({
+        ...hsl,
+        lightness: Math.min(0.85, hsl.lightness + 0.18),
+      }),
       tooltip: t("series.ballTooltip", {
         name: release.playlist.name,
         date: formatDate(release.releasedAt),
@@ -78,7 +108,12 @@ const points = computed(() =>
         ),
       }),
     };
-  }),
+  });
+});
+
+/* Wider than the screen only when there are many releases; it then scrolls. */
+const minWidth = computed(
+  () => `${Math.max(640, props.releases.length * 30)}px`,
 );
 
 /** 1 January of every year the axis covers. */
@@ -115,7 +150,12 @@ async function open(release: Release): Promise<void> {
 
 <template>
   <div class="timeline">
-    <svg :viewBox="`0 0 ${WIDTH} ${HEIGHT}`" role="group" :aria-label="summary">
+    <svg
+      :viewBox="`0 0 ${WIDTH} ${HEIGHT}`"
+      role="group"
+      :aria-label="summary"
+      :style="{ minInlineSize: minWidth }"
+    >
       <defs>
         <linearGradient
           :id="`${id}-axis`"
@@ -133,13 +173,12 @@ async function open(release: Release): Promise<void> {
           v-for="(point, index) in points"
           :id="`${id}-ball-${index}`"
           :key="point.release.playlist.id"
-          cx="0.35"
-          cy="0.3"
-          r="0.75"
+          cx="0.38"
+          cy="0.32"
+          r="0.7"
         >
-          <stop offset="0" stop-color="#ffffff" stop-opacity="0.85" />
-          <stop offset="0.25" :stop-color="point.inner" />
-          <stop offset="1" :stop-color="point.outer" />
+          <stop offset="0" :stop-color="point.light" />
+          <stop offset="1" :stop-color="point.color" />
         </radialGradient>
       </defs>
 
@@ -157,8 +196,8 @@ async function open(release: Release): Promise<void> {
         <line
           :x1="tick.x"
           :x2="tick.x"
-          :y1="AXIS_Y - 46"
-          :y2="AXIS_Y + 46"
+          :y1="AXIS_Y - 72"
+          :y2="AXIS_Y + 72"
           class="timeline__tick"
         />
         <text :x="tick.x + 6" :y="HEIGHT - 6" class="timeline__year">
@@ -180,7 +219,7 @@ async function open(release: Release): Promise<void> {
         class="timeline__point"
         :style="{
           animationDelay: `${(point.x / WIDTH) * SWEEP_MS}ms`,
-          '--glow': point.outer,
+          '--glow': point.color,
         }"
         @click.prevent="open(point.release)"
       >
@@ -188,9 +227,9 @@ async function open(release: Release): Promise<void> {
           :x1="point.x"
           :x2="point.x"
           :y1="AXIS_Y"
-          :y2="point.above ? AXIS_Y - 26 : AXIS_Y + 26"
+          :y2="AXIS_Y + point.offset * 0.72"
           class="timeline__stem"
-          :style="{ stroke: point.outer }"
+          :style="{ stroke: point.color }"
         />
         <circle
           v-if="point.release === highlight"
@@ -198,7 +237,7 @@ async function open(release: Release): Promise<void> {
           :cy="AXIS_Y"
           :r="RADIUS + 5"
           class="timeline__ring"
-          :style="{ stroke: point.outer }"
+          :style="{ stroke: point.color }"
         />
         <circle
           :cx="point.x"
@@ -209,10 +248,14 @@ async function open(release: Release): Promise<void> {
         />
         <text
           :x="point.x"
-          :y="point.above ? AXIS_Y - 32 : AXIS_Y + 42"
+          :y="
+            point.offset < 0
+              ? AXIS_Y + point.offset - 2
+              : AXIS_Y + point.offset + 12
+          "
           text-anchor="middle"
           class="timeline__label"
-          :style="{ fill: point.outer }"
+          :style="{ fill: point.text }"
         >
           {{ point.label }}
         </text>
@@ -228,7 +271,6 @@ async function open(release: Release): Promise<void> {
 }
 .timeline svg {
   display: block;
-  min-inline-size: 640px;
   inline-size: 100%;
   block-size: auto;
   overflow: visible;

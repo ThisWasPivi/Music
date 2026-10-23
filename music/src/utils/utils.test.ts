@@ -2,11 +2,14 @@ import { describe, expect, it } from "vitest";
 
 import {
   accentFromPalette,
+  auroraTint,
   colorSortKey,
+  colourfulOf,
   contrastRatio,
   DEFAULT_ACCENT,
   hexToHsl,
   hslToHex,
+  markerColor,
   vivid,
   withContrast,
 } from "./color.ts";
@@ -76,8 +79,22 @@ describe("accent helpers", () => {
   it("brightens near-black cover colours into usable accents", () => {
     expect(hexToHsl(vivid("#0a0a20")).lightness).toBeGreaterThanOrEqual(0.5);
     expect(accentFromPalette([])).toEqual(DEFAULT_ACCENT);
-    const accent = accentFromPalette(["#ff0000"]);
-    expect(accent.c2).toBe(accent.c1);
+  });
+
+  it("skips greys and fills accents with the aurora defaults", () => {
+    const accent = accentFromPalette(["#4a4a4a", "#2266dd", "#9a9a9a"]);
+    expect(hexToHsl(accent.c1).hue).toBeCloseTo(hexToHsl("#2266dd").hue, 0);
+    expect(accent.c2).toBe(DEFAULT_ACCENT.c1);
+  });
+
+  it("gives grey covers an aurora tint by position", () => {
+    expect(markerColor(["#555555", "#aaaaaa"], 0)).toBe(vivid(auroraTint(0)));
+    expect(markerColor(["#555555", "#ff0000"], 0.5)).toBe(vivid("#ff0000"));
+    expect(hexToHsl(auroraTint(1)).hue).toBeCloseTo(320, 0);
+    expect(colourfulOf(["#808080", "#ff0000", "#aa3333"])).toEqual([
+      "#ff0000",
+      "#aa3333",
+    ]);
   });
 
   it("round-trips HSL", () => {

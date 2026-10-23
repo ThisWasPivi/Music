@@ -25,6 +25,7 @@ import { backdropImage } from "@/composables/useBackdrop.ts";
     <span class="aurora__orb aurora__orb--3" />
     <span class="aurora__orb aurora__orb--4" />
     <span class="aurora__veil" />
+    <span class="aurora__tint" />
   </div>
 </template>
 
@@ -105,6 +106,16 @@ import { backdropImage } from "@/composables/useBackdrop.ts";
       color-mix(in oklab, var(--c2) 18%, transparent),
       transparent 60%
     );
+}
+/*
+ * A wash of the page colour over everything: keeps text on the aurora
+ * readable whatever the cover colours, especially greyish photo covers.
+ */
+.aurora__tint {
+  position: absolute;
+  inset: 0;
+  background: var(--bg);
+  opacity: var(--tint-opacity);
 }
 @keyframes drift-a {
   to {

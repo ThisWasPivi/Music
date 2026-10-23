@@ -261,7 +261,7 @@ function coverDataUri(palette: readonly string[], label: string): string {
     `<stop offset="0" stop-color="${base}"/><stop offset="1" stop-color="${second}"/></linearGradient></defs>` +
     `<rect width="300" height="300" fill="url(#g)"/>` +
     `<circle cx="215" cy="85" r="70" fill="${third}" opacity=".85"/>` +
-    `<text x="24" y="276" font-family="sans-serif" font-weight="700" font-size="56" fill="#fff" opacity=".92">${label}</text>` +
+    `<text x="24" y="274" font-family="Montserrat, sans-serif" font-weight="800" font-size="34" fill="#fff">${label}</text>` +
     `</svg>`;
   return `data:image/svg+xml,${encodeURIComponent(svg)}`;
 }
@@ -398,12 +398,24 @@ export function createFixtureCatalog(seed = 20240114): FixtureCatalog {
     reach = 14 + issueIndex * 4;
     const id = fakeId("pl", issueIndex);
     const hue = (issueIndex * 47 + random.int(0, 40)) % 360;
-    const palette = [
-      hslToHex(hue, 0.62, 0.42),
-      hslToHex((hue + 38) % 360, 0.7, 0.58),
-      hslToHex((hue + 180) % 360, 0.55, 0.7),
-      hslToHex((hue + 210) % 360, 0.35, 0.22),
-    ];
+    /*
+     * Every third issue gets a muted, photo-like palette (greys with one
+     * weak tint), like real covers made from photographs.
+     */
+    const muted = issueIndex % 3 === 1;
+    const palette = muted
+      ? [
+          hslToHex(hue, 0.08, 0.32),
+          hslToHex((hue + 20) % 360, 0.06, 0.62),
+          hslToHex(hue, 0.3, 0.45),
+          hslToHex(0, 0, 0.12),
+        ]
+      : [
+          hslToHex(hue, 0.62, 0.42),
+          hslToHex((hue + 38) % 360, 0.7, 0.58),
+          hslToHex((hue + 180) % 360, 0.55, 0.7),
+          hslToHex((hue + 210) % 360, 0.35, 0.22),
+        ];
     const name =
       number === null
         ? "Pivəəkly — Rarities"
@@ -437,7 +449,7 @@ export function createFixtureCatalog(seed = 20240114): FixtureCatalog {
         number === null
           ? "Leftovers, B-sides and songs that never fit a numbered issue."
           : `Issue ${number} of the series. ${random.pick(["Late-night drives", "Sunday mornings", "Rainy commutes", "Kitchen dancing", "Long flights"])} and everything in between.`,
-      coverUrl: coverDataUri(palette, number === null ? "R" : String(number)),
+      coverUrl: coverDataUri(palette, name.replace("—", "·")),
       url: `https://open.spotify.com/playlist/${id}`,
       trackCount: tracks.length,
       durationMs: tracks.reduce((sum, track) => sum + track.durationMs, 0),

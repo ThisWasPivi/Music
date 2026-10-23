@@ -10,6 +10,7 @@ import AppFooter from "@/components/ui/AppFooter.vue";
 import AppHeader from "@/components/ui/AppHeader.vue";
 import AppTooltip from "@/components/ui/AppTooltip.vue";
 import AuroraBackdrop from "@/components/ui/AuroraBackdrop.vue";
+import RouteProgress from "@/components/ui/RouteProgress.vue";
 import SampleDataNotice from "@/components/ui/SampleDataNotice.vue";
 import { useThemeStore } from "@/stores/theme.ts";
 
@@ -18,6 +19,7 @@ const { t } = useI18n();
 </script>
 
 <template>
+  <RouteProgress />
   <a href="#main" class="skip">{{ t("app.skip") }}</a>
   <AuroraBackdrop />
   <AppHeader />

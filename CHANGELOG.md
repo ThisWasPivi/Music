@@ -4,6 +4,25 @@ All notable changes to music.pivi.dev. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 [Semantic Versioning](https://semver.org/). Data syncs are not listed.
 
+## [1.1.0] - 2026-10-23
+
+### Added
+
+- Loading animations: a spinning-record splash, a progress bar between pages, shimmering
+  skeletons for covers and the Spotify player, sections rising into place and counting figures.
+- Floating glass for the header, dropdown menus and tooltips; menus now blur the page behind
+  them.
+- README in the style of TravelMap, with the detailed setup moved to `docs/GUIDE.md`.
+
+### Fixed
+
+- Text over photo covers was hard to read: the playlist header sits in a glass panel and a wash
+  of the page colour keeps the aurora calm.
+- Grey photo covers gave grey timeline balls, artist dots and accents: the liveliest cover colour
+  is used, or an aurora tint for the issue's place in the series.
+- Timeline labels no longer overlap, and keep AA contrast in both themes.
+- Artist timeline dots are centred on their card and glow in the issue's colour.
+
 ## [1.0.0] - 2026-10-23
 
 ### Added

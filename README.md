@@ -1,223 +1,168 @@
-# music.pivi.dev
+<div align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="./music/public/brand/mark-vinyl-dark.svg">
+    <source media="(prefers-color-scheme: light)" srcset="./music/public/brand/mark-vinyl-light.svg">
+    <img alt="Pivəəkly logo: a record player shaped like a p" src="./music/public/brand/mark-vinyl-dark.svg" height="96">
+  </picture>
+</div>
 
-A static showcase of the **Pivəəkly** Spotify playlist series: every issue with its cover and
-player, stats, a release timeline, recurring artists. The site never calls the Spotify API and
-holds no credentials. `pnpm sync` downloads the data locally, cleans it and commits it as JSON,
-then GitHub Actions builds and publishes the site on GitHub Pages.
+# [Pivəəkly](https://music.pivi.dev/)
 
-- **Site:** <https://music.pivi.dev> — in English and Italian (round-flag menu in the header)
-- **Stack:** pnpm workspace, Vue 3 (`<script setup>`) with strict TypeScript, Vite, Tailwind CSS
-  v4 plus native CSS, Pinia, Vue Router, vue-i18n, Vitest, zod, remeda.
+A static showcase of the **Pivəəkly** Spotify playlist series. Every issue with its cover,
+tracklist and the official Spotify player, plus statistics, a release timeline that shows the
+busy spells and the pauses, recurring artists and repeated tracks. The site never calls the
+Spotify API and holds no credentials: a local sync downloads the data, cleans it and commits it
+as JSON, and GitHub Actions publishes the site.
 
-## Contents
+![Vue](https://img.shields.io/badge/vue.js-%2335495e.svg?style=for-the-badge&logo=vuedotjs&logoColor=%234FC08D) ![TypeScript](https://img.shields.io/badge/typescript-%23007ACC.svg?style=for-the-badge&logo=typescript&logoColor=white) ![pnpm](https://img.shields.io/badge/pnpm-%23F69220.svg?style=for-the-badge&logo=pnpm&logoColor=white) ![Node.js](https://img.shields.io/badge/node.js-6DA55F?style=for-the-badge&logo=node.js&logoColor=white) ![Vite](https://img.shields.io/badge/vite-%23646CFF.svg?style=for-the-badge&logo=vite&logoColor=white) ![Tailwind CSS](https://img.shields.io/badge/tailwind_css-%2338B2AC.svg?style=for-the-badge&logo=tailwind-css&logoColor=white) ![Pinia](https://img.shields.io/badge/pinia-FFD859.svg?style=for-the-badge&logo=pinia&logoColor=black) ![Vue i18n](https://img.shields.io/badge/vue_i18n-41B883.svg?style=for-the-badge&logo=vuedotjs&logoColor=white) ![Zod](https://img.shields.io/badge/zod-3E67B1.svg?style=for-the-badge&logo=zod&logoColor=white) ![Vitest](https://img.shields.io/badge/vitest-6E9F18.svg?style=for-the-badge&logo=vitest&logoColor=white) ![Spotify](https://img.shields.io/badge/spotify_web_api-1ED760.svg?style=for-the-badge&logo=spotify&logoColor=black) ![ESLint](https://img.shields.io/badge/eslint-4B3263.svg?style=for-the-badge&logo=eslint&logoColor=white) ![Prettier](https://img.shields.io/badge/prettier-F7B93E.svg?style=for-the-badge&logo=prettier&logoColor=black) ![GitHub Pages](https://img.shields.io/badge/github_pages-222222.svg?style=for-the-badge&logo=github&logoColor=white)
 
-- [Requirements](#requirements)
-- [Spotify app setup](#spotify-app-setup)
-- [First run](#first-run)
-- [Commands](#commands)
-- [How the Pivəəkly are selected](#how-the-pivəəkly-are-selected)
-- [When the token expires](#when-the-token-expires)
-- [Architecture](#architecture)
-- [Localization](#localization)
-- [Versioning](#versioning)
-- [Security](#security)
-- [Deploy](#deploy)
+The [live site](https://music.pivi.dev/) shows the real series. A fresh clone ships with invented
+sample issues, so the app runs without a Spotify login. Read the [guide](./docs/GUIDE.md) for the
+complete setup and release workflow.
 
-## Requirements
+## Tech Stack
 
-- Node.js ≥ 22.22 and pnpm ≥ 10.28 (`corepack enable` uses the version pinned in `package.json`).
-- A **Spotify Premium** account: since 2026, apps in _Development Mode_ only work when the app
-  owner has Premium.
+- **Web app**: Vue 3 with `<script setup>`, Vue Router, Pinia, vue-i18n, and hand-made SVG and
+  CSS charts with entrance animations and themed tooltips.
+- **Sync**: Node.js scripts with a throttled Spotify Web API client (PKCE auth, retries with
+  backoff on 429, disk cache), zod-validated responses and `sharp` for cover palettes.
+- **Shared model**: TypeScript domain types, zod schemas, series rules and security rules in the
+  `@music/shared` workspace package.
+- **Data**: Portable JSON documents for playlists, top artists, rotation and sync metadata.
+- **Styling**: Tailwind CSS v4 with native CSS tokens, the "Aurora" glass design, light and dark
+  themes, Montserrat and Inter.
+- **Internationalization**: vue-i18n with English and Italian interfaces and round-flag
+  language menu.
+- **Search**: a shared fuzzy matcher for every search box and dropdown.
+- **Build system**: Vite, TypeScript, pnpm workspaces, and Node.js 22.
+- **Hosting**: GitHub Pages through GitHub Actions, on the music.pivi.dev custom domain.
+- **Quality**: ESLint, Prettier, Vitest, Husky, lint-staged, commitlint and a security scan.
 
-## Spotify app setup
+## What the site includes
 
-The app already exists. If it ever has to be recreated:
+### A showcase of the series
 
-1. Go to <https://developer.spotify.com/dashboard> and create an app ("Web API").
-2. Under **Redirect URIs** add a loopback address, for example `http://127.0.0.1:8888/callback`.
-   Spotify no longer accepts `localhost`: use `127.0.0.1`.
-3. The app stays in **Development Mode**: the owner needs Premium, and playlist contents are only
-   readable for playlists you own or collaborate on.
-4. Copy the **Client ID** and **Client secret** from the app settings.
+- Every issue as a cover card, with fuzzy search across playlists, tracks, albums and artists.
+- Sorting by number, name, track count, duration and cover colour.
+- Filters by artist and release decade (themed dropdowns with fuzzy search) and by mood tag.
 
-Constraints of the current API the code follows: playlist endpoints are `/playlists/{id}/items`
-(in the JSON `tracks` → `items`, `items[].track` → `items[].item`); audio-features,
-recommendations, related-artists, artist top-tracks and the batch endpoints no longer exist;
-`popularity`, `followers` and `label` are not used.
+### A page per issue
 
-## First run
+- Cover, release and update dates, totals and the official Spotify embed.
+- The tracklist with album covers, sortable by every column and fuzzy-filterable.
+- Links to the previous and next issue, with the cover glowing behind the whole page.
 
-```sh
+### Statistics and the series over time
+
+- Headline figures, top artists and albums by tracks or minutes, for the whole series or one
+  issue.
+- A per-year calendar of when tracks were added and the distribution of release years.
+- A real-time release timeline with average, shortest and longest gaps and missing numbers.
+- The discovery index (new artists per issue), recurring artists and repeated tracks.
+- A page per artist: album shelf and a timeline of every issue they appear in.
+
+Everything works on mobile and desktop, in light and dark themes, in English and Italian, with
+keyboard navigation and reduced-motion support.
+
+## How it works
+
+1. `pnpm auth` authorizes the Spotify app once and stores the refresh token in `.env`.
+2. `pnpm sync` reads your playlists, keeps the Pivəəkly ones you own and prints why each other
+   playlist was skipped.
+3. The adapter maps Spotify's JSON onto the domain model; the sanitizer drops anything that
+   identifies people.
+4. `pnpm release` verifies everything, commits only `music/src/data/` and pushes to `main`.
+5. GitHub Actions checks, builds and deploys the static site to GitHub Pages.
+
+There is no server, database or API call at runtime. Credentials never leave your machine.
+
+## Getting Started
+
+You need [Node.js](https://nodejs.org/) 22.22 or newer and [pnpm](https://pnpm.io/) 10.28 or
+newer.
+
+```bash
+git clone https://github.com/ThisWasPivi/Music.git
+cd Music
 pnpm install
-cp .env.example .env    # then fill in SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET, SPOTIFY_REDIRECT_URI
-pnpm auth               # runs the authorization flow and saves the refresh token to .env
-pnpm sync               # downloads the playlists and writes music/src/data/*.json
-pnpm dev                # http://localhost:5173
+pnpm dev
 ```
 
-`SPOTIFY_REDIRECT_URI` must match **exactly** one of the Redirect URIs registered on the app:
-`pnpm auth` listens on that very port and path.
+Open <http://localhost:5173>. The app starts with invented sample issues and says so on screen.
 
-You can work on the design without logging in: `pnpm fixtures` regenerates `music/src/data/`
-with invented Pivəəkly issues. When the data comes from the fixtures, the site says so.
+To publish your own playlists, fill in `.env` from `.env.example` and run:
 
-## Commands
-
-| Command                                                  | What it does                                                                                                                                                                                                          |
-| -------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `pnpm auth`                                              | Authorization Code flow with PKCE on a local server; saves `SPOTIFY_REFRESH_TOKEN` to `.env`. Run it the first time and when the token expires.                                                                       |
-| `pnpm sync`                                              | Downloads playlists, tracks, artists and "in rotation", maps them to the domain model, extracts cover palettes, sanitizes and writes `music/src/data/*.json`. `pnpm sync -- --no-cache` ignores the cache.            |
-| `pnpm release`                                           | From `main`: `sync`, then typecheck, lint, format, test, build and security scan; if everything passes it commits **only** `music/src/data/` (`chore(data): sync YYYY-MM-DD`) and pushes. The push starts the deploy. |
-| `pnpm dev`                                               | Web app dev server.                                                                                                                                                                                                   |
-| `pnpm build`                                             | Production build in `music/dist` (with `404.html` for routing on GitHub Pages).                                                                                                                                       |
-| `pnpm check`                                             | typecheck + lint + format:check + test.                                                                                                                                                                               |
-| `pnpm test`                                              | Vitest unit tests of every package.                                                                                                                                                                                   |
-| `pnpm security:scan`                                     | Looks for tokens, secrets, user ids and forbidden keys in `music/src/data` and `music/dist`.                                                                                                                          |
-| `pnpm security:audit`                                    | `pnpm audit` of the dependencies.                                                                                                                                                                                     |
-| `pnpm fixtures`                                          | Writes the invented sample data.                                                                                                                                                                                      |
-| `pnpm version:patch` / `version:minor` / `version:major` | Bumps the app version (see [Versioning](#versioning)).                                                                                                                                                                |
-
-The name `deploy` is not used because it is a built-in pnpm command.
-
-## How the Pivəəkly are selected
-
-The rules live in [`sync/playlists.config.ts`](sync/playlists.config.ts):
-
-- the starting point is `GET /me/playlists`;
-- **only playlists you own** are considered;
-- the name must start with `prefix` (default `"Pivəəkly"`, with two **ə**, U+0259). The
-  comparison runs on NFC-normalized, case-insensitive strings, so `PIVƏƏKLY` and names typed
-  with a decomposed ə work too;
-- `exclude`: ids never to publish, whatever their name;
-- `include`: ids to publish even when the name does not match (still only if you own them);
-- `tags`: optional moods per id, used by the site's filters.
-
-The issue number comes from the name (`Pivəəkly 12`, `Pivəəkly #12`, `Pivəəkly Nº 12`…). A
-playlist without a number is published last, as a special issue.
-
-Every `sync` prints a summary with:
-
-- the included playlists and why;
-- the skipped playlists and why: excluded in the config, not the owner, or a name that looks
-  like the series but does not match (often an "e" instead of the "ə");
-- numbers missing from the sequence, duplicated numbers and playlists without a number;
-- ids in `include`/`exclude` that match none of your playlists.
-
-No playlist outside these rules ever reaches the published JSON.
-
-The "release" date of an issue is the earliest `added_at` of its tracks: Spotify does not expose
-when a playlist was published, and the site says so next to the dates.
-
-## When the token expires
-
-The Spotify refresh token expires **6 months after authorization** (or when you revoke access to
-the app). `pnpm sync` then stops with:
-
-> The Spotify refresh token is no longer valid […]. Run `pnpm auth` again, then `pnpm sync`.
-
-Just run `pnpm auth` again. If Spotify rotates the refresh token during a sync, the new value is
-saved to `.env` automatically.
-
-## Architecture
-
-```
-music/    Vue web app: reads only the static JSON, knows nothing about the Spotify API
-sync/     Node scripts that download, adapt and sanitize the data
-shared/   domain model, zod schemas, series and security rules, fixtures
-scripts/  release and security scan
+```bash
+pnpm auth      # once, and again when the token expires (every 6 months)
+pnpm release   # sync, verify, commit the data and deploy
 ```
 
-Design patterns:
+A **Spotify Premium** account is required: Spotify apps in Development Mode only work for
+Premium owners. The [guide](./docs/GUIDE.md#1-spotify-app) covers the app setup.
 
-- **Adapter** (`sync/src/adapter.ts`): maps the Spotify DTOs (validated with zod in
-  `sync/src/spotify/schemas.ts`) onto the model in `shared/src/domain.ts`. All Spotify API
-  knowledge lives in `sync/`.
-- **Spotify client** (`sync/src/spotify/client.ts`):
-  - queued requests with a minimum spacing;
-  - retries with exponential backoff on 429 (honouring `Retry-After`), on 5xx and network errors;
-  - token refresh on 401;
-  - disk cache in `.sync-cache/`: tracks are keyed by `snapshot_id`, so only changed playlists
-    are downloaded again; artists and palettes expire.
-- **Repository** (`music/src/repositories/PlaylistRepository.ts`): the only module that imports
-  the JSON; an ESLint rule enforces it.
-- **Pure service layer** (`music/src/services/stats/`): summaries, rankings, per-year heatmaps,
-  year/decade distribution, timeline and gaps, recurring artists, discovery index, repeated
-  tracks. Pure functions, tested with Vitest.
-- **Strategy** (`music/src/strategies/`): every sort or filter is a strategy, combined with
-  `sortWith`/`filterWith` and `chainSorts`/`withDirection`.
-- **Fuzzy search** (`music/src/utils/fuzzy.ts`): every search box and dropdown matches with the
-  same rules. Text is folded (no case, no accents, "ə" read as "e"); every query word must match
-  a word of the text, by substring, word prefix, typo-tolerant prefix (no typos up to 3 letters,
-  1 up to 6, 2 from 7) or, last, letters in order.
-- **Pinia** for UI state (theme, showcase sort and filters); **composables** for reusable logic
-  (`useCatalog`, `useAccent`, `useBackdrop`, `useTooltip`); components by feature
-  (`playlists/`, `stats/`, `series/`, `player/`) plus the base ones in `ui/` (`SelectMenu`
-  dropdown with fuzzy search, themed tooltip, language and theme switchers).
+## Development checks
 
-The "Aurora" design: glass panels over blurred, drifting orbs painted with the colours of the
-cover in view (extracted during the sync with `sharp`); on playlist and artist pages the cover
-itself, blurred, fills the whole page. Display type is Montserrat, the face of the covers; body
-text is Inter. Light and dark themes (automatic, or chosen with the header button); accents are
-adjusted to always meet WCAG AA contrast; keyboard navigable; `prefers-reduced-motion` turns the
-animations off. The logo is the vinyl "p" (`music/src/components/ui/BrandMark.vue`,
-`music/public/brand/`).
+Run the repository-wide quality gate before pushing:
 
-Listening uses the official Spotify embed (no login needed). Attribution: the Spotify logo and
-"Listen on Spotify" links next to the content, plus a note in the footer.
+```bash
+pnpm check
+pnpm build
+pnpm security:scan
+pnpm security:audit
+```
 
-### Quality
+`pnpm check` runs type checking, linting, formatting and the unit tests of every workspace
+package. Git hooks lint staged files before each commit and check commit messages against
+Conventional Commits; CI repeats the full suite before every deploy.
 
-- ESLint flat config with Vue and TypeScript rules, plus the documentation rules of
-  [TravelMap](https://github.com/thisispivi/TravelMap): JSDoc on declarations and comments as
-  own-line blocks.
-- Prettier.
-- Husky + lint-staged on pre-commit and commitlint (Conventional Commits) on commit-msg.
+### Runtime validation
 
-## Localization
+Spotify's responses are untrusted. `sync/src/spotify/schemas.ts` validates them with zod at the
+point they enter the sync, so a changed API fails with the field named instead of publishing
+broken data. Before anything is written, `sync/src/sanitize.ts` parses the result through the
+domain schemas of `@music/shared`, which keep only declared fields.
 
-The site is in English (`en-GB`) and Italian (`it-IT`). The first visit follows the browser
-language; the choice made in the header menu is remembered. All code, URLs and comments are in
-English; translations live only in `music/src/i18n/locales/*.json`. A test fails if a key is
-missing from one language or if the code uses a key that does not exist. Dates and numbers are
-formatted for the active language.
+## Deployment
 
-## Versioning
+`.github/workflows/deploy.yml` runs on every push to `main` and on demand. It installs, audits,
+type checks, lints, tests, builds and scans the site, then publishes `music/dist/` with
+`actions/deploy-pages`. There is no `gh-pages` branch, and no secrets are needed: the data is
+already in the repository.
 
-The app follows [Semantic Versioning](https://semver.org). The version is the `version` of the
-root `package.json`; the footer shows it with the commit the site was built from, linking to
-[`CHANGELOG.md`](CHANGELOG.md). To release a new version of the site (not a data sync):
+Releases of the app itself follow Semantic Versioning: see
+[Versioning](./docs/GUIDE.md#7-versioning) and the [changelog](./CHANGELOG.md).
 
-1. add an entry to `CHANGELOG.md`;
-2. run `pnpm version:patch`, `pnpm version:minor` or `pnpm version:major`;
-3. commit (`chore(release): vX.Y.Z`) and push to `main`.
+## Your data stays private
 
-Data syncs (`pnpm release`) do not change the version.
+- `.env` holds the client ID, client secret and refresh token, and is gitignored.
+- `.sync-cache/` keeps raw Spotify responses locally to save API calls, and is gitignored.
+- `music/src/data/` holds only the sanitized, public data the site shows.
 
-## Security
+The sanitizer removes `added_by`, owner and collaborator ids and your account name, and the
+security scan fails a release if a token, secret or user identifier ever slips into the data or
+the built site.
 
-The repository is public, so:
+## Documentation
 
-- Client ID, client secret and refresh token live **only** in `.env`, which is gitignored
-  (`.env.example` has no values). No GitHub secrets are needed.
-- The bundle contains no token and never calls the Spotify API.
-- Sanitization is mandatory (`sync/src/sanitize.ts`):
-  - data passes through the domain zod schemas, which drop every undeclared key (`added_by`,
-    owners, collaborator ids…);
-  - a second check rejects forbidden keys;
-  - the account's id and name and collaborators' ids are removed from playlist names and
-    descriptions.
-- `pnpm security:scan` (in `release` and in CI) fails if `music/src/data/` or `music/dist/`
-  contain strings that look like Spotify tokens, Bearer headers, hexadecimal ids or secrets, user
-  URIs or links, forbidden keys, or the real values of your `.env`.
-- `pnpm audit` runs in CI. `pnpm-workspace.yaml` refuses packages published less than a week ago.
+| Guide                                                     | Covers                                                        |
+| --------------------------------------------------------- | ------------------------------------------------------------- |
+| [Guide](./docs/GUIDE.md)                                  | Spotify app, first run, commands, selection, tokens, releases |
+| [Spotify app](./docs/GUIDE.md#1-spotify-app)              | Dashboard setup, redirect URI, Premium and API constraints    |
+| [Selection](./docs/GUIDE.md#4-choosing-the-pivəəkly)      | How playlists are picked and how to include or exclude one    |
+| [Expired token](./docs/GUIDE.md#5-when-the-token-expires) | What to do when the refresh token expires                     |
+| [Architecture](./docs/GUIDE.md#6-architecture)            | Adapter, repository, services, strategies, design and search  |
+| [Changelog](./CHANGELOG.md)                               | What changed in every version                                 |
 
-## Deploy
+## Project Structure
 
-`.github/workflows/deploy.yml` runs on every push to `main` and on `workflow_dispatch`:
-
-1. install, `pnpm audit`, typecheck, lint, format, test, build, security scan;
-2. `actions/upload-pages-artifact` and `actions/deploy-pages`.
-
-There is no `gh-pages` branch: GitHub Pages is set to "GitHub Actions". The custom domain is in
-`music/public/CNAME` (`music.pivi.dev`), so Vite uses `base: "/"`. On pull requests the workflow
-only verifies.
+```text
+.
+├── music/             Vue web app (the published site)
+│   ├── public/        Static files: CNAME, favicon, brand marks
+│   └── src/data/      Sanitized JSON written by the sync
+├── sync/              Spotify auth, sync, adapter and sanitizer
+├── shared/            Domain model, schemas, series and security rules, fixtures
+├── scripts/           Release and security scan
+├── eslint/            Repository-local ESLint rules
+└── docs/              Guide
+```

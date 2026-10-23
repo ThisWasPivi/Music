@@ -22,7 +22,7 @@ const style = computed(() => ({
         v-show="tooltip.visible"
         :id="TOOLTIP_ID"
         role="tooltip"
-        class="tip"
+        class="tip glass-pop"
         :class="{ 'tip--below': below }"
         :style="style"
       >
@@ -39,11 +39,6 @@ const style = computed(() => ({
   max-inline-size: min(280px, calc(100vw - 24px));
   padding: 7px 12px;
   border-radius: 12px;
-  border: 1px solid var(--glass-border);
-  background: var(--glass-strong);
-  backdrop-filter: blur(18px) saturate(1.4);
-  -webkit-backdrop-filter: blur(18px) saturate(1.4);
-  box-shadow: var(--shadow);
   color: var(--text);
   font: 500 13px/1.35 var(--font-body);
   text-align: center;

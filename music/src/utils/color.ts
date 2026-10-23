@@ -115,15 +115,83 @@ export function vivid(hex: string): string {
   });
 }
 
+/** Below this saturation a cover colour reads as grey. */
+const GREY_SATURATION = 0.22;
+
 /**
- * Derives a page's accents from a cover palette.
+ * How lively a colour looks: saturated and neither too dark nor too light.
+ * @param hex - The colour
+ * @returns A score in [0, 1]
+ */
+export function vividness(hex: string): number {
+  const { saturation, lightness } = hexToHsl(hex);
+  return saturation * Math.max(0, 1 - Math.abs(lightness - 0.5) * 1.4);
+}
+
+/**
+ * Keeps the colourful entries of a palette, liveliest first.
+ * @param palette - Cover colours
+ * @returns The non-grey colours, sorted by vividness
+ */
+export function colourfulOf(palette: readonly string[]): string[] {
+  return palette
+    .filter((hex) => hexToHsl(hex).saturation >= GREY_SATURATION)
+    .sort((a, b) => vividness(b) - vividness(a));
+}
+
+/**
+ * An aurora tint for a position along the series, used when a cover has no
+ * colour of its own: violet at the start, through blue and cyan, to pink.
+ * @param position - Where the item sits, in [0, 1]
+ * @returns The colour
+ */
+export function auroraTint(position: number): string {
+  const stops = [265, 225, 190, 320];
+  const scaled = Math.min(0.999, Math.max(0, position)) * (stops.length - 1);
+  const index = Math.floor(scaled);
+  const from = stops[index] ?? 265;
+  const to = stops[index + 1] ?? from;
+  return hslToHex({
+    hue: from + (to - from) * (scaled - index),
+    saturation: 0.72,
+    lightness: 0.6,
+  });
+}
+
+/**
+ * The marker colour of an issue: its liveliest cover colour, or an aurora
+ * tint for its place in the series when the cover is all greys.
+ * @param palette - Cover colours
+ * @param position - Place in the series, in [0, 1]
+ * @returns A vivid colour
+ */
+export function markerColor(
+  palette: readonly string[],
+  position: number,
+): string {
+  const [best] = colourfulOf(palette);
+  return vivid(best ?? auroraTint(position));
+}
+
+/**
+ * Derives a page's accents from a cover palette. Colourful cover colours
+ * come first; greys are skipped and the gaps filled with the default
+ * aurora accents, so photo covers still give a colourful page.
  * @param palette - Cover colours, most dominant first
- * @returns Three accents, falling back to the defaults
+ * @returns Three accents
  */
 export function accentFromPalette(palette: readonly string[]): Accent {
-  const [first, second, third] = palette.map(vivid);
-  if (!first) return DEFAULT_ACCENT;
-  return { c1: first, c2: second ?? first, c3: third ?? second ?? first };
+  const [c1, c2, c3] = [
+    ...colourfulOf(palette).map(vivid),
+    DEFAULT_ACCENT.c1,
+    DEFAULT_ACCENT.c2,
+    DEFAULT_ACCENT.c3,
+  ];
+  return {
+    c1: c1 ?? DEFAULT_ACCENT.c1,
+    c2: c2 ?? DEFAULT_ACCENT.c2,
+    c3: c3 ?? DEFAULT_ACCENT.c3,
+  };
 }
 
 /**

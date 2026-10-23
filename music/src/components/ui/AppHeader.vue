@@ -20,7 +20,7 @@ const LINKS = [
 
 <template>
   <header class="header">
-    <div class="header__bar glass">
+    <div class="header__bar glass-pop">
       <RouterLink
         :to="{ name: 'home' }"
         class="header__brand"
@@ -59,7 +59,6 @@ const LINKS = [
   gap: 8px;
   padding: 6px 8px 6px 14px;
   border-radius: 999px;
-  background: var(--glass-strong);
   max-inline-size: 1200px;
   margin-inline: auto;
 }
