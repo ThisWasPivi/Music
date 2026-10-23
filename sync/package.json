@@ -3,12 +3,17 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "auth": "tsx src/cli-auth.ts",
     "fixtures": "tsx src/fixtures.ts",
-    "test": "vitest run --passWithNoTests",
+    "sync": "tsx src/cli-sync.ts",
+    "test": "vitest run",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@music/shared": "workspace:*"
+    "@music/shared": "workspace:*",
+    "remeda": "^2.52.0",
+    "sharp": "^0.35.5",
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "tsx": "^4.23.15"

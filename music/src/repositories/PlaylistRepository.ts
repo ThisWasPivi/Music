@@ -60,15 +60,6 @@ export class PlaylistRepository {
   }
 
   /**
-   * Finds a playlist by its issue number.
-   * @param issue - The issue number
-   * @returns The playlist, or undefined when that issue does not exist
-   */
-  byNumber(issue: number): Playlist | undefined {
-    return this.#playlists.find((playlist) => playlist.number === issue);
-  }
-
-  /**
    * Lists the profiles of the top artists.
    * @returns The artist profiles
    */

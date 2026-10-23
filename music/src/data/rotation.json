@@ -39,153 +39,148 @@
   ],
   "tracks": [
     {
-      "id": "fxtr00fe00000000000000",
-      "title": "Highway Song",
+      "id": "fxtr00gd00000000000000",
+      "title": "Neon Dreams",
       "artists": [
         {
-          "id": "fxar000l00000000000000",
-          "name": "Fax Machine Romance",
-          "url": "https://open.spotify.com/artist/fxar000l00000000000000"
+          "id": "fxar000200000000000000",
+          "name": "The Midnight Cartographers",
+          "url": "https://open.spotify.com/artist/fxar000200000000000000"
         }
       ],
       "album": {
-        "id": "fxal002t00000000000000",
-        "name": "Gold Tonight",
-        "url": "https://open.spotify.com/album/fxal002t00000000000000",
+        "id": "fxal000o00000000000000",
+        "name": "Gold Love",
+        "url": "https://open.spotify.com/album/fxal000o00000000000000",
         "imageUrl": null
       },
-      "url": "https://open.spotify.com/track/fxtr00fe00000000000000"
+      "url": "https://open.spotify.com/track/fxtr00gd00000000000000"
     },
     {
-      "id": "fxtr00ff00000000000000",
-      "title": "Riviera Forever",
+      "id": "fxtr00ge00000000000000",
+      "title": "Harbour Season",
       "artists": [
         {
-          "id": "fxar000a00000000000000",
-          "name": "Saltwater Choir",
-          "url": "https://open.spotify.com/artist/fxar000a00000000000000"
+          "id": "fxar001200000000000000",
+          "name": "Vera Lux",
+          "url": "https://open.spotify.com/artist/fxar001200000000000000"
         }
       ],
       "album": {
-        "id": "fxal001n00000000000000",
-        "name": "Salt Love",
-        "url": "https://open.spotify.com/album/fxal001n00000000000000",
+        "id": "fxal002s00000000000000",
+        "name": "Signal Blues",
+        "url": "https://open.spotify.com/album/fxal002s00000000000000",
         "imageUrl": null
       },
-      "url": "https://open.spotify.com/track/fxtr00ff00000000000000"
+      "url": "https://open.spotify.com/track/fxtr00ge00000000000000"
     },
     {
-      "id": "fxtr00fg00000000000000",
-      "title": "Fever Dreams",
+      "id": "fxtr00gf00000000000000",
+      "title": "Signal Talk",
       "artists": [
         {
-          "id": "fxar000700000000000000",
-          "name": "Marisol Ferro",
-          "url": "https://open.spotify.com/artist/fxar000700000000000000"
+          "id": "fxar001b00000000000000",
+          "name": "Fennel & Fig",
+          "url": "https://open.spotify.com/artist/fxar001b00000000000000"
         }
       ],
       "album": {
-        "id": "fxal000w00000000000000",
-        "name": "Gold Dreams",
-        "url": "https://open.spotify.com/album/fxal000w00000000000000",
+        "id": "fxal002m00000000000000",
+        "name": "Salt Blues",
+        "url": "https://open.spotify.com/album/fxal002m00000000000000",
         "imageUrl": null
       },
-      "url": "https://open.spotify.com/track/fxtr00fg00000000000000"
+      "url": "https://open.spotify.com/track/fxtr00gf00000000000000"
     },
     {
-      "id": "fxtr00fh00000000000000",
-      "title": "Velvet Blues",
+      "id": "fxtr00gg00000000000000",
+      "title": "Cherry Forever",
       "artists": [
         {
-          "id": "fxar000z00000000000000",
-          "name": "Yuki Harrow",
-          "url": "https://open.spotify.com/artist/fxar000z00000000000000"
+          "id": "fxar001h00000000000000",
+          "name": "The Riviera Season",
+          "url": "https://open.spotify.com/artist/fxar001h00000000000000"
         }
       ],
       "album": {
-        "id": "fxal001e00000000000000",
-        "name": "Honey Song",
-        "url": "https://open.spotify.com/album/fxal001e00000000000000",
+        "id": "fxal002w00000000000000",
+        "name": "Highway Love",
+        "url": "https://open.spotify.com/album/fxal002w00000000000000",
         "imageUrl": null
       },
-      "url": "https://open.spotify.com/track/fxtr00fh00000000000000"
+      "url": "https://open.spotify.com/track/fxtr00gg00000000000000"
     },
     {
-      "id": "fxtr00fi00000000000000",
-      "title": "Velvet Season",
+      "id": "fxtr00gh00000000000000",
+      "title": "Glow Lights",
       "artists": [
         {
-          "id": "fxar000o00000000000000",
-          "name": "Tessa Mint",
-          "url": "https://open.spotify.com/artist/fxar000o00000000000000"
+          "id": "fxar000e00000000000000",
+          "name": "Hollow Palms",
+          "url": "https://open.spotify.com/artist/fxar000e00000000000000"
         }
       ],
       "album": {
-        "id": "fxal002600000000000000",
-        "name": "Paper Season",
-        "url": "https://open.spotify.com/album/fxal002600000000000000",
+        "id": "fxal000u00000000000000",
+        "name": "Cherry Again",
+        "url": "https://open.spotify.com/album/fxal000u00000000000000",
         "imageUrl": null
       },
-      "url": "https://open.spotify.com/track/fxtr00fi00000000000000"
+      "url": "https://open.spotify.com/track/fxtr00gh00000000000000"
     },
     {
-      "id": "fxtr00fj00000000000000",
-      "title": "Summer Season",
+      "id": "fxtr00gi00000000000000",
+      "title": "Lullaby Lights",
       "artists": [
         {
-          "id": "fxar000x00000000000000",
-          "name": "Cassette Ghosts",
-          "url": "https://open.spotify.com/artist/fxar000x00000000000000"
+          "id": "fxar000600000000000000",
+          "name": "Paper Satellites",
+          "url": "https://open.spotify.com/artist/fxar000600000000000000"
         }
       ],
       "album": {
-        "id": "fxal002d00000000000000",
-        "name": "Honey Heart",
-        "url": "https://open.spotify.com/album/fxal002d00000000000000",
+        "id": "fxal004500000000000000",
+        "name": "Static Again",
+        "url": "https://open.spotify.com/album/fxal004500000000000000",
         "imageUrl": null
       },
-      "url": "https://open.spotify.com/track/fxtr00fj00000000000000"
+      "url": "https://open.spotify.com/track/fxtr00gi00000000000000"
     },
     {
-      "id": "fxtr00fk00000000000000",
-      "title": "Ghost Dreams",
+      "id": "fxtr00gj00000000000000",
+      "title": "Polaroid Again",
+      "artists": [
+        {
+          "id": "fxar002e00000000000000",
+          "name": "Riviera Again Club",
+          "url": "https://open.spotify.com/artist/fxar002e00000000000000"
+        }
+      ],
+      "album": {
+        "id": "fxal005700000000000000",
+        "name": "Orbit Heart",
+        "url": "https://open.spotify.com/album/fxal005700000000000000",
+        "imageUrl": null
+      },
+      "url": "https://open.spotify.com/track/fxtr00gj00000000000000"
+    },
+    {
+      "id": "fxtr00gk00000000000000",
+      "title": "Signal Again",
       "artists": [
         {
           "id": "fxar000100000000000000",
           "name": "Nora Kessel",
           "url": "https://open.spotify.com/artist/fxar000100000000000000"
-        },
-        {
-          "id": "fxar000000000000000000",
-          "name": "Velvet Harbour",
-          "url": "https://open.spotify.com/artist/fxar000000000000000000"
         }
       ],
       "album": {
-        "id": "fxal001c00000000000000",
-        "name": "Midnight Song",
-        "url": "https://open.spotify.com/album/fxal001c00000000000000",
+        "id": "fxal001900000000000000",
+        "name": "Neon Song",
+        "url": "https://open.spotify.com/album/fxal001900000000000000",
         "imageUrl": null
       },
-      "url": "https://open.spotify.com/track/fxtr00fk00000000000000"
-    },
-    {
-      "id": "fxtr00fl00000000000000",
-      "title": "Echo Blues",
-      "artists": [
-        {
-          "id": "fxar000m00000000000000",
-          "name": "Low Tide Society",
-          "url": "https://open.spotify.com/artist/fxar000m00000000000000"
-        }
-      ],
-      "album": {
-        "id": "fxal002p00000000000000",
-        "name": "Harbour Season",
-        "url": "https://open.spotify.com/album/fxal002p00000000000000",
-        "imageUrl": null
-      },
-      "url": "https://open.spotify.com/track/fxtr00fl00000000000000"
+      "url": "https://open.spotify.com/track/fxtr00gk00000000000000"
     }
   ]
 }

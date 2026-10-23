@@ -29,7 +29,11 @@ export const byNumber: SortStrategy<Playlist> = {
 export const byName: SortStrategy<Playlist> = {
   id: "name",
   label: "Nome",
-  compare: (a, b) => a.name.localeCompare(b.name, "it", { numeric: true }),
+  compare: (a, b) =>
+    a.name.localeCompare(b.name, "it", {
+      numeric: true,
+      ignorePunctuation: true,
+    }),
 };
 
 /** Ascending by track count. */

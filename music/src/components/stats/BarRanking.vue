@@ -25,6 +25,9 @@ export interface BarRow {
 const props = defineProps<{
   /** Rows, already sorted. */
   rows: readonly BarRow[];
+
+  /** Links each label to the named route, with the row key as `id`. */
+  link?: string;
 }>();
 
 const max = computed(() => Math.max(1, ...props.rows.map((row) => row.value)));
@@ -35,7 +38,14 @@ const max = computed(() => Math.max(1, ...props.rows.map((row) => row.value)));
     <li v-for="(row, index) in rows" :key="row.key" class="ranking__row">
       <span class="ranking__rank">{{ index + 1 }}</span>
       <span class="ranking__text">
-        <span class="ranking__label">{{ row.label }}</span>
+        <RouterLink
+          v-if="link"
+          :to="{ name: link, params: { id: row.key } }"
+          class="ranking__label"
+        >
+          {{ row.label }}
+        </RouterLink>
+        <span v-else class="ranking__label">{{ row.label }}</span>
         <span v-if="row.sublabel" class="ranking__sublabel">{{
           row.sublabel
         }}</span>
@@ -79,6 +89,12 @@ const max = computed(() => Math.max(1, ...props.rows.map((row) => row.value)));
   display: flex;
   gap: 6px;
   align-items: baseline;
+}
+a.ranking__label {
+  text-decoration: none;
+}
+a.ranking__label:hover {
+  text-decoration: underline;
 }
 .ranking__label {
   overflow: hidden;

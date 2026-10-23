@@ -153,3 +153,19 @@ describe("core helpers", () => {
     expect(trackTextFilter("zzz").test(entry)).toBe(false);
   });
 });
+
+describe("name sort", () => {
+  it("ignores the # in issue names", () => {
+    const names = [
+      "Pivəəkly #5",
+      "Pivəəkly 1",
+      "Pivəəkly 10",
+      "Pivəəkly #2",
+    ].map((name, index) => playlist({ number: index + 1, name }));
+    expect(
+      sortWith(names, ...playlistSortChain("name", "asc")).map(
+        (entry) => entry.name,
+      ),
+    ).toEqual(["Pivəəkly 1", "Pivəəkly #2", "Pivəəkly #5", "Pivəəkly 10"]);
+  });
+});

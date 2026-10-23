@@ -286,18 +286,35 @@ export interface FixtureCatalog {
 export function createFixtureCatalog(seed = 20240114): FixtureCatalog {
   const random = createRandom(seed);
 
-  const artists: ArtistRef[] = ARTIST_NAMES.map((name, index) => {
+  /* Beyond the hand-written names, derive more so later issues can discover new artists. */
+  const names = [
+    ...ARTIST_NAMES,
+    ...TITLE_WORDS.flatMap((word, index) => [
+      `The ${word} ${TITLE_TAILS[index % TITLE_TAILS.length]}`,
+    ]),
+    ...TITLE_TAILS.map(
+      (tail, index) =>
+        `${TITLE_WORDS[(index * 7) % TITLE_WORDS.length]} ${tail} Club`,
+    ),
+  ];
+  const artists: ArtistRef[] = names.map((name, index) => {
     const id = fakeId("ar", index);
     return { id, name, url: `https://open.spotify.com/artist/${id}` };
   });
 
+  /* How many artists the series "knows" so far; it grows with every issue. */
+  let reach = 14;
+
   /**
    * Draws an artist with a popularity skew: the first artists in the list
-   * recur far more often, like the favourites of a real series.
+   * recur far more often, like the favourites of a real series, while
+   * newer issues can reach artists never heard before.
    * @returns The artist
    */
   const pickArtist = (): ArtistRef =>
-    artists[Math.floor(random.next() ** 1.6 * artists.length)] as ArtistRef;
+    artists[
+      Math.floor(random.next() ** 1.6 * Math.min(reach, artists.length))
+    ] as ArtistRef;
 
   const albums = new Map<string, AlbumRef & { year: number }>();
   let trackIndex = 0;
@@ -352,6 +369,7 @@ export function createFixtureCatalog(seed = 20240114): FixtureCatalog {
   };
 
   const playlists: Playlist[] = ISSUES.map(([number, day], issueIndex) => {
+    reach = 14 + issueIndex * 4;
     const id = fakeId("pl", issueIndex);
     const hue = (issueIndex * 47 + random.int(0, 40)) % 360;
     const palette = [

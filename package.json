@@ -12,15 +12,18 @@
     "build": "pnpm --filter music build",
     "check": "pnpm typecheck && pnpm lint && pnpm format:check && pnpm test",
     "dev": "pnpm --filter music dev",
+    "fixtures": "pnpm --filter @music/sync fixtures",
     "format": "prettier . --write",
     "format:check": "prettier . --check",
     "lint": "eslint . --report-unused-disable-directives --max-warnings=0",
     "lint:fix": "eslint . --fix --max-warnings=0",
     "prepare": "husky",
+    "release": "tsx scripts/release.ts",
     "security:audit": "pnpm audit --audit-level=low",
-    "security:scan": "node scripts/security-scan.mjs",
+    "security:scan": "tsx scripts/security-scan.ts",
+    "sync": "pnpm --filter @music/sync sync",
     "test": "pnpm -r --if-present test",
-    "typecheck": "pnpm -r --if-present typecheck"
+    "typecheck": "pnpm -r --if-present typecheck && tsc -p scripts"
   },
   "devDependencies": {
     "@commitlint/cli": "^21.2.3",
@@ -37,6 +40,7 @@
     "husky": "^9.1.7",
     "lint-staged": "^17.6.0",
     "prettier": "^3.9.10",
+    "tsx": "^4.23.15",
     "typescript": "~6.0.3",
     "typescript-eslint": "^8.71.2",
     "vitest": "^5.0.5",

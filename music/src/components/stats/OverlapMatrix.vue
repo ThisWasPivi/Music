@@ -19,9 +19,17 @@ const props = withDefaults(
 
     /** Cell size in pixels. */
     cell?: number;
+
+    /** Selected pair, highlighted. */
+    selected?: readonly [number, number] | null;
   }>(),
-  { cell: 26 },
+  { cell: 26, selected: null },
 );
+
+const emit = defineEmits<{
+  /** A cell was picked: row and column indexes. */
+  select: [row: number, column: number];
+}>();
 
 const LEGEND = 34;
 const size = computed(() => LEGEND + props.labels.length * props.cell);
@@ -80,10 +88,19 @@ const max = computed(() => {
           :width="cell - 2"
           :height="cell - 2"
           rx="3"
-          :class="i === j ? 'matrix__cell matrix__cell--self' : 'matrix__cell'"
+          :class="[
+            'matrix__cell',
+            i === j ? 'matrix__cell--self' : 'matrix__cell--pick',
+            selected &&
+            ((selected[0] === i && selected[1] === j) ||
+              (selected[0] === j && selected[1] === i))
+              ? 'matrix__cell--on'
+              : '',
+          ]"
           :style="
             i === j ? undefined : { fillOpacity: 0.08 + (value / max) * 0.92 }
           "
+          @click="i !== j && emit('select', i, j)"
         >
           <title>
             {{ labels[i] }} × {{ labels[j] }}: {{ formatPercent(value) }}
@@ -109,6 +126,13 @@ const max = computed(() => {
 }
 .matrix__cell {
   fill: var(--matrix-hi, currentColor);
+}
+.matrix__cell--pick {
+  cursor: pointer;
+}
+.matrix__cell--on {
+  stroke: var(--chart-ink, currentColor);
+  stroke-width: 2;
 }
 .matrix__cell--self {
   fill: var(--matrix-lo, transparent);

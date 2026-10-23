@@ -1,3 +1,5 @@
+import "@fontsource-variable/bricolage-grotesque";
+import "@fontsource-variable/inter";
 import "./styles/main.css";
 
 import { createPinia } from "pinia";
