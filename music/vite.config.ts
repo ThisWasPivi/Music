@@ -1,3 +1,5 @@
+import { execFileSync } from "node:child_process";
+import { readFileSync } from "node:fs";
 import { copyFile } from "node:fs/promises";
 import { join } from "node:path";
 import { fileURLToPath, URL } from "node:url";
@@ -27,11 +29,40 @@ function spaFallback(): Plugin {
   };
 }
 
+/* The app version is the workspace's; the commit comes from CI or the local checkout. */
+const { version } = JSON.parse(
+  readFileSync(new URL("../package.json", import.meta.url), "utf8"),
+) as { version: string };
+
+/**
+ * Reads the commit being built.
+ * @returns The full SHA, or an empty string outside a git checkout
+ */
+function currentCommit(): string {
+  if (process.env.GITHUB_SHA) return process.env.GITHUB_SHA;
+  try {
+    return execFileSync("git", ["rev-parse", "HEAD"], {
+      encoding: "utf8",
+    }).trim();
+  } catch {
+    return "";
+  }
+}
+
 /* Served from the custom domain music.pivi.dev (see public/CNAME): the app lives at the root. */
 export default defineConfig({
   base: "/",
+  define: {
+    __APP_VERSION__: JSON.stringify(version),
+    __APP_COMMIT__: JSON.stringify(currentCommit()),
+  },
   plugins: [vue(), tailwindcss(), spaFallback()],
   build: {
+    /*
+     * The data chunk holds the whole catalogue; the sample fixtures inline
+     * their covers as SVG and push it past the default 500 kB warning.
+     */
+    chunkSizeWarningLimit: 800,
     rolldownOptions: {
       output: {
         /* The catalogue changes with every sync, the code rarely: separate chunks cache independently. */

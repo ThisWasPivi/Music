@@ -1,16 +1,38 @@
+import { watch } from "vue";
 import {
   createRouter,
   createWebHistory,
   type RouteRecordRaw,
 } from "vue-router";
 
+import { i18n } from "./i18n/index.ts";
 import { playlistRepository } from "./repositories/PlaylistRepository.ts";
 import HomeView from "./views/HomeView.vue";
 
 const SITE = "Pivəəkly";
 
+/**
+ * Finds an artist's name in the published tracks.
+ * @param id - Spotify artist id
+ * @returns The name, if the artist is credited anywhere
+ */
+function artistName(id: string): string | undefined {
+  for (const playlist of playlistRepository.all()) {
+    for (const track of playlist.tracks) {
+      const artist = track.artists.find((entry) => entry.id === id);
+      if (artist) return artist.name;
+    }
+  }
+  return undefined;
+}
+
 const routes: RouteRecordRaw[] = [
-  { path: "/", name: "home", component: HomeView, meta: { title: SITE } },
+  {
+    path: "/",
+    name: "home",
+    component: HomeView,
+    meta: { title: () => undefined },
+  },
   {
     path: "/playlist/:id",
     name: "playlist",
@@ -19,36 +41,29 @@ const routes: RouteRecordRaw[] = [
     meta: { title: (id: string) => playlistRepository.byId(id)?.name },
   },
   {
-    path: "/statistiche",
+    path: "/stats",
     name: "stats",
     component: () => import("./views/StatsView.vue"),
-    meta: { title: "Statistiche" },
+    meta: { title: () => i18n.global.t("nav.stats") },
   },
   {
-    path: "/serie",
+    path: "/series",
     name: "series",
     component: () => import("./views/SeriesView.vue"),
-    meta: { title: "La serie" },
+    meta: { title: () => i18n.global.t("nav.series") },
   },
   {
-    path: "/artista/:id",
+    path: "/artist/:id",
     name: "artist",
     component: () => import("./views/ArtistView.vue"),
     props: true,
-    meta: {
-      title: (id: string) =>
-        playlistRepository
-          .all()
-          .flatMap((playlist) => playlist.tracks)
-          .flatMap((track) => track.artists)
-          .find((artist) => artist.id === id)?.name,
-    },
+    meta: { title: artistName },
   },
   {
     path: "/:pathMatch(.*)*",
     name: "not-found",
     component: () => import("./views/NotFoundView.vue"),
-    meta: { title: "Pagina non trovata" },
+    meta: { title: () => i18n.global.t("notFound.title") },
   },
 ];
 
@@ -59,14 +74,20 @@ export const router = createRouter({
   scrollBehavior: (_to, _from, saved) => saved ?? { top: 0 },
 });
 
-router.afterEach((to) => {
-  const { title } = to.meta;
-  const id = typeof to.params.id === "string" ? to.params.id : "";
-  const resolved = typeof title === "function" ? title(id) : title;
-  if (!resolved || resolved === SITE)
-    document.title = `${SITE} · music.pivi.dev`;
+/**
+ * Sets the document title from the current route, in the current language.
+ * @returns Nothing
+ */
+function updateTitle(): void {
+  const route = router.currentRoute.value;
+  const id = typeof route.params.id === "string" ? route.params.id : "";
+  const title = route.meta.title?.(id);
+  if (!title) document.title = `${SITE} · music.pivi.dev`;
   else
-    document.title = resolved.includes(SITE)
-      ? `${resolved} · music.pivi.dev`
-      : `${resolved} · ${SITE}`;
-});
+    document.title = title.includes(SITE)
+      ? `${title} · music.pivi.dev`
+      : `${title} · ${SITE}`;
+}
+
+router.afterEach(updateTitle);
+watch(i18n.global.locale, updateTitle);

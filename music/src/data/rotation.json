@@ -39,134 +39,103 @@
   ],
   "tracks": [
     {
-      "id": "fxtr00gd00000000000000",
-      "title": "Neon Dreams",
+      "id": "fxtr00g300000000000000",
+      "title": "Tangerine Machine",
       "artists": [
         {
-          "id": "fxar000200000000000000",
-          "name": "The Midnight Cartographers",
-          "url": "https://open.spotify.com/artist/fxar000200000000000000"
+          "id": "fxar000o00000000000000",
+          "name": "Tessa Mint",
+          "url": "https://open.spotify.com/artist/fxar000o00000000000000"
         }
       ],
       "album": {
-        "id": "fxal000o00000000000000",
-        "name": "Gold Love",
-        "url": "https://open.spotify.com/album/fxal000o00000000000000",
-        "imageUrl": null
+        "id": "fxal001r00000000000000",
+        "name": "Glow Lights",
+        "url": "https://open.spotify.com/album/fxal001r00000000000000",
+        "imageUrl": "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20100%20100%22%3E%3Crect%20width%3D%22100%22%20height%3D%22100%22%20fill%3D%22%2334b264%22%2F%3E%3Crect%20x%3D%2222%22%20y%3D%2222%22%20width%3D%2256%22%20height%3D%2256%22%20rx%3D%226%22%20fill%3D%22%235fc2dd%22%20transform%3D%22rotate(12%2050%2050)%22%2F%3E%3C%2Fsvg%3E"
       },
-      "url": "https://open.spotify.com/track/fxtr00gd00000000000000"
+      "url": "https://open.spotify.com/track/fxtr00g300000000000000"
     },
     {
-      "id": "fxtr00ge00000000000000",
-      "title": "Harbour Season",
+      "id": "fxtr00g400000000000000",
+      "title": "Summer Days",
       "artists": [
         {
-          "id": "fxar001200000000000000",
-          "name": "Vera Lux",
-          "url": "https://open.spotify.com/artist/fxar001200000000000000"
+          "id": "fxar000500000000000000",
+          "name": "Juno Vale",
+          "url": "https://open.spotify.com/artist/fxar000500000000000000"
+        },
+        {
+          "id": "fxar000i00000000000000",
+          "name": "Neon Gondola",
+          "url": "https://open.spotify.com/artist/fxar000i00000000000000"
         }
       ],
       "album": {
-        "id": "fxal002s00000000000000",
-        "name": "Signal Blues",
-        "url": "https://open.spotify.com/album/fxal002s00000000000000",
-        "imageUrl": null
+        "id": "fxal001200000000000000",
+        "name": "Lullaby Heart",
+        "url": "https://open.spotify.com/album/fxal001200000000000000",
+        "imageUrl": "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20100%20100%22%3E%3Crect%20width%3D%22100%22%20height%3D%22100%22%20fill%3D%22%23b23447%22%2F%3E%3Cpath%20d%3D%22M0%2070%20Q50%2030%20100%2070%20V100%20H0Z%22%20fill%3D%22%23ddb55f%22%2F%3E%3C%2Fsvg%3E"
       },
-      "url": "https://open.spotify.com/track/fxtr00ge00000000000000"
+      "url": "https://open.spotify.com/track/fxtr00g400000000000000"
     },
     {
-      "id": "fxtr00gf00000000000000",
-      "title": "Signal Talk",
+      "id": "fxtr00g500000000000000",
+      "title": "Static Love",
       "artists": [
         {
-          "id": "fxar001b00000000000000",
-          "name": "Fennel & Fig",
-          "url": "https://open.spotify.com/artist/fxar001b00000000000000"
+          "id": "fxar000b00000000000000",
+          "name": "Kiki Moreau",
+          "url": "https://open.spotify.com/artist/fxar000b00000000000000"
         }
       ],
       "album": {
-        "id": "fxal002m00000000000000",
-        "name": "Salt Blues",
-        "url": "https://open.spotify.com/album/fxal002m00000000000000",
-        "imageUrl": null
+        "id": "fxal000j00000000000000",
+        "name": "Mirror Run",
+        "url": "https://open.spotify.com/album/fxal000j00000000000000",
+        "imageUrl": "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20100%20100%22%3E%3Crect%20width%3D%22100%22%20height%3D%22100%22%20fill%3D%22%239734b2%22%2F%3E%3Crect%20x%3D%2222%22%20y%3D%2222%22%20width%3D%2256%22%20height%3D%2256%22%20rx%3D%226%22%20fill%3D%22%23dd5f8f%22%20transform%3D%22rotate(12%2050%2050)%22%2F%3E%3C%2Fsvg%3E"
       },
-      "url": "https://open.spotify.com/track/fxtr00gf00000000000000"
+      "url": "https://open.spotify.com/track/fxtr00g500000000000000"
     },
     {
-      "id": "fxtr00gg00000000000000",
-      "title": "Cherry Forever",
+      "id": "fxtr00g600000000000000",
+      "title": "Harbour Song",
       "artists": [
         {
-          "id": "fxar001h00000000000000",
-          "name": "The Riviera Season",
-          "url": "https://open.spotify.com/artist/fxar001h00000000000000"
+          "id": "fxar000k00000000000000",
+          "name": "Mira Solano",
+          "url": "https://open.spotify.com/artist/fxar000k00000000000000"
         }
       ],
       "album": {
-        "id": "fxal002w00000000000000",
-        "name": "Highway Love",
-        "url": "https://open.spotify.com/album/fxal002w00000000000000",
-        "imageUrl": null
+        "id": "fxal001l00000000000000",
+        "name": "Harbour Party",
+        "url": "https://open.spotify.com/album/fxal001l00000000000000",
+        "imageUrl": "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20100%20100%22%3E%3Crect%20width%3D%22100%22%20height%3D%22100%22%20fill%3D%22%2334b277%22%2F%3E%3Ccircle%20cx%3D%2250%22%20cy%3D%2250%22%20r%3D%2228%22%20fill%3D%22%235fafdd%22%2F%3E%3C%2Fsvg%3E"
       },
-      "url": "https://open.spotify.com/track/fxtr00gg00000000000000"
+      "url": "https://open.spotify.com/track/fxtr00g600000000000000"
     },
     {
-      "id": "fxtr00gh00000000000000",
-      "title": "Glow Lights",
+      "id": "fxtr00g700000000000000",
+      "title": "Salt Waves",
       "artists": [
         {
-          "id": "fxar000e00000000000000",
-          "name": "Hollow Palms",
-          "url": "https://open.spotify.com/artist/fxar000e00000000000000"
+          "id": "fxar002900000000000000",
+          "name": "Pulse Heart Club",
+          "url": "https://open.spotify.com/artist/fxar002900000000000000"
         }
       ],
       "album": {
-        "id": "fxal000u00000000000000",
-        "name": "Cherry Again",
-        "url": "https://open.spotify.com/album/fxal000u00000000000000",
-        "imageUrl": null
+        "id": "fxal004u00000000000000",
+        "name": "Ghost Machine",
+        "url": "https://open.spotify.com/album/fxal004u00000000000000",
+        "imageUrl": "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20100%20100%22%3E%3Crect%20width%3D%22100%22%20height%3D%22100%22%20fill%3D%22%23b26434%22%2F%3E%3Crect%20x%3D%2222%22%20y%3D%2222%22%20width%3D%2256%22%20height%3D%2256%22%20rx%3D%226%22%20fill%3D%22%23c2dd5f%22%20transform%3D%22rotate(12%2050%2050)%22%2F%3E%3C%2Fsvg%3E"
       },
-      "url": "https://open.spotify.com/track/fxtr00gh00000000000000"
+      "url": "https://open.spotify.com/track/fxtr00g700000000000000"
     },
     {
-      "id": "fxtr00gi00000000000000",
-      "title": "Lullaby Lights",
-      "artists": [
-        {
-          "id": "fxar000600000000000000",
-          "name": "Paper Satellites",
-          "url": "https://open.spotify.com/artist/fxar000600000000000000"
-        }
-      ],
-      "album": {
-        "id": "fxal004500000000000000",
-        "name": "Static Again",
-        "url": "https://open.spotify.com/album/fxal004500000000000000",
-        "imageUrl": null
-      },
-      "url": "https://open.spotify.com/track/fxtr00gi00000000000000"
-    },
-    {
-      "id": "fxtr00gj00000000000000",
-      "title": "Polaroid Again",
-      "artists": [
-        {
-          "id": "fxar002e00000000000000",
-          "name": "Riviera Again Club",
-          "url": "https://open.spotify.com/artist/fxar002e00000000000000"
-        }
-      ],
-      "album": {
-        "id": "fxal005700000000000000",
-        "name": "Orbit Heart",
-        "url": "https://open.spotify.com/album/fxal005700000000000000",
-        "imageUrl": null
-      },
-      "url": "https://open.spotify.com/track/fxtr00gj00000000000000"
-    },
-    {
-      "id": "fxtr00gk00000000000000",
-      "title": "Signal Again",
+      "id": "fxtr00g800000000000000",
+      "title": "Harbour Run",
       "artists": [
         {
           "id": "fxar000100000000000000",
@@ -175,12 +144,48 @@
         }
       ],
       "album": {
-        "id": "fxal001900000000000000",
-        "name": "Neon Song",
-        "url": "https://open.spotify.com/album/fxal001900000000000000",
-        "imageUrl": null
+        "id": "fxal000a00000000000000",
+        "name": "Lullaby Blues",
+        "url": "https://open.spotify.com/album/fxal000a00000000000000",
+        "imageUrl": "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20100%20100%22%3E%3Crect%20width%3D%22100%22%20height%3D%22100%22%20fill%3D%22%23b2349d%22%2F%3E%3Ccircle%20cx%3D%2250%22%20cy%3D%2250%22%20r%3D%2228%22%20fill%3D%22%23dd5f5f%22%2F%3E%3C%2Fsvg%3E"
       },
-      "url": "https://open.spotify.com/track/fxtr00gk00000000000000"
+      "url": "https://open.spotify.com/track/fxtr00g800000000000000"
+    },
+    {
+      "id": "fxtr00g900000000000000",
+      "title": "Velvet Lights",
+      "artists": [
+        {
+          "id": "fxar000f00000000000000",
+          "name": "Ines Larue",
+          "url": "https://open.spotify.com/artist/fxar000f00000000000000"
+        }
+      ],
+      "album": {
+        "id": "fxal001n00000000000000",
+        "name": "Glow Run",
+        "url": "https://open.spotify.com/album/fxal001n00000000000000",
+        "imageUrl": "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20100%20100%22%3E%3Crect%20width%3D%22100%22%20height%3D%22100%22%20fill%3D%22%2384b234%22%2F%3E%3Crect%20x%3D%2222%22%20y%3D%2222%22%20width%3D%2256%22%20height%3D%2256%22%20rx%3D%226%22%20fill%3D%22%235fdd78%22%20transform%3D%22rotate(12%2050%2050)%22%2F%3E%3C%2Fsvg%3E"
+      },
+      "url": "https://open.spotify.com/track/fxtr00g900000000000000"
+    },
+    {
+      "id": "fxtr00ga00000000000000",
+      "title": "Ghost Talk",
+      "artists": [
+        {
+          "id": "fxar001p00000000000000",
+          "name": "The Harbour Party",
+          "url": "https://open.spotify.com/artist/fxar001p00000000000000"
+        }
+      ],
+      "album": {
+        "id": "fxal004h00000000000000",
+        "name": "Lullaby Talk",
+        "url": "https://open.spotify.com/album/fxal004h00000000000000",
+        "imageUrl": "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20100%20100%22%3E%3Crect%20width%3D%22100%22%20height%3D%22100%22%20fill%3D%22%23b23434%22%2F%3E%3Cpath%20d%3D%22M0%2070%20Q50%2030%20100%2070%20V100%20H0Z%22%20fill%3D%22%23ddc85f%22%2F%3E%3C%2Fsvg%3E"
+      },
+      "url": "https://open.spotify.com/track/fxtr00ga00000000000000"
     }
   ]
 }

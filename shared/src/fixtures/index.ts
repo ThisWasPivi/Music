@@ -267,6 +267,27 @@ function coverDataUri(palette: readonly string[], label: string): string {
 }
 
 /**
+ * Draws a small abstract album cover as an inline SVG data URI.
+ * @param base - Background colour
+ * @param accent - Shape colour
+ * @param shape - Which of three motifs to draw
+ * @returns The data URI
+ */
+function albumCoverDataUri(
+  base: string,
+  accent: string,
+  shape: number,
+): string {
+  const motif = [
+    `<circle cx="50" cy="50" r="28" fill="${accent}"/>`,
+    `<rect x="22" y="22" width="56" height="56" rx="6" fill="${accent}" transform="rotate(12 50 50)"/>`,
+    `<path d="M0 70 Q50 30 100 70 V100 H0Z" fill="${accent}"/>`,
+  ][shape];
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="${base}"/>${motif}</svg>`;
+  return `data:image/svg+xml,${encodeURIComponent(svg)}`;
+}
+
+/**
  * The complete fixture catalogue.
  * @property playlists - Pivəəkly issues with their tracks
  * @property artists - Profiles for the most frequent artists
@@ -343,11 +364,16 @@ export function createFixtureCatalog(seed = 20240114): FixtureCatalog {
           : decadeRoll < 0.22
             ? random.int(1990, 2009)
             : random.int(2010, 2026);
+      const hue = random.int(0, 359);
       album = {
         id,
         name: `${random.pick(TITLE_WORDS)} ${random.pick(TITLE_TAILS)}`,
         url: `https://open.spotify.com/album/${id}`,
-        imageUrl: null,
+        imageUrl: albumCoverDataUri(
+          hslToHex(hue, 0.55, 0.45),
+          hslToHex((hue + 50) % 360, 0.65, 0.62),
+          random.int(0, 2),
+        ),
         year,
       };
       albums.set(albumKey, album);

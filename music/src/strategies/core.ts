@@ -2,12 +2,12 @@
  * One way of ordering items. Strategies are plain values, so the UI can list
  * them, pick one by id, and chain them.
  * @property id - Stable identifier, used in URLs and stores
- * @property label - Human-readable name
+ * @property labelKey - i18n key of the human-readable name
  * @property compare - Array.sort comparator, ascending
  */
 export interface SortStrategy<T> {
   id: string;
-  label: string;
+  labelKey: string;
   compare: (a: T, b: T) => number;
 }
 
@@ -79,15 +79,6 @@ export function filterWith<T>(
   filters: readonly FilterStrategy<T>[],
 ): T[] {
   return items.filter((item) => filters.every((filter) => filter.test(item)));
-}
-
-/**
- * Normalizes text for accent- and case-insensitive search.
- * @param value - Any text
- * @returns Lower-case text without diacritics
- */
-export function searchable(value: string): string {
-  return value.normalize("NFD").replace(/\p{M}/gu, "").toLowerCase();
 }
 
 /**

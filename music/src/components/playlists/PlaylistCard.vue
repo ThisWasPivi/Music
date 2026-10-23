@@ -5,6 +5,7 @@
  * number, track count and duration.
  */
 import type { Playlist } from "@music/shared";
+import { useI18n } from "vue-i18n";
 
 import CoverImage from "@/components/ui/CoverImage.vue";
 import { formatIssue, formatLongDuration } from "@/utils/format.ts";
@@ -13,6 +14,8 @@ defineProps<{
   /** The issue to show. */
   playlist: Playlist;
 }>();
+
+const { t } = useI18n();
 </script>
 
 <template>
@@ -36,7 +39,10 @@ defineProps<{
         </RouterLink>
       </h3>
       <p class="card__meta muted tabular">
-        {{ playlist.trackCount }} brani ·
+        {{
+          t("common.tracks", { n: playlist.trackCount }, playlist.trackCount)
+        }}
+        ·
         {{ formatLongDuration(playlist.durationMs) }}
       </p>
     </div>
@@ -50,8 +56,8 @@ defineProps<{
   gap: 12px;
   padding: 12px;
   transition:
-    transform 200ms ease,
-    box-shadow 200ms ease;
+    transform 220ms cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 220ms ease;
 }
 .card:hover,
 .card:focus-within {
@@ -75,7 +81,7 @@ defineProps<{
 .card__title {
   margin: 0;
   font-size: 17px;
-  font-weight: 650;
+  font-weight: 700;
   line-height: 1.2;
 }
 .card__link {

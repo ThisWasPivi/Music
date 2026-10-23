@@ -1,6 +1,6 @@
 /** Message shown whenever the stored authorization can no longer be used. */
 export const REAUTH_HINT =
-  "Il refresh token Spotify non è più valido (scade 6 mesi dopo l'autorizzazione, o è stato revocato). Rilancia `pnpm auth` e poi `pnpm sync`.";
+  "The Spotify refresh token is no longer valid (it expires 6 months after authorization, or it was revoked). Run `pnpm auth` again, then `pnpm sync`.";
 
 /** A failure the user can fix, reported without a stack trace. */
 export class SyncError extends Error {
@@ -22,9 +22,7 @@ export class ReauthorizationRequiredError extends SyncError {
    * @param detail - Spotify's own error description, if any
    */
   constructor(detail?: string) {
-    super(
-      detail ? `${REAUTH_HINT}\nDettaglio Spotify: ${detail}` : REAUTH_HINT,
-    );
+    super(detail ? `${REAUTH_HINT}\nSpotify says: ${detail}` : REAUTH_HINT);
     this.name = "ReauthorizationRequiredError";
   }
 }

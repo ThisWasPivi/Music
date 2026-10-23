@@ -1,6 +1,6 @@
 import type { ArtistRef, Playlist, Track } from "@music/shared";
 
-import { artistsOf } from "./overlap.ts";
+import { artistsOf } from "./artists.ts";
 
 /**
  * Keeps the numbered issues and sorts them by number.

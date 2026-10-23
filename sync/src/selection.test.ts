@@ -101,14 +101,14 @@ describe("formatSelectionReport", () => {
       { ...rules, exclude: ["f"] },
     );
     const text = formatSelectionReport(selection, "Pivəəkly").join("\n");
-    expect(text).toContain("Incluse (3)");
+    expect(text).toContain("Included (3)");
     expect(text).toContain("Pivəəkly Rarities");
-    expect(text).toContain("non ha un numero");
-    expect(text).toContain("Numeri mancanti nella serie: 2, 3");
+    expect(text).toContain("has no number");
+    expect(text).toContain("Numbers missing from the series: 2, 3");
     expect(text).toContain("Piveekly 5");
     expect(text).toContain("U+0259");
-    expect(text).toContain("esclusa in playlists.config.ts");
-    expect(text).toContain("altre 1 playlist");
+    expect(text).toContain("excluded in playlists.config.ts");
+    expect(text).toContain("1 more playlists");
     expect(text).not.toContain("Gym");
   });
 
@@ -119,7 +119,7 @@ describe("formatSelectionReport", () => {
       rules,
     );
     expect(formatSelectionReport(selection, "Pivəəkly").join("\n")).toContain(
-      "Il Nº 2 compare in più playlist",
+      "No. 2 appears in more than one playlist",
     );
   });
 });

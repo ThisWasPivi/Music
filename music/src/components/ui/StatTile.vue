@@ -18,7 +18,12 @@ defineProps<{
 <template>
   <div class="tile glass">
     <p class="tile__label muted">{{ label }}</p>
-    <p class="tile__value tabular">{{ value }}</p>
+    <p
+      class="tile__value tabular"
+      :class="{ 'tile__value--long': value.length > 7 }"
+    >
+      {{ value }}
+    </p>
     <p v-if="detail" class="tile__detail muted">{{ detail }}</p>
   </div>
 </template>
@@ -41,6 +46,10 @@ defineProps<{
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
+}
+.tile__value--long {
+  font-size: clamp(20px, 1.9vw, 26px);
+  white-space: nowrap;
 }
 .tile__detail {
   font-size: 12px;

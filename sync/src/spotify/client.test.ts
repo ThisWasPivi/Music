@@ -143,7 +143,7 @@ describe("SpotifyClient", () => {
   it("reports unexpected shapes clearly", async () => {
     const { client } = setup([json(200, { ok: "yes" })]);
     await expect(client.get("/me", schema)).rejects.toThrow(
-      /Risposta inattesa da \/v1\/me/,
+      /Unexpected response from \/v1\/me/,
     );
   });
 });

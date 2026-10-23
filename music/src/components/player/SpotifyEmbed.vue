@@ -6,6 +6,7 @@
  * invented, so a labelled placeholder takes its place.
  */
 import type { Playlist } from "@music/shared";
+import { useI18n } from "vue-i18n";
 
 import { playlistRepository } from "@/repositories/PlaylistRepository.ts";
 
@@ -16,6 +17,7 @@ defineProps<{
   playlist: Playlist;
 }>();
 
+const { t } = useI18n();
 const isSample = playlistRepository.meta().source === "fixtures";
 </script>
 
@@ -24,7 +26,7 @@ const isSample = playlistRepository.meta().source === "fixtures";
     <iframe
       v-if="!isSample"
       :src="`https://open.spotify.com/embed/playlist/${encodeURIComponent(playlist.id)}?utm_source=generator`"
-      :title="`Player Spotify: ${playlist.name}`"
+      :title="t('playlist.playerTitle', { name: playlist.name })"
       width="100%"
       height="352"
       loading="lazy"
@@ -38,10 +40,7 @@ const isSample = playlistRepository.meta().source === "fixtures";
     />
     <div v-else class="embed__placeholder">
       <SpotifyMark class="embed__logo" />
-      <p>
-        Qui c'è il player Spotify di <strong>{{ playlist.name }}</strong
-        >. Con i dati di esempio non può suonare.
-      </p>
+      <p>{{ t("playlist.samplePlayer", { name: playlist.name }) }}</p>
     </div>
   </div>
 </template>

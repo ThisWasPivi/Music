@@ -6,9 +6,11 @@
  */
 import { findMissingIssues } from "@music/shared";
 import { computed } from "vue";
+import { useI18n } from "vue-i18n";
 
 import ReleaseTimeline from "@/components/series/ReleaseTimeline.vue";
 import ColumnChart, { type Column } from "@/components/stats/ColumnChart.vue";
+import CoverImage from "@/components/ui/CoverImage.vue";
 import StatTile from "@/components/ui/StatTile.vue";
 import { useAccent } from "@/composables/useAccent.ts";
 import { useCatalog } from "@/composables/useCatalog.ts";
@@ -18,9 +20,10 @@ import {
   releaseTimeline,
   repeatedTracks,
 } from "@/services/stats";
-import { formatDate, formatPercent } from "@/utils/format.ts";
+import { formatDate, formatIssue, formatPercent } from "@/utils/format.ts";
 
-const { playlists, issues, latest } = useCatalog();
+const { t } = useI18n();
+const { playlists, issues, latest, profile } = useCatalog();
 useAccent(() => latest?.palette);
 
 const timeline = releaseTimeline(issues);
@@ -32,110 +35,118 @@ const recurring = recurringArtists(playlists)
   .filter((row) => row.issueCount > 1)
   .slice(0, 20);
 const repeated = repeatedTracks(playlists).slice(0, 20);
+const byNumber = new Map(issues.map((issue) => [issue.number, issue]));
 
 const discoveryColumns = computed<Column[]>(() =>
   discovery.map((row) => ({
     key: row.playlist.id,
     label: String(row.playlist.number),
     value: row.newArtists.length,
-    title: `Nº ${row.playlist.number}: ${row.newArtists.length} artisti nuovi su ${row.artistCount} (${formatPercent(row.discoveryRate)})`,
+    highlight: row.playlist.id === latest?.id,
+    tooltip: t("series.discoveryTooltip", {
+      issue: formatIssue(row.playlist.number),
+      n: row.newArtists.length,
+      total: row.artistCount,
+      share: formatPercent(row.discoveryRate),
+    }),
   })),
 );
 const labelEvery = Math.max(1, Math.ceil(discovery.length / 12));
 
 /**
  * Formats a gap in days.
- * @param days - The gap, or null
- * @returns e.g. "12 giorni"
+ * @param value - The gap, or null
+ * @returns e.g. "12 days"
  */
-function days(days: number | null | undefined): string {
-  if (days === null || days === undefined) return "—";
-  const rounded = Math.round(days);
-  return `${rounded} ${rounded === 1 ? "giorno" : "giorni"}`;
+function days(value: number | null | undefined): string {
+  if (value === null || value === undefined) return "—";
+  const rounded = Math.round(value);
+  return t("series.days", { n: rounded }, rounded);
 }
 </script>
 
 <template>
   <div class="stack">
     <header>
-      <p class="eyebrow">La serie</p>
-      <h1 class="page-title">Pivəəkly <span class="grad">nel tempo</span></h1>
+      <h1 class="page-title">
+        Pivəəkly <span class="grad">{{ t("series.titleAccent") }}</span>
+      </h1>
     </header>
 
     <section class="glass panel" aria-labelledby="timeline-title">
-      <h2 id="timeline-title" class="section-title">Timeline delle uscite</h2>
-      <p class="muted lede">
-        Un punto per numero su un asse temporale reale: si vedono i periodi
-        fitti e le pause. La data di uscita è approssimata al primo brano
-        aggiunto. In evidenza il numero arrivato dopo la pausa più lunga.
-      </p>
+      <h2 id="timeline-title" class="section-title">
+        {{ t("series.timelineTitle") }}
+      </h2>
+      <p class="muted lede">{{ t("series.timelineLede") }}</p>
       <ReleaseTimeline
         v-if="timeline.releases.length > 0"
         :releases="timeline.releases"
         :highlight="timeline.maxGap"
-        colored
-        :radius="9"
       />
       <div class="tiles">
         <StatTile
-          label="Intervallo medio"
+          :label="t('series.averageGap')"
           :value="days(timeline.averageGapDays)"
         />
         <StatTile
-          label="Intervallo minimo"
+          :label="t('series.minGap')"
           :value="days(timeline.minGap?.gapDays)"
           :detail="
             timeline.minGap
-              ? `prima di ${timeline.minGap.playlist.name}`
+              ? t('series.before', { name: timeline.minGap.playlist.name })
               : undefined
           "
         />
         <StatTile
-          label="Intervallo massimo"
+          :label="t('series.maxGap')"
           :value="days(timeline.maxGap?.gapDays)"
           :detail="
             timeline.maxGap
-              ? `prima di ${timeline.maxGap.playlist.name}`
+              ? t('series.before', { name: timeline.maxGap.playlist.name })
               : undefined
           "
         />
         <StatTile
-          label="Prima uscita"
+          :label="t('series.firstRelease')"
           :value="formatDate(timeline.releases[0]?.releasedAt ?? null)"
           :detail="timeline.releases[0]?.playlist.name"
         />
       </div>
       <p v-if="missing.length > 0" class="muted missing">
-        Numeri che mancano nella sequenza: {{ missing.join(", ") }}.
+        {{ t("series.missing", { list: missing.join(", ") }) }}
       </p>
     </section>
 
     <section class="glass panel" aria-labelledby="discovery-title">
-      <h2 id="discovery-title" class="section-title">Indice di scoperta</h2>
-      <p class="muted lede">
-        Quanti artisti compaiono per la prima volta in ogni numero.
-      </p>
+      <h2 id="discovery-title" class="section-title">
+        {{ t("series.discoveryTitle") }}
+      </h2>
+      <p class="muted lede">{{ t("series.discoveryLede") }}</p>
       <ColumnChart
         :columns="discoveryColumns"
         :label-every="labelEvery"
-        :height="130"
-        label="Artisti nuovi per numero"
+        :height="170"
+        :label="t('series.discoveryTitle')"
       />
     </section>
 
     <div class="grid-2">
       <section class="glass panel" aria-labelledby="recurring-title">
-        <h2 id="recurring-title" class="section-title">Artisti ricorrenti</h2>
+        <h2 id="recurring-title" class="section-title">
+          {{ t("series.recurringTitle") }}
+        </h2>
         <div class="scroll">
           <table class="table">
             <thead>
               <tr>
-                <th scope="col">Artista</th>
-                <th scope="col">Numeri</th>
-                <th scope="col">Primo</th>
-                <th scope="col">Ultimo</th>
+                <th scope="col">{{ t("series.artist") }}</th>
+                <th scope="col">{{ t("series.issues") }}</th>
+                <th scope="col">{{ t("series.first") }}</th>
+                <th scope="col">{{ t("series.last") }}</th>
                 <th scope="col">
-                  <abbr title="Numeri consecutivi più lunghi">Di fila</abbr>
+                  <span v-tooltip="t('series.streakHint')" tabindex="0">{{
+                    t("series.streak")
+                  }}</span>
                 </th>
               </tr>
             </thead>
@@ -144,26 +155,38 @@ function days(days: number | null | undefined): string {
                 <td>
                   <RouterLink
                     :to="{ name: 'artist', params: { id: row.artist.id } }"
-                    >{{ row.artist.name }}</RouterLink
+                    class="who"
                   >
+                    <CoverImage
+                      :src="profile(row.artist.id)?.imageUrl ?? null"
+                      class="who__image"
+                    />
+                    {{ row.artist.name }}
+                  </RouterLink>
                 </td>
                 <td class="tabular">{{ row.issueCount }}</td>
-                <td class="tabular">Nº {{ row.firstIssue }}</td>
-                <td class="tabular">Nº {{ row.lastIssue }}</td>
+                <td class="tabular">{{ formatIssue(row.firstIssue) }}</td>
+                <td class="tabular">{{ formatIssue(row.lastIssue) }}</td>
                 <td class="tabular">{{ row.longestStreak }}</td>
               </tr>
             </tbody>
           </table>
         </div>
         <p v-if="recurring.length === 0" class="muted">
-          Nessun artista compare in più di un numero.
+          {{ t("series.noneRecurring") }}
         </p>
       </section>
 
       <section class="glass panel" aria-labelledby="repeated-title">
-        <h2 id="repeated-title" class="section-title">Brani ripetuti</h2>
+        <h2 id="repeated-title" class="section-title">
+          {{ t("series.repeatedTitle") }}
+        </h2>
         <ul class="repeats">
           <li v-for="row in repeated" :key="row.track.id">
+            <CoverImage
+              :src="row.track.album.imageUrl"
+              class="repeats__cover"
+            />
             <span class="repeats__track">
               <a :href="row.track.url" target="_blank" rel="noopener">{{
                 row.track.title
@@ -172,27 +195,28 @@ function days(days: number | null | undefined): string {
                 row.track.artists.map((artist) => artist.name).join(", ")
               }}</span>
             </span>
-            <span class="chips repeats__issues">
+            <span class="repeats__issues">
               <RouterLink
                 v-for="issue in row.issues"
                 :key="issue"
+                v-tooltip="byNumber.get(issue)?.name"
                 :to="{
                   name: 'playlist',
-                  params: {
-                    id:
-                      issues.find((entry) => entry.number === issue)?.id ?? '',
-                  },
+                  params: { id: byNumber.get(issue)?.id ?? '' },
                 }"
-                class="chip"
-                :aria-label="`Nº ${issue}`"
+                class="repeats__issue"
+                :aria-label="byNumber.get(issue)?.name"
               >
-                {{ issue }}
+                <CoverImage
+                  :src="byNumber.get(issue)?.coverUrl ?? null"
+                  :palette="byNumber.get(issue)?.palette"
+                />
               </RouterLink>
             </span>
           </li>
         </ul>
         <p v-if="repeated.length === 0" class="muted">
-          Nessun brano compare in più di un numero.
+          {{ t("series.noneRepeated") }}
         </p>
       </section>
     </div>
@@ -209,7 +233,7 @@ function days(days: number | null | undefined): string {
   display: grid;
   gap: 14px;
   margin-top: 16px;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 180px), 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 170px), 1fr));
 }
 .missing {
   margin: 14px 0 0;
@@ -231,17 +255,25 @@ function days(days: number | null | undefined): string {
   color: var(--muted);
   border-bottom: 1px solid var(--line);
 }
+.table th span {
+  cursor: help;
+}
 .table td {
-  padding: 8px;
+  padding: 6px 8px;
   border-bottom: 1px solid var(--line);
   white-space: nowrap;
 }
-.table a {
-  text-decoration: none;
+.who {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   font-weight: 600;
-}
-.table abbr {
   text-decoration: none;
+}
+.who__image {
+  --cover-radius: 50%;
+  inline-size: 32px;
+  flex: none;
 }
 .repeats {
   list-style: none;
@@ -252,12 +284,17 @@ function days(days: number | null | undefined): string {
 }
 .repeats li {
   display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  gap: 8px;
+  align-items: center;
+  gap: 12px;
+}
+.repeats__cover {
+  --cover-radius: 8px;
+  inline-size: 44px;
+  flex: none;
 }
 .repeats__track {
   display: grid;
+  flex: 1;
   min-width: 0;
   font-size: 14px;
 }
@@ -265,8 +302,19 @@ function days(days: number | null | undefined): string {
   font-weight: 600;
   text-decoration: none;
 }
-.repeats__issues .chip {
-  min-block-size: 28px;
-  padding: 2px 10px;
+.repeats__issues {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 4px;
+}
+.repeats__issue {
+  display: block;
+  inline-size: 30px;
+  --cover-radius: 6px;
+  transition: transform 150ms ease;
+}
+.repeats__issue:hover {
+  transform: scale(1.15);
 }
 </style>

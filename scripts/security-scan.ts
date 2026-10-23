@@ -73,10 +73,8 @@ for (const target of targets) {
 
 if (failures > 0) {
   console.error(
-    `\nVerifica di sicurezza fallita: ${failures} problemi in ${scanned} file.`,
+    `\nSecurity scan failed: ${failures} problems in ${scanned} files.`,
   );
   process.exit(1);
 }
-console.log(
-  `✓ Verifica di sicurezza: ${scanned} file puliti (${targets.join(", ")}).`,
-);
+console.log(`✓ Security scan: ${scanned} clean files (${targets.join(", ")}).`);

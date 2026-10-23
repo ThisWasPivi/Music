@@ -68,7 +68,7 @@ describe("sanitize", () => {
       ...data,
       playlists: [{ ...data.playlists[0], url: "https://evil.example/p" }],
     } as PublishedData;
-    expect(() => sanitize(broken, [])).toThrow(/non pubblicabili/);
+    expect(() => sanitize(broken, [])).toThrow(/cannot be published/);
   });
 });
 

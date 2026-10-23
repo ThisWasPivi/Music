@@ -112,11 +112,11 @@ async function requestToken(
     }
     if (code === "invalid_client") {
       throw new SyncError(
-        "Spotify rifiuta le credenziali: controlla SPOTIFY_CLIENT_ID e SPOTIFY_CLIENT_SECRET in .env.",
+        "Spotify rejects the credentials: check SPOTIFY_CLIENT_ID and SPOTIFY_CLIENT_SECRET in .env.",
       );
     }
     throw new SyncError(
-      `Errore dal token endpoint Spotify: ${code}${description ? ` (${description})` : ""}.`,
+      `Spotify token endpoint error: ${code}${description ? ` (${description})` : ""}.`,
     );
   }
 
@@ -172,7 +172,7 @@ export async function refreshAccessToken(
 ): Promise<TokenGrant> {
   if (!env.SPOTIFY_REFRESH_TOKEN) {
     throw new SyncError(
-      "Manca SPOTIFY_REFRESH_TOKEN in .env: lancia prima `pnpm auth`.",
+      "SPOTIFY_REFRESH_TOKEN is missing from .env: run `pnpm auth` first.",
     );
   }
   return requestToken(

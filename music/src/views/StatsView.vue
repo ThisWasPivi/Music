@@ -2,15 +2,17 @@
 /**
  * StatsView component
  * Statistics of the whole series or of one issue: headline figures, top
- * artists and albums, when tracks were added, release years and the
- * overlap between issues.
+ * artists and albums, when tracks were added, release years and what is in
+ * rotation now.
  */
 import { computed, ref } from "vue";
+import { useI18n } from "vue-i18n";
 
+import RotationSection from "@/components/playlists/RotationSection.vue";
 import ColumnChart, { type Column } from "@/components/stats/ColumnChart.vue";
 import HeatmapCalendar from "@/components/stats/HeatmapCalendar.vue";
-import OverlapPanel from "@/components/stats/OverlapPanel.vue";
 import TopRankings from "@/components/stats/TopRankings.vue";
+import SelectMenu, { type SelectOption } from "@/components/ui/SelectMenu.vue";
 import StatTile from "@/components/ui/StatTile.vue";
 import { useAccent } from "@/composables/useAccent.ts";
 import { useCatalog } from "@/composables/useCatalog.ts";
@@ -27,100 +29,118 @@ import {
   formatTrackDuration,
 } from "@/utils/format.ts";
 
-const { playlists, issues, latest } = useCatalog();
-useAccent(() => latest?.palette);
+const { t } = useI18n();
+const { playlists, latest } = useCatalog();
 
-const scopeId = ref<string>("all");
+const scopeId = ref<string | null>(null);
 const scope = computed(() =>
-  scopeId.value === "all"
+  scopeId.value === null
     ? playlists
     : playlists.filter((playlist) => playlist.id === scopeId.value),
 );
+const scopeOptions = computed<SelectOption<string>[]>(() => [
+  {
+    value: null,
+    label: t("stats.wholeSeries"),
+    hint: t("home.resultCount", { n: playlists.length }, playlists.length),
+  },
+  ...playlists.map((playlist) => ({
+    value: playlist.id,
+    label: playlist.name,
+    hint: t("common.tracks", { n: playlist.trackCount }, playlist.trackCount),
+    image: playlist.coverUrl,
+  })),
+]);
+useAccent(() =>
+  scope.value.length === 1 ? scope.value[0]?.palette : latest?.palette,
+);
+
 const tracks = computed(() => tracksOf(scope.value));
 const summary = computed(() => summarize(tracks.value));
-const heatmap = computed(() => buildAddedHeatmap(tracksOf(playlists)));
+const heatmap = computed(() => buildAddedHeatmap(tracks.value));
 
 const bucket = ref<1 | 10>(10);
 const columns = computed<Column[]>(() =>
   releaseDistribution(tracks.value, bucket.value).map((entry) => ({
     key: String(entry.key),
-    label:
-      bucket.value === 10
-        ? `'${String(entry.key).slice(2)}`
-        : `'${String(entry.key).slice(2)}`,
+    label: `'${String(entry.key).slice(2)}`,
     value: entry.count,
-    title:
+    tooltip:
       bucket.value === 10
-        ? `Anni ${entry.key}: ${entry.count} brani`
-        : `${entry.key}: ${entry.count} brani`,
+        ? t("stats.decadeTooltip", {
+            decade: entry.key,
+            tracks: t("common.tracks", { n: entry.count }, entry.count),
+          })
+        : t("stats.yearTooltip", {
+            year: entry.key,
+            tracks: t("common.tracks", { n: entry.count }, entry.count),
+          }),
   })),
 );
 const labelEvery = computed(() =>
   bucket.value === 1 ? Math.max(1, Math.ceil(columns.value.length / 12)) : 1,
 );
+
+/**
+ * Describes a track for a tile detail.
+ * @param track - The track, if any
+ * @returns "Title · Artist", or an em dash
+ */
+function describe(track: (typeof summary.value)["longest"]): string {
+  return track ? `${track.title} · ${track.artists[0]?.name ?? ""}` : "—";
+}
 </script>
 
 <template>
   <div class="stack">
     <header class="top">
-      <div>
-        <p class="eyebrow">Statistiche</p>
-        <h1 class="page-title">
-          I numeri <span class="grad">dei numeri</span>
-        </h1>
-      </div>
-      <label class="scope">
-        <span class="muted">Mostra</span>
-        <select id="stats-scope" v-model="scopeId" class="chip">
-          <option value="all">Tutta la serie</option>
-          <option
-            v-for="playlist in playlists"
-            :key="playlist.id"
-            :value="playlist.id"
-          >
-            {{ playlist.name }}
-          </option>
-        </select>
-      </label>
+      <h1 class="page-title">{{ t("nav.stats") }}</h1>
+      <SelectMenu
+        v-model="scopeId"
+        :options="scopeOptions"
+        :label="t('stats.show')"
+        align-end
+      />
     </header>
 
     <div class="tiles">
       <StatTile
-        label="Brani"
+        :label="t('stats.tracks')"
         :value="formatNumber(summary.trackCount)"
-        :detail="`${summary.uniqueTrackCount} diversi`"
+        :detail="t('stats.unique', { n: summary.uniqueTrackCount })"
       />
-      <StatTile label="Ascolto" :value="formatLongDuration(summary.totalMs)" />
       <StatTile
-        label="Artisti unici"
+        :label="t('stats.listening')"
+        :value="formatLongDuration(summary.totalMs)"
+      />
+      <StatTile
+        :label="t('stats.artists')"
         :value="formatNumber(summary.uniqueArtistCount)"
-        :detail="`${summary.uniqueAlbumCount} album`"
+        :detail="
+          t(
+            'stats.albums',
+            { n: summary.uniqueAlbumCount },
+            summary.uniqueAlbumCount,
+          )
+        "
       />
       <StatTile
-        label="Durata media"
+        :label="t('stats.average')"
         :value="formatTrackDuration(summary.averageMs)"
       />
       <StatTile
-        label="Espliciti"
+        :label="t('stats.explicit')"
         :value="formatPercent(summary.explicitShare)"
       />
       <StatTile
-        label="Più lungo"
+        :label="t('stats.longest')"
         :value="formatTrackDuration(summary.longest?.durationMs ?? 0)"
-        :detail="
-          summary.longest
-            ? `${summary.longest.title} · ${summary.longest.artists[0]?.name ?? ''}`
-            : '—'
-        "
+        :detail="describe(summary.longest)"
       />
       <StatTile
-        label="Più corto"
+        :label="t('stats.shortest')"
         :value="formatTrackDuration(summary.shortest?.durationMs ?? 0)"
-        :detail="
-          summary.shortest
-            ? `${summary.shortest.title} · ${summary.shortest.artists[0]?.name ?? ''}`
-            : '—'
-        "
+        :detail="describe(summary.shortest)"
       />
     </div>
 
@@ -130,25 +150,26 @@ const labelEvery = computed(() =>
     </div>
 
     <section class="glass panel" aria-labelledby="added-title">
-      <h2 id="added-title" class="section-title">Quando aggiungo i brani</h2>
-      <p class="muted lede">
-        Ogni quadrato è un giorno, dall'inizio della serie: più acceso, più
-        brani aggiunti.
-      </p>
-      <HeatmapCalendar :heatmap="heatmap" />
+      <h2 id="added-title" class="section-title">
+        {{ t("stats.addedTitle") }}
+      </h2>
+      <p class="muted lede">{{ t("stats.addedLede") }}</p>
+      <HeatmapCalendar :key="`h-${scopeId}`" :heatmap="heatmap" />
     </section>
 
     <section class="glass panel" aria-labelledby="years-title">
       <div class="head">
-        <h2 id="years-title" class="section-title">Anno di uscita dei brani</h2>
-        <div class="chips" role="group" aria-label="Raggruppa per">
+        <h2 id="years-title" class="section-title">
+          {{ t("stats.yearsTitle") }}
+        </h2>
+        <div class="chips" role="group" :aria-label="t('stats.groupBy')">
           <button
             type="button"
             class="chip"
             :aria-pressed="bucket === 10"
             @click="bucket = 10"
           >
-            decennio
+            {{ t("stats.decades") }}
           </button>
           <button
             type="button"
@@ -156,37 +177,31 @@ const labelEvery = computed(() =>
             :aria-pressed="bucket === 1"
             @click="bucket = 1"
           >
-            anno
+            {{ t("stats.years") }}
           </button>
         </div>
       </div>
       <ColumnChart
+        :key="`c-${bucket}`"
         :columns="columns"
         :label-every="labelEvery"
-        label="Distribuzione dei brani per anno di uscita"
+        :label="t('stats.yearsTitle')"
       />
     </section>
 
-    <OverlapPanel v-if="issues.length > 1" :issues="issues" />
+    <RotationSection />
   </div>
 </template>
 
 <style scoped>
 .top {
+  position: relative;
+  z-index: 5;
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
-  align-items: end;
-  gap: 16px;
-}
-.scope {
-  display: flex;
   align-items: center;
-  gap: 8px;
-  max-inline-size: 100%;
-}
-.scope select {
-  max-inline-size: 70vw;
+  gap: 16px;
 }
 .tiles {
   display: grid;

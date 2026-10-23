@@ -1,4 +1,4 @@
-const LOCALE = "it-IT";
+import { currentLocale, i18n } from "@/i18n/index.ts";
 
 /**
  * Formats a track length as `m:ss`.
@@ -26,13 +26,13 @@ export function formatLongDuration(ms: number): string {
 }
 
 /**
- * Formats a date for display, e.g. "14 gen 2024".
+ * Formats a date in the active locale, e.g. "14 Jan 2024".
  * @param iso - An ISO timestamp, or null
  * @returns The date, or an em dash when missing
  */
 export function formatDate(iso: string | null): string {
   if (iso === null) return "—";
-  return new Date(iso).toLocaleDateString(LOCALE, {
+  return new Date(iso).toLocaleDateString(currentLocale(), {
     day: "numeric",
     month: "short",
     year: "numeric",
@@ -46,23 +46,29 @@ export function formatDate(iso: string | null): string {
  * @returns The percentage, e.g. "14%"
  */
 export function formatPercent(share: number): string {
-  return `${Math.round(share * 100)}%`;
+  return new Intl.NumberFormat(currentLocale(), {
+    style: "percent",
+    maximumFractionDigits: 0,
+  }).format(share);
 }
 
 /**
- * Formats a count with the locale's grouping, e.g. "1.234".
+ * Formats a count with the active locale's grouping.
  * @param value - The number
  * @returns The formatted number
  */
 export function formatNumber(value: number): string {
-  return value.toLocaleString(LOCALE, { maximumFractionDigits: 1 });
+  return value.toLocaleString(currentLocale(), { maximumFractionDigits: 1 });
 }
 
 /**
  * Formats an issue number for display.
  * @param issue - The issue number, or null
- * @returns "Nº 12", or "Fuori serie" for unnumbered playlists
+ * @returns "No. 12" / "Nº 12", or the special-issue label
  */
 export function formatIssue(issue: number | null): string {
-  return issue === null ? "Fuori serie" : `Nº ${issue}`;
+  const { t } = i18n.global;
+  return issue === null
+    ? t("common.unnumbered")
+    : t("common.issue", { n: issue });
 }

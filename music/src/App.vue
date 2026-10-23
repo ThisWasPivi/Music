@@ -1,26 +1,36 @@
 <script setup lang="ts">
 /**
  * App component
- * Shell: skip link, aurora backdrop, header, the active page and footer.
+ * Shell: skip link, aurora backdrop, header, the active page, footer and
+ * the shared tooltip.
  */
+import { useI18n } from "vue-i18n";
+
 import AppFooter from "@/components/ui/AppFooter.vue";
 import AppHeader from "@/components/ui/AppHeader.vue";
+import AppTooltip from "@/components/ui/AppTooltip.vue";
 import AuroraBackdrop from "@/components/ui/AuroraBackdrop.vue";
 import SampleDataNotice from "@/components/ui/SampleDataNotice.vue";
 import { useThemeStore } from "@/stores/theme.ts";
 
 useThemeStore();
+const { t } = useI18n();
 </script>
 
 <template>
-  <a href="#main" class="skip">Vai al contenuto</a>
+  <a href="#main" class="skip">{{ t("app.skip") }}</a>
   <AuroraBackdrop />
   <AppHeader />
   <div class="notice-wrap"><SampleDataNotice /></div>
   <main id="main" tabindex="-1" class="main">
-    <RouterView />
+    <RouterView v-slot="{ Component, route }">
+      <Transition name="page" mode="out-in">
+        <component :is="Component" :key="route.fullPath" />
+      </Transition>
+    </RouterView>
   </main>
   <AppFooter />
+  <AppTooltip />
 </template>
 
 <style scoped>
@@ -46,5 +56,18 @@ useThemeStore();
   padding-inline: max(var(--gutter), env(safe-area-inset-left, 0px))
     max(var(--gutter), env(safe-area-inset-right, 0px));
   outline: none;
+}
+.page-enter-active,
+.page-leave-active {
+  transition:
+    opacity 200ms ease,
+    transform 260ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.page-enter-from {
+  opacity: 0;
+  transform: translateY(10px);
+}
+.page-leave-to {
+  opacity: 0;
 }
 </style>

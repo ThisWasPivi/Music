@@ -1,0 +1,180 @@
+{
+  "app": {
+    "skip": "Skip to content",
+    "sampleData": "invented sample data",
+    "sampleNotice": "You are looking at {sample}: the real Pivəəkly arrive with the next {command}."
+  },
+  "nav": {
+    "home": "Pivəəkly, home",
+    "main": "Main",
+    "playlists": "Playlists",
+    "stats": "Stats",
+    "series": "Series"
+  },
+  "theme": {
+    "toLight": "Switch to the light theme",
+    "toDark": "Switch to the dark theme"
+  },
+  "language": {
+    "label": "Language"
+  },
+  "select": {
+    "search": "Search…",
+    "searchIn": "Search {label}",
+    "noResults": "No matches"
+  },
+  "footer": {
+    "spotify": "Playlists, covers and metadata from {spotify}. Listening through the official Spotify player.",
+    "links": "Links",
+    "madeBy": "Made by Pivi",
+    "source": "Source code",
+    "updated": "Data updated on {date}",
+    "changelog": "What's new in this version",
+    "commit": "Commit this build comes from"
+  },
+  "common": {
+    "tracks": "{n} track | {n} tracks",
+    "issue": "No. {n}",
+    "unnumbered": "Special issue",
+    "listenOnSpotify": "Listen on Spotify",
+    "openOnSpotify": "Open on Spotify",
+    "noData": "No data."
+  },
+  "sort": {
+    "number": "Number",
+    "name": "Name",
+    "tracks": "Track count",
+    "duration": "Duration",
+    "color": "Colour",
+    "unnumberedLast": "Special issues last",
+    "ascending": "ascending",
+    "descending": "descending"
+  },
+  "home": {
+    "title": "Every Pivəəkly issue",
+    "toolbar": "Search, sort and filter",
+    "searchLabel": "Search playlists, tracks or artists",
+    "searchPlaceholder": "Search playlists, tracks, artists… typos are fine",
+    "sortBy": "Sort",
+    "filterBy": "Filter",
+    "artist": "Artist",
+    "allArtists": "All artists",
+    "issueCount": "{n} issue | {n} issues",
+    "decadeLabel": "Release decade",
+    "anyDecade": "Any decade",
+    "decade": "{decade}s",
+    "clearFilters": "Clear filters",
+    "resultCount": "{n} playlist | {n} playlists",
+    "empty": "No playlist matches these filters. Try clearing them."
+  },
+  "playlist": {
+    "released": "Released",
+    "releaseNote": "Approximate release date: the day the first track was added, because Spotify does not say when a playlist was published.",
+    "updated": "Updated",
+    "tracks": "Tracks",
+    "duration": "Duration",
+    "average": "Average",
+    "explicit": "Explicit",
+    "listen": "Listen",
+    "openCover": "Open {name} on Spotify",
+    "neighbours": "Neighbouring issues",
+    "previous": "Previous",
+    "next": "Next",
+    "first": "This is the first",
+    "notYet": "Not out yet",
+    "playerTitle": "Spotify player: {name}",
+    "samplePlayer": "The Spotify player for {name} goes here. With the sample data it cannot play."
+  },
+  "tracks": {
+    "heading": "Tracks",
+    "filterLabel": "Filter tracks by title, artist or album",
+    "filterPlaceholder": "Filter tracks…",
+    "caption": "Tracks of the playlist, sortable by column",
+    "title": "Title",
+    "artist": "Artist",
+    "album": "Album",
+    "year": "Year",
+    "added": "Added",
+    "duration": "Length",
+    "explicit": "Explicit",
+    "empty": "No track matches “{query}”."
+  },
+  "charts": {
+    "tracksAdded": "{n} track added | {n} tracks added",
+    "less": "less",
+    "more": "more"
+  },
+  "stats": {
+    "show": "Show",
+    "wholeSeries": "Whole series",
+    "tracks": "Tracks",
+    "unique": "{n} different",
+    "listening": "Listening time",
+    "artists": "Unique artists",
+    "albums": "{n} album | {n} albums",
+    "average": "Average length",
+    "explicit": "Explicit",
+    "longest": "Longest",
+    "shortest": "Shortest",
+    "topArtists": "Top artists",
+    "topAlbums": "Top albums",
+    "rankBy": "Rank by",
+    "byTracks": "tracks",
+    "byMinutes": "minutes",
+    "addedTitle": "When tracks were added",
+    "addedLede": "One square per day: the brighter, the more tracks added.",
+    "yearsTitle": "Release year of the tracks",
+    "groupBy": "Group by",
+    "decades": "decade",
+    "years": "year",
+    "decadeTooltip": "{decade}s: {tracks}",
+    "yearTooltip": "{year}: {tracks}",
+    "rotation": "In rotation now"
+  },
+  "series": {
+    "titleAccent": "over time",
+    "timelineTitle": "Release timeline",
+    "timelineLede": "One ball per issue on a real time axis, so busy spells and pauses show as they happened. Release dates are approximated by the first track added. The ringed ball came after the longest pause.",
+    "timelineSummary": "{n} releases from {from} to {to}",
+    "ballTooltip": "{name} · {date} · {tracks}",
+    "averageGap": "Average gap",
+    "minGap": "Shortest gap",
+    "maxGap": "Longest gap",
+    "firstRelease": "First release",
+    "before": "before {name}",
+    "days": "{n} day | {n} days",
+    "missing": "Missing from the sequence: {list}.",
+    "discoveryTitle": "Discovery index",
+    "discoveryLede": "How many artists appear for the first time in each issue.",
+    "discoveryTooltip": "{issue}: {n} new artists out of {total} ({share})",
+    "recurringTitle": "Recurring artists",
+    "artist": "Artist",
+    "issues": "Issues",
+    "first": "First",
+    "last": "Last",
+    "streak": "In a row",
+    "streakHint": "Longest run of consecutive issues featuring the artist",
+    "noneRecurring": "No artist appears in more than one issue.",
+    "repeatedTitle": "Repeated tracks",
+    "noneRepeated": "No track appears in more than one issue."
+  },
+  "artist": {
+    "eyebrow": "Artist",
+    "lede": "Featured in {issues}, with {tracks}.",
+    "issueCount": "{n} issue | {n} issues",
+    "issues": "Issues",
+    "tracks": "Tracks",
+    "listening": "Listening time",
+    "firstSeen": "First seen",
+    "lastSeen": "Last seen",
+    "streak": "In a row",
+    "streakDetail": "longest run of consecutive issues",
+    "albums": "Albums",
+    "appearances": "Where they appear"
+  },
+  "notFound": {
+    "title": "This record is missing",
+    "text": "The page you are looking for does not exist, or the playlist is not part of the series.",
+    "back": "Back to every issue"
+  }
+}

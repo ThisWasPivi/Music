@@ -2,13 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { playlist, track } from "@/test/builders.ts";
 
-import {
-  chainSorts,
-  filterWith,
-  searchable,
-  sortWith,
-  withDirection,
-} from "./core.ts";
+import { chainSorts, filterWith, sortWith, withDirection } from "./core.ts";
 import {
   artistFilter,
   byColor,
@@ -98,7 +92,8 @@ describe("playlist filters", () => {
     ]);
   });
 
-  it("search text accent-insensitively across tracks and artists", () => {
+  it("search text fuzzily across tracks and artists", () => {
+    expect(filterWith(all, [textFilter("brnuo")])).toEqual([p1]);
     expect(filterWith(all, [textFilter("citta")])).toEqual([p1]);
     expect(filterWith(all, [textFilter("bruno")])).toEqual([p1]);
     expect(filterWith(all, [textFilter("  ")])).toHaveLength(4);
@@ -140,10 +135,6 @@ describe("core helpers", () => {
         byYear,
       )[0]?.id,
     ).toBe("y");
-  });
-
-  it("searchable strips diacritics and case", () => {
-    expect(searchable("Città ÉTÉ")).toBe("citta ete");
   });
 
   it("track text filter matches album and artist", () => {

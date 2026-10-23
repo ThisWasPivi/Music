@@ -10,10 +10,21 @@ const isSample = playlistRepository.meta().source === "fixtures";
 </script>
 
 <template>
-  <p v-if="isSample" class="notice" role="note">
-    Stai vedendo <strong>dati di esempio inventati</strong>: le vere Pivəəkly
-    arrivano al prossimo <code>pnpm release</code>.
-  </p>
+  <i18n-t
+    v-if="isSample"
+    keypath="app.sampleNotice"
+    tag="p"
+    scope="global"
+    class="notice"
+    role="note"
+  >
+    <template #sample>
+      <strong>{{ $t("app.sampleData") }}</strong>
+    </template>
+    <template #command>
+      <code>pnpm release</code>
+    </template>
+  </i18n-t>
 </template>
 
 <style scoped>

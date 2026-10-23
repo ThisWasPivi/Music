@@ -1,9 +1,12 @@
 <script setup lang="ts">
 /**
  * SeriesPager component
- * Links to the previous and next issue of the series.
+ * Links to the previous and next issue of the series, with their covers.
  */
 import type { Playlist } from "@music/shared";
+import { useI18n } from "vue-i18n";
+
+import CoverImage from "@/components/ui/CoverImage.vue";
 
 defineProps<{
   /** The issue before, if any. */
@@ -12,33 +15,55 @@ defineProps<{
   /** The issue after, if any. */
   next?: Playlist;
 }>();
+
+const { t } = useI18n();
 </script>
 
 <template>
-  <nav class="pager" aria-label="Numeri vicini nella serie">
+  <nav class="pager" :aria-label="t('playlist.neighbours')">
     <RouterLink
       v-if="previous"
       :to="{ name: 'playlist', params: { id: previous.id } }"
       class="pager__item glass"
       rel="prev"
     >
-      <span class="muted">← Precedente</span>
-      <strong>{{ previous.name }}</strong>
+      <CoverImage
+        :src="previous.coverUrl"
+        :palette="previous.palette"
+        class="pager__cover"
+      />
+      <span class="pager__text">
+        <span class="muted">← {{ t("playlist.previous") }}</span>
+        <strong>{{ previous.name }}</strong>
+      </span>
     </RouterLink>
-    <span v-else class="pager__item pager__item--off glass"
-      ><span class="muted">← Precedente</span><strong>È il primo</strong></span
-    >
+    <span v-else class="pager__item pager__item--off glass">
+      <span class="pager__text"
+        ><span class="muted">← {{ t("playlist.previous") }}</span
+        ><strong>{{ t("playlist.first") }}</strong></span
+      >
+    </span>
     <RouterLink
       v-if="next"
       :to="{ name: 'playlist', params: { id: next.id } }"
       class="pager__item pager__item--next glass"
       rel="next"
     >
-      <span class="muted">Successivo →</span>
-      <strong>{{ next.name }}</strong>
+      <span class="pager__text">
+        <span class="muted">{{ t("playlist.next") }} →</span>
+        <strong>{{ next.name }}</strong>
+      </span>
+      <CoverImage
+        :src="next.coverUrl"
+        :palette="next.palette"
+        class="pager__cover"
+      />
     </RouterLink>
     <span v-else class="pager__item pager__item--next pager__item--off glass">
-      <span class="muted">Successivo →</span><strong>Non ancora uscito</strong>
+      <span class="pager__text"
+        ><span class="muted">{{ t("playlist.next") }} →</span
+        ><strong>{{ t("playlist.notYet") }}</strong></span
+      >
     </span>
   </nav>
 </template>
@@ -50,20 +75,32 @@ defineProps<{
   gap: 12px;
 }
 .pager__item {
-  display: grid;
-  gap: 2px;
-  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
   text-decoration: none;
-  font-size: 14px;
+  font-size: 13px;
+  min-width: 0;
+  transition: background 150ms ease;
+}
+.pager__item--next {
+  justify-content: flex-end;
+  text-align: right;
+}
+.pager__cover {
+  flex: none;
+  inline-size: 44px;
+  --cover-radius: 8px;
+}
+.pager__text {
+  display: grid;
   min-width: 0;
 }
-.pager__item strong {
+.pager__text strong {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-.pager__item--next {
-  text-align: right;
 }
 .pager__item--off {
   opacity: 0.6;

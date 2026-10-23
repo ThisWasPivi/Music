@@ -1,13 +1,15 @@
 <script setup lang="ts">
 /**
  * TrackTable component
- * The tracks of a playlist, sortable by every column and filterable by
- * text. Playlist order is the default; a sorted column cycles asc → desc →
- * playlist order.
+ * The tracks of a playlist with their album covers, sortable by every
+ * column and fuzzy-filterable. Playlist order is the default; a sorted
+ * column cycles ascending → descending → playlist order.
  */
 import type { Track } from "@music/shared";
 import { computed, ref } from "vue";
+import { useI18n } from "vue-i18n";
 
+import CoverImage from "@/components/ui/CoverImage.vue";
 import {
   filterWith,
   type SortDirection,
@@ -26,6 +28,7 @@ const props = defineProps<{
   tracks: readonly Track[];
 }>();
 
+const { t } = useI18n();
 const query = ref("");
 const sortId = ref<TrackSortId | null>(null);
 const direction = ref<SortDirection>("asc");
@@ -68,39 +71,36 @@ function ariaSort(id: TrackSortId): "ascending" | "descending" | "none" {
   return direction.value === "asc" ? "ascending" : "descending";
 }
 
-const COLUMNS: readonly {
-  id: TrackSortId;
-  label: string;
-  className?: string;
-}[] = [
-  { id: "title", label: "Titolo" },
-  { id: "artist", label: "Artista", className: "col-artist" },
-  { id: "album", label: "Album", className: "col-album" },
-  { id: "year", label: "Anno", className: "col-year" },
-  { id: "added", label: "Aggiunto", className: "col-added" },
-  { id: "duration", label: "Durata" },
+const COLUMNS: readonly { id: TrackSortId; className?: string }[] = [
+  { id: "title", className: "col-title" },
+  { id: "album", className: "col-album" },
+  { id: "year", className: "col-year" },
+  { id: "added", className: "col-added" },
+  { id: "duration", className: "col-duration" },
 ];
 </script>
 
 <template>
   <section class="tracks glass panel" aria-labelledby="tracks-title">
     <div class="tracks__head">
-      <h2 id="tracks-title" class="section-title">Brani</h2>
+      <h2 id="tracks-title" class="section-title">{{ t("tracks.heading") }}</h2>
       <label class="tracks__filter">
-        <span class="sr-only">Filtra i brani per titolo, artista o album</span>
+        <span class="sr-only">{{ t("tracks.filterLabel") }}</span>
         <input
           id="track-filter"
           v-model="query"
           class="field"
           type="search"
-          placeholder="Filtra i brani…"
+          :placeholder="t('tracks.filterPlaceholder')"
         />
       </label>
     </div>
     <div class="tracks__scroll">
       <table>
         <caption class="sr-only">
-          Brani della playlist, ordinabili per colonna
+          {{
+            t("tracks.caption")
+          }}
         </caption>
         <thead>
           <tr>
@@ -125,7 +125,7 @@ const COLUMNS: readonly {
                 :class="{ on: sortId === column.id }"
                 @click="toggleSort(column.id)"
               >
-                {{ column.label }}
+                {{ t(`tracks.${column.id}`) }}
                 <span aria-hidden="true">{{
                   sortId === column.id ? (direction === "asc" ? "↑" : "↓") : ""
                 }}</span>
@@ -133,47 +133,52 @@ const COLUMNS: readonly {
             </th>
           </tr>
         </thead>
-        <tbody>
+        <TransitionGroup tag="tbody" name="row">
           <tr v-for="track in rows" :key="`${track.id}-${track.addedAt}`">
             <td class="col-n muted tabular">{{ positions.get(track) }}</td>
             <td class="col-title">
-              <a
-                :href="track.url"
-                target="_blank"
-                rel="noopener"
-                class="tracks__title"
-                >{{ track.title }}</a
-              >
-              <span class="tracks__sub muted">
-                <abbr
-                  v-if="track.explicit"
-                  class="tracks__e"
-                  title="Contenuto esplicito"
-                  >E</abbr
+              <div class="song">
+                <a
+                  v-tooltip="track.album.name"
+                  :href="track.album.url"
+                  target="_blank"
+                  rel="noopener"
+                  class="song__cover"
+                  tabindex="-1"
+                  aria-hidden="true"
                 >
-                <template
-                  v-for="(artist, index) in track.artists"
-                  :key="artist.id"
-                >
-                  <RouterLink
-                    :to="{ name: 'artist', params: { id: artist.id } }"
-                    >{{ artist.name }}</RouterLink
-                  ><template v-if="index < track.artists.length - 1"
-                    >,
-                  </template>
-                </template>
-              </span>
-            </td>
-            <td class="col-artist">
-              <template
-                v-for="(artist, index) in track.artists"
-                :key="artist.id"
-              >
-                <RouterLink
-                  :to="{ name: 'artist', params: { id: artist.id } }"
-                  >{{ artist.name }}</RouterLink
-                ><template v-if="index < track.artists.length - 1">, </template>
-              </template>
+                  <CoverImage :src="track.album.imageUrl" />
+                </a>
+                <span class="song__text">
+                  <a
+                    :href="track.url"
+                    target="_blank"
+                    rel="noopener"
+                    class="song__title"
+                    >{{ track.title }}</a
+                  >
+                  <span class="song__artists muted">
+                    <abbr
+                      v-if="track.explicit"
+                      v-tooltip="t('tracks.explicit')"
+                      class="song__e"
+                      :aria-label="t('tracks.explicit')"
+                      >E</abbr
+                    >
+                    <template
+                      v-for="(artist, index) in track.artists"
+                      :key="artist.id"
+                    >
+                      <RouterLink
+                        :to="{ name: 'artist', params: { id: artist.id } }"
+                        >{{ artist.name }}</RouterLink
+                      ><template v-if="index < track.artists.length - 1"
+                        >,
+                      </template>
+                    </template>
+                  </span>
+                </span>
+              </div>
             </td>
             <td class="col-album muted">
               <a :href="track.album.url" target="_blank" rel="noopener">{{
@@ -186,12 +191,14 @@ const COLUMNS: readonly {
             <td class="col-added muted tabular">
               {{ formatDate(track.addedAt) }}
             </td>
-            <td class="tabular">{{ formatTrackDuration(track.durationMs) }}</td>
+            <td class="col-duration tabular">
+              {{ formatTrackDuration(track.durationMs) }}
+            </td>
           </tr>
-        </tbody>
+        </TransitionGroup>
       </table>
       <p v-if="rows.length === 0" class="muted tracks__empty">
-        Nessun brano corrisponde a “{{ query }}”.
+        {{ t("tracks.empty", { query }) }}
       </p>
     </div>
   </section>
@@ -239,7 +246,7 @@ th button.on {
 }
 td {
   padding: 8px;
-  vertical-align: top;
+  vertical-align: middle;
   border-bottom: 1px solid var(--line);
 }
 td a {
@@ -247,6 +254,9 @@ td a {
 }
 td a:hover {
   text-decoration: underline;
+}
+tbody tr {
+  transition: background 150ms ease;
 }
 tbody tr:hover {
   background: var(--glass);
@@ -256,18 +266,35 @@ tbody tr:hover {
 }
 .col-added,
 .col-year,
-td:last-child {
+.col-duration {
   white-space: nowrap;
 }
-.tracks__title {
-  display: block;
-  font-weight: 600;
+.song {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
 }
-.tracks__sub {
-  display: none;
+.song__cover {
+  flex: none;
+  inline-size: 46px;
+  --cover-radius: 8px;
+  transition: transform 200ms ease;
+}
+tbody tr:hover .song__cover {
+  transform: scale(1.06);
+}
+.song__text {
+  display: grid;
+  min-width: 0;
+}
+.song__title {
+  font-weight: 650;
+}
+.song__artists {
   font-size: 13px;
 }
-.tracks__e {
+.song__e {
   display: inline-block;
   margin-right: 4px;
   padding: 0 4px;
@@ -278,11 +305,19 @@ td:last-child {
   line-height: 1.5;
   text-decoration: none;
 }
-.col-artist .tracks__e {
-  display: none;
-}
 .tracks__empty {
   margin: 16px 8px;
+}
+.row-move {
+  transition: transform 450ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.row-enter-active,
+.row-leave-active {
+  transition: opacity 200ms ease;
+}
+.row-enter-from,
+.row-leave-to {
+  opacity: 0;
 }
 @media (max-width: 899px) {
   .col-album,
@@ -290,13 +325,12 @@ td:last-child {
     display: none;
   }
 }
-@media (max-width: 640px) {
-  .col-artist,
+@media (max-width: 560px) {
   .col-year {
     display: none;
   }
-  .tracks__sub {
-    display: block;
+  .song__cover {
+    inline-size: 40px;
   }
 }
 </style>

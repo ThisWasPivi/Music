@@ -31,7 +31,7 @@ try {
     !["127.0.0.1", "[::1]", "localhost"].includes(redirect.hostname)
   ) {
     throw new SyncError(
-      "SPOTIFY_REDIRECT_URI deve essere un indirizzo di loopback, es. http://127.0.0.1:8888/callback.",
+      "SPOTIFY_REDIRECT_URI must be a loopback address, e.g. http://127.0.0.1:8888/callback.",
     );
   }
   const port = Number(redirect.port || 80);
@@ -49,43 +49,41 @@ try {
       const received = url.searchParams.get("code");
       response.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
       if (error || !received || url.searchParams.get("state") !== state) {
-        response.end(page("Autorizzazione non riuscita. Torna al terminale."));
+        response.end(page("Authorization failed. Go back to the terminal."));
         server.close();
         reject(
           new SyncError(
-            `Autorizzazione rifiutata o non valida${error ? `: ${error}` : ""}.`,
+            `Authorization denied or invalid${error ? `: ${error}` : ""}.`,
           ),
         );
         return;
       }
       response.end(
-        page("Fatto! Puoi chiudere questa scheda e tornare al terminale."),
+        page("Done! You can close this tab and go back to the terminal."),
       );
       server.close();
       resolve(received);
     });
     server.on("error", (error) =>
       reject(
-        new SyncError(
-          `Impossibile ascoltare su ${redirect.host}: ${error.message}`,
-        ),
+        new SyncError(`Cannot listen on ${redirect.host}: ${error.message}`),
       ),
     );
     server.listen(port, redirect.hostname.replace(/^\[|\]$/g, ""), () => {
       console.log(
-        "Apri questo link nel browser e autorizza l'app (serve l'account Premium owner dell'app):\n",
+        "Open this link in your browser and authorize the app (use the Premium account that owns the app):\n",
       );
       console.log(`  ${buildAuthorizeUrl(env, challenge, state)}\n`);
-      console.log(`In attesa del redirect su ${redirect.href} …`);
+      console.log(`Waiting for the redirect on ${redirect.href} …`);
     });
   });
 
   const grant = await exchangeCode(env, code, verifier);
   if (!grant.refreshToken)
-    throw new SyncError("Spotify non ha restituito un refresh token.");
+    throw new SyncError("Spotify did not return a refresh token.");
   await writeEnvValue("SPOTIFY_REFRESH_TOKEN", grant.refreshToken);
   console.log(
-    "\n✓ Refresh token salvato in .env (scade tra 6 mesi). Ora puoi lanciare `pnpm sync`.",
+    "\n✓ Refresh token saved to .env (it expires in 6 months). You can now run `pnpm sync`.",
   );
 } catch (error) {
   if (error instanceof SyncError) {

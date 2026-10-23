@@ -25,8 +25,8 @@ describe("format", () => {
   });
 
   it("formats issue numbers", () => {
-    expect(formatIssue(12)).toBe("Nº 12");
-    expect(formatIssue(null)).toBe("Fuori serie");
+    expect(formatIssue(12)).toBe("No. 12");
+    expect(formatIssue(null)).toBe("Special issue");
   });
 });
 

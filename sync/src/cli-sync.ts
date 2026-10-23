@@ -35,7 +35,7 @@ try {
     0,
   );
   console.log(
-    `\nScritti ${data.playlists.length} playlist, ${tracks} brani, ${data.artists.length} artisti in ${DATA_DIR}`,
+    `\nWrote ${data.playlists.length} playlists, ${tracks} tracks, ${data.artists.length} artists to ${DATA_DIR}`,
   );
 } catch (error) {
   if (error instanceof SyncError) {

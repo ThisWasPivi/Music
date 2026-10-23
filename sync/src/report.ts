@@ -3,9 +3,9 @@ import { findMissingIssues } from "@music/shared";
 import type { Selection, SkipReason } from "./selection.ts";
 
 const SKIP_LABELS: Record<SkipReason, string> = {
-  excluded: "esclusa in playlists.config.ts",
-  "not-owner": "non sei owner",
-  "no-match": "nome senza prefisso",
+  excluded: "excluded in playlists.config.ts",
+  "not-owner": "not the owner",
+  "no-match": "name without the prefix",
 };
 
 /**
@@ -21,34 +21,32 @@ export function formatSelectionReport(
   const lines: string[] = [];
   const { selected, skipped, unknownIds } = selection;
 
-  lines.push(`Incluse (${selected.length}):`);
+  lines.push(`Included (${selected.length}):`);
   for (const entry of selected) {
     const why =
-      entry.reason === "include" ? "in include" : `prefisso "${prefix}"`;
-    lines.push(
-      `  + ${entry.playlist.name}  [${entry.number === null ? "senza numero" : `Nº ${entry.number}`}, ${why}]`,
-    );
+      entry.reason === "include" ? "in include" : `prefix "${prefix}"`;
+    const issue = entry.number === null ? "no number" : `No. ${entry.number}`;
+    lines.push(`  + ${entry.playlist.name}  [${issue}, ${why}]`);
   }
 
   const relevant = skipped.filter(
     (entry) => entry.reason !== "no-match" || entry.nearMiss,
   );
   const others = skipped.length - relevant.length;
-  lines.push(`Escluse (${skipped.length}):`);
+  lines.push(`Skipped (${skipped.length}):`);
   for (const entry of relevant) {
     const hint = entry.nearMiss
-      ? `; somiglia a "${prefix}": controlla le "ə" (U+0259) o aggiungila a include`
+      ? `; looks like "${prefix}": check the "ə" (U+0259) or add it to include`
       : "";
     lines.push(
       `  - ${entry.playlist.name}  [${SKIP_LABELS[entry.reason]}${hint}]`,
     );
   }
-  if (others > 0)
-    lines.push(`  - altre ${others} playlist con nome fuori serie`);
+  if (others > 0) lines.push(`  - ${others} more playlists outside the series`);
 
-  const unnumbered = selected.filter((entry) => entry.number === null);
-  for (const entry of unnumbered)
-    lines.push(`! "${entry.playlist.name}" non ha un numero: andrà in fondo.`);
+  for (const entry of selected.filter((item) => item.number === null)) {
+    lines.push(`! "${entry.playlist.name}" has no number: it goes last.`);
+  }
 
   const numbers = selected.flatMap((entry) =>
     entry.number === null ? [] : [entry.number],
@@ -57,15 +55,15 @@ export function formatSelectionReport(
     (value, index) => numbers.indexOf(value) !== index,
   );
   for (const value of new Set(duplicates))
-    lines.push(`! Il Nº ${value} compare in più playlist.`);
+    lines.push(`! No. ${value} appears in more than one playlist.`);
 
   const missing = findMissingIssues(numbers);
   if (missing.length > 0)
-    lines.push(`! Numeri mancanti nella serie: ${missing.join(", ")}.`);
+    lines.push(`! Numbers missing from the series: ${missing.join(", ")}.`);
 
   for (const id of unknownIds)
     lines.push(
-      `! L'id ${id} in include/exclude non corrisponde a nessuna tua playlist.`,
+      `! The id ${id} in include/exclude matches none of your playlists.`,
     );
   return lines;
 }

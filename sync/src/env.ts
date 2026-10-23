@@ -10,9 +10,9 @@ import { SyncError } from "./errors.ts";
 export const ENV_PATH = fileURLToPath(new URL("../../.env", import.meta.url));
 
 const envSchema = z.object({
-  SPOTIFY_CLIENT_ID: z.string().min(1, "manca SPOTIFY_CLIENT_ID"),
-  SPOTIFY_CLIENT_SECRET: z.string().min(1, "manca SPOTIFY_CLIENT_SECRET"),
-  SPOTIFY_REDIRECT_URI: z.url("SPOTIFY_REDIRECT_URI non è un URL valido"),
+  SPOTIFY_CLIENT_ID: z.string().min(1, "SPOTIFY_CLIENT_ID is missing"),
+  SPOTIFY_CLIENT_SECRET: z.string().min(1, "SPOTIFY_CLIENT_SECRET is missing"),
+  SPOTIFY_REDIRECT_URI: z.url("SPOTIFY_REDIRECT_URI is not a valid URL"),
   SPOTIFY_REFRESH_TOKEN: z.string().optional(),
 });
 
@@ -30,13 +30,13 @@ export async function loadEnv(path: string = ENV_PATH): Promise<SpotifyEnv> {
     text = await readFile(path, "utf8");
   } catch {
     throw new SyncError(
-      `File ${path} non trovato: copia .env.example in .env e compila i valori dell'app Spotify.`,
+      `${path} not found: copy .env.example to .env and fill in your Spotify app values.`,
     );
   }
   const result = envSchema.safeParse(parseEnv(text));
   if (!result.success) {
     throw new SyncError(
-      `.env non valido: ${result.error.issues.map((issue) => issue.message).join(", ")}.`,
+      `Invalid .env: ${result.error.issues.map((issue) => issue.message).join(", ")}.`,
     );
   }
   return {

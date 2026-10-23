@@ -107,7 +107,7 @@ export async function runSync(deps: SyncDeps): Promise<PublishedData> {
         await cache.set(key, palette);
     }
     playlists.push({ ...adapted, palette });
-    log(`  ✓ ${adapted.name}: ${adapted.trackCount} brani`);
+    log(`  ✓ ${adapted.name}: ${adapted.trackCount} tracks`);
   }
 
   const artists: ArtistProfile[] = [];
@@ -138,7 +138,7 @@ export async function runSync(deps: SyncDeps): Promise<PublishedData> {
       };
     } catch (error) {
       log(
-        `! "In rotazione" non disponibile (${error instanceof Error ? error.message : String(error)}): sezione vuota.`,
+        `! "In rotation" unavailable (${error instanceof Error ? error.message : String(error)}): section left empty.`,
       );
     }
   }

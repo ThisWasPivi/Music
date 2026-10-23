@@ -1,64 +1,46 @@
 <script setup lang="ts">
 /**
  * HeatmapCalendar component
- * GitHub-style calendar of the days tracks were added. Colours come from the
- * `--heat-0` … `--heat-4` custom properties of the surrounding theme.
+ * GitHub-style calendar of the days tracks were added, one block per year.
+ * Each block is a 53-column grid that fills the available width, so it
+ * never scrolls sideways. Colours come from `--heat-0` … `--heat-4`.
  */
 import { computed } from "vue";
+import { useI18n } from "vue-i18n";
 
-import type { Heatmap } from "@/services/stats";
-import { formatNumber } from "@/utils/format.ts";
+import type { Heatmap, HeatmapDay } from "@/services/stats";
+import { formatDate } from "@/utils/format.ts";
 
-const props = withDefaults(
-  defineProps<{
-    /** The calendar to draw. */
-    heatmap: Heatmap;
+const props = defineProps<{
+  /** The calendars to draw. */
+  heatmap: Heatmap;
+}>();
 
-    /** Cell size in pixels. */
-    cell?: number;
+const { t, locale } = useI18n();
 
-    /** Gap between cells in pixels. */
-    gap?: number;
-  }>(),
-  { cell: 11, gap: 3 },
-);
-
-const MONTHS = [
-  "gen",
-  "feb",
-  "mar",
-  "apr",
-  "mag",
-  "giu",
-  "lug",
-  "ago",
-  "set",
-  "ott",
-  "nov",
-  "dic",
-];
-const LABEL_HEIGHT = 16;
-
-const pitch = computed(() => props.cell + props.gap);
-const width = computed(() => props.heatmap.weeks.length * pitch.value);
-const height = computed(() => LABEL_HEIGHT + 7 * pitch.value);
-
-/** A month label above the first week that starts in that month. */
-const monthLabels = computed(() => {
-  const labels: { x: number; text: string }[] = [];
-  let previous = -1;
-  props.heatmap.weeks.forEach((week, index) => {
-    const month = Number(week[0]?.date.slice(5, 7)) - 1;
-    if (month !== previous) {
-      const year = week[0]?.date.slice(2, 4);
-      labels.push({
-        x: index * pitch.value,
-        text: month === 0 ? `${MONTHS[month]} '${year}` : (MONTHS[month] ?? ""),
-      });
-      previous = month;
-    }
+/** Month labels per year: the week column where each month starts. */
+const months = computed(() => {
+  const formatter = new Intl.DateTimeFormat(locale.value, {
+    month: "short",
+    timeZone: "UTC",
   });
-  return labels;
+  return props.heatmap.years.map((year) => {
+    const labels: { column: number; text: string }[] = [];
+    let previous = -1;
+    year.weeks.forEach((week, index) => {
+      const day = week.find((entry): entry is HeatmapDay => entry !== null);
+      if (!day) return;
+      const month = Number(day.date.slice(5, 7)) - 1;
+      if (month !== previous && day.date.slice(8) <= "07") {
+        labels.push({
+          column: index + 1,
+          text: formatter.format(new Date(Date.UTC(year.year, month, 1))),
+        });
+      }
+      previous = month;
+    });
+    return labels;
+  });
 });
 
 /**
@@ -71,129 +53,159 @@ function level(count: number): number {
   return Math.min(4, Math.ceil((count / props.heatmap.max) * 4));
 }
 
-const summary = computed(
-  () =>
-    `${formatNumber(props.heatmap.total)} brani aggiunti in ${props.heatmap.weeks.length} settimane`,
-);
+/**
+ * Tooltip text of one day.
+ * @param day - The day
+ * @returns e.g. "3 tracks · 14 Jan 2024"
+ */
+function dayLabel(day: HeatmapDay): string {
+  return `${t("charts.tracksAdded", { n: day.count }, day.count)} · ${formatDate(`${day.date}T00:00:00Z`)}`;
+}
 </script>
 
 <template>
   <figure class="heatmap">
-    <div class="heatmap__scroll" tabindex="0" :aria-label="summary">
-      <svg
-        :width="width"
-        :height="height"
-        :viewBox="`0 0 ${width} ${height}`"
+    <section
+      v-for="(year, yearIndex) in heatmap.years"
+      :key="year.year"
+      class="heatmap__year"
+    >
+      <header class="heatmap__head">
+        <strong class="tabular">{{ year.year }}</strong>
+        <span class="muted tabular">{{
+          t("charts.tracksAdded", { n: year.total }, year.total)
+        }}</span>
+      </header>
+      <div class="heatmap__months" aria-hidden="true">
+        <span
+          v-for="month in months[yearIndex]"
+          :key="month.column"
+          :style="{ gridColumn: `${month.column} / span 4` }"
+        >
+          {{ month.text }}
+        </span>
+      </div>
+      <div
+        class="heatmap__grid"
         role="img"
-        :aria-label="summary"
+        :aria-label="`${year.year}: ${t('charts.tracksAdded', { n: year.total }, year.total)}`"
       >
-        <text
-          v-for="label in monthLabels"
-          :key="label.x"
-          :x="label.x"
-          y="10"
-          class="heatmap__label"
-        >
-          {{ label.text }}
-        </text>
-        <g
-          v-for="(week, column) in heatmap.weeks"
-          :key="week[0]?.date"
-          :transform="`translate(${column * pitch} ${LABEL_HEIGHT})`"
-          :style="{ '--d': `${column * 10}ms` }"
-        >
-          <rect
+        <template v-for="(week, column) in year.weeks" :key="column">
+          <span
             v-for="(day, row) in week"
-            :key="day.date"
-            :y="row * pitch"
-            :width="cell"
-            :height="cell"
-            rx="2"
-            :class="`heatmap__cell heatmap__cell--${level(day.count)}`"
-          >
-            <title>{{ day.date }}: {{ day.count }} brani</title>
-          </rect>
-        </g>
-      </svg>
-    </div>
+            :key="`${column}-${row}`"
+            v-tooltip="day ? dayLabel(day) : undefined"
+            :class="
+              day
+                ? `heatmap__cell heatmap__cell--${level(day.count)}`
+                : 'heatmap__cell heatmap__cell--pad'
+            "
+            :style="{ animationDelay: `${column * 10}ms` }"
+          />
+        </template>
+      </div>
+    </section>
     <figcaption class="heatmap__legend">
-      <span>meno</span>
-      <svg
+      <span>{{ t("charts.less") }}</span>
+      <span
         v-for="step in 5"
         :key="step"
-        width="11"
-        height="11"
+        :class="`heatmap__cell heatmap__cell--${step - 1}`"
         aria-hidden="true"
-      >
-        <rect
-          width="11"
-          height="11"
-          rx="2"
-          :class="`heatmap__cell heatmap__cell--${step - 1}`"
-        />
-      </svg>
-      <span>più</span>
+      />
+      <span>{{ t("charts.more") }}</span>
     </figcaption>
   </figure>
 </template>
 
 <style scoped>
 .heatmap {
+  display: grid;
+  gap: 22px;
   margin: 0;
 }
-.heatmap__scroll {
-  overflow-x: auto;
-  padding-bottom: 4px;
+.heatmap__year {
+  display: grid;
+  gap: 6px;
 }
-.heatmap__scroll:focus-visible {
-  outline: 2px solid var(--focus, currentColor);
-  outline-offset: 2px;
+.heatmap__year {
+  max-inline-size: calc(53 * 18px + 52 * 4px);
 }
-.heatmap__label {
-  font-size: 10px;
-  fill: var(--chart-muted, currentColor);
+.heatmap__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: 13px;
 }
-g .heatmap__cell {
-  transform-box: fill-box;
-  transform-origin: center;
-  animation: heat-pop 500ms cubic-bezier(0.2, 0.8, 0.2, 1) var(--d, 0ms)
-    backwards;
+.heatmap__months,
+.heatmap__grid {
+  display: grid;
+  grid-template-columns: repeat(53, minmax(0, 18px));
+  justify-content: space-between;
+  column-gap: clamp(1px, 0.35vw, 4px);
+}
+.heatmap__months {
+  font-size: 11px;
+  color: var(--chart-muted);
+}
+.heatmap__months span {
+  white-space: nowrap;
+}
+.heatmap__grid {
+  grid-template-rows: repeat(7, auto);
+  grid-auto-flow: column;
+  row-gap: clamp(1px, 0.35vw, 4px);
+}
+.heatmap__cell {
+  display: block;
+  aspect-ratio: 1;
+  border-radius: 28%;
+  animation: heat-pop 500ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
   transition:
     transform 150ms ease,
     filter 150ms ease;
 }
-g .heatmap__cell:hover {
-  transform: scale(1.5);
-  filter: brightness(1.3);
+.heatmap__grid .heatmap__cell:not(.heatmap__cell--pad):hover {
+  transform: scale(1.6);
+  filter: brightness(1.25);
+  position: relative;
+  z-index: 1;
 }
 @keyframes heat-pop {
   from {
     opacity: 0;
-    transform: scale(0.2);
+    transform: scale(0.3);
   }
 }
+.heatmap__cell--pad {
+  visibility: hidden;
+}
 .heatmap__cell--0 {
-  fill: var(--heat-0);
+  background: var(--heat-0);
 }
 .heatmap__cell--1 {
-  fill: var(--heat-1);
+  background: var(--heat-1);
 }
 .heatmap__cell--2 {
-  fill: var(--heat-2);
+  background: var(--heat-2);
 }
 .heatmap__cell--3 {
-  fill: var(--heat-3);
+  background: var(--heat-3);
 }
 .heatmap__cell--4 {
-  fill: var(--heat-4);
+  background: var(--heat-4);
+  box-shadow: 0 0 8px color-mix(in oklab, var(--heat-4) 60%, transparent);
 }
 .heatmap__legend {
   display: flex;
   align-items: center;
   justify-content: flex-end;
   gap: 4px;
-  margin-top: 6px;
   font-size: 11px;
-  color: var(--chart-muted, currentColor);
+  color: var(--chart-muted);
+}
+.heatmap__legend .heatmap__cell {
+  inline-size: 11px;
+  animation: none;
 }
 </style>

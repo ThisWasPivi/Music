@@ -81,7 +81,7 @@ export function sanitize(
   const parsed = publishedSchema.safeParse(data);
   if (!parsed.success) {
     throw new SyncError(
-      `Dati non pubblicabili: ${parsed.error.issues
+      `Data cannot be published: ${parsed.error.issues
         .slice(0, 3)
         .map((issue) => `${issue.path.join(".")} ${issue.message}`)
         .join("; ")}`,
@@ -91,7 +91,7 @@ export function sanitize(
   const keys = findForbiddenKeys(parsed.data);
   if (keys.length > 0)
     throw new SyncError(
-      `Chiavi vietate nei dati: ${keys.slice(0, 5).join(", ")}`,
+      `Forbidden keys in the data: ${keys.slice(0, 5).join(", ")}`,
     );
 
   /* Very short values (a 2-letter name) would match inside ordinary words. */
@@ -102,7 +102,7 @@ export function sanitize(
     const description = redact(playlist.description, needles);
     if (name !== playlist.name || description !== playlist.description) {
       warnings.push(
-        `Rimosso un identificativo personale da nome/descrizione di "${name}".`,
+        `Removed a personal identifier from the name or description of "${name}".`,
       );
     }
     return { ...playlist, name, description };

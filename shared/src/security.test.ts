@@ -30,7 +30,7 @@ describe("findSecrets", () => {
   it("flags literal .env values but ignores short ones", () => {
     expect(
       rules("... my-real-secret-value ...", ["my-real-secret-value", "x"]),
-    ).toEqual(["Valore di .env"]);
+    ).toEqual([".env value"]);
     expect(rules("x", ["x"])).toEqual([]);
   });
 

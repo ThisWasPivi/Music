@@ -3,12 +3,23 @@
  * AuroraBackdrop component
  * Fixed, heavily blurred orbs behind the whole app, painted with the
  * current cover accents and drifting slowly, plus a soft gradient veil.
+ * On a playlist page its cover, blurred, fills the whole viewport too.
  * Purely decorative; still when motion is reduced.
  */
+import { backdropImage } from "@/composables/useBackdrop.ts";
 </script>
 
 <template>
   <div class="aurora" aria-hidden="true">
+    <Transition name="fade">
+      <img
+        v-if="backdropImage"
+        :key="backdropImage"
+        :src="backdropImage"
+        alt=""
+        class="aurora__cover"
+      />
+    </Transition>
     <span class="aurora__orb aurora__orb--1" />
     <span class="aurora__orb aurora__orb--2" />
     <span class="aurora__orb aurora__orb--3" />
@@ -24,6 +35,24 @@
   z-index: -1;
   overflow: hidden;
   pointer-events: none;
+}
+.aurora__cover {
+  position: absolute;
+  inset: -10%;
+  inline-size: 120%;
+  max-inline-size: none;
+  block-size: 120%;
+  object-fit: cover;
+  filter: blur(90px) saturate(1.6);
+  opacity: var(--cover-opacity);
+}
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 900ms ease;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
 }
 .aurora__orb {
   position: absolute;
@@ -98,6 +127,24 @@
   }
 }
 @media (prefers-reduced-motion: reduce) {
+  .aurora__cover {
+    position: absolute;
+    inset: -10%;
+    inline-size: 120%;
+    max-inline-size: none;
+    block-size: 120%;
+    object-fit: cover;
+    filter: blur(90px) saturate(1.6);
+    opacity: var(--cover-opacity);
+  }
+  .fade-enter-active,
+  .fade-leave-active {
+    transition: opacity 900ms ease;
+  }
+  .fade-enter-from,
+  .fade-leave-to {
+    opacity: 0;
+  }
   .aurora__orb {
     animation: none;
   }

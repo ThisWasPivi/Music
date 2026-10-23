@@ -113,7 +113,7 @@ export class SpotifyClient {
     const result = schema.safeParse(body);
     if (!result.success) {
       throw new SyncError(
-        `Risposta inattesa da ${new URL(url).pathname}: ${result.error.issues
+        `Unexpected response from ${new URL(url).pathname}: ${result.error.issues
           .slice(0, 3)
           .map((issue) => `${issue.path.join(".")} ${issue.message}`)
           .join("; ")}. L'API Spotify potrebbe essere cambiata.`,
@@ -199,11 +199,11 @@ export class SpotifyClient {
       } catch (error) {
         if (attempt >= maxRetries)
           throw new SyncError(
-            `Rete non disponibile verso Spotify: ${String(error)}`,
+            `Network unavailable towards Spotify: ${String(error)}`,
             { cause: error },
           );
         const backoff = baseBackoffMs * 2 ** attempt;
-        log(`Errore di rete, nuovo tentativo tra ${backoff} ms`);
+        log(`Network error, retrying in ${backoff} ms`);
         await sleep(backoff);
         continue;
       }
@@ -235,13 +235,13 @@ export class SpotifyClient {
       const path = new URL(url).pathname;
       if (response.status === 403) {
         throw new SyncError(
-          `Spotify nega l'accesso a ${path} (403). In Development Mode servono un account Premium e playlist di cui sei owner o collaboratore.`,
+          `Spotify denied access to ${path} (403). Development Mode needs a Premium account and playlists you own or collaborate on.`,
         );
       }
       if (response.status === 404)
-        throw new SyncError(`Risorsa non trovata su Spotify: ${path}.`);
+        throw new SyncError(`Not found on Spotify: ${path}.`);
       throw new SyncError(
-        `Richiesta a ${path} fallita con HTTP ${response.status}.`,
+        `Request to ${path} failed with HTTP ${response.status}.`,
       );
     }
   }

@@ -1,11 +1,11 @@
 import type { Playlist } from "@music/shared";
 
 import { colorSortKey } from "@/utils/color.ts";
+import { fuzzyMatches } from "@/utils/fuzzy.ts";
 
 import {
   compareNullableNumbers,
   type FilterStrategy,
-  searchable,
   type SortDirection,
   type SortStrategy,
   withDirection,
@@ -14,23 +14,23 @@ import {
 /** Unnumbered playlists always sink to the bottom, whatever the direction. */
 export const unnumberedLast: SortStrategy<Playlist> = {
   id: "unnumbered-last",
-  label: "Fuori serie in fondo",
+  labelKey: "sort.unnumberedLast",
   compare: (a, b) => Number(a.number === null) - Number(b.number === null),
 };
 
 /** Ascending by issue number. */
 export const byNumber: SortStrategy<Playlist> = {
   id: "number",
-  label: "Numero",
+  labelKey: "sort.number",
   compare: (a, b) => compareNullableNumbers(a.number, b.number),
 };
 
-/** Alphabetical by name. */
+/** Alphabetical by name, numbers compared as numbers and "#" ignored. */
 export const byName: SortStrategy<Playlist> = {
   id: "name",
-  label: "Nome",
+  labelKey: "sort.name",
   compare: (a, b) =>
-    a.name.localeCompare(b.name, "it", {
+    a.name.localeCompare(b.name, "en", {
       numeric: true,
       ignorePunctuation: true,
     }),
@@ -39,28 +39,21 @@ export const byName: SortStrategy<Playlist> = {
 /** Ascending by track count. */
 export const byTrackCount: SortStrategy<Playlist> = {
   id: "tracks",
-  label: "Numero brani",
+  labelKey: "sort.tracks",
   compare: (a, b) => a.trackCount - b.trackCount,
 };
 
 /** Ascending by total duration. */
 export const byDuration: SortStrategy<Playlist> = {
   id: "duration",
-  label: "Durata",
+  labelKey: "sort.duration",
   compare: (a, b) => a.durationMs - b.durationMs,
-};
-
-/** Ascending by the latest `added_at`. */
-export const byLastUpdate: SortStrategy<Playlist> = {
-  id: "updated",
-  label: "Ultimo aggiornamento",
-  compare: (a, b) => (a.lastAddedAt ?? "").localeCompare(b.lastAddedAt ?? ""),
 };
 
 /** Along the rainbow by the dominant cover colour, greys last. */
 export const byColor: SortStrategy<Playlist> = {
   id: "color",
-  label: "Colore",
+  labelKey: "sort.color",
   compare: (a, b) =>
     colorSortKey(a.palette[0] ?? "#000000") -
     colorSortKey(b.palette[0] ?? "#000000"),
@@ -72,7 +65,6 @@ export const PLAYLIST_SORTS = [
   { strategy: byName, defaultDirection: "asc" },
   { strategy: byTrackCount, defaultDirection: "desc" },
   { strategy: byDuration, defaultDirection: "desc" },
-  { strategy: byLastUpdate, defaultDirection: "desc" },
   { strategy: byColor, defaultDirection: "asc" },
 ] as const satisfies readonly {
   strategy: SortStrategy<Playlist>;
@@ -102,17 +94,16 @@ export function playlistSortChain(
 }
 
 /**
- * Matches playlists whose name, description, tags, tracks or artists contain the text.
+ * Fuzzy-matches playlists by name, description, tags, tracks, albums or artists.
  * @param query - Free text; blank matches everything
  * @returns The filter
  */
 export function textFilter(query: string): FilterStrategy<Playlist> {
-  const needle = searchable(query.trim());
   return {
     id: "text",
     test: (playlist) =>
-      needle === "" ||
-      [
+      fuzzyMatches(
+        query,
         playlist.name,
         playlist.description,
         ...playlist.tags,
@@ -121,7 +112,7 @@ export function textFilter(query: string): FilterStrategy<Playlist> {
           track.album.name,
           ...track.artists.map((artist) => artist.name),
         ]),
-      ].some((value) => searchable(value).includes(needle)),
+      ),
   };
 }
 

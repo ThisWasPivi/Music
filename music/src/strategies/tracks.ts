@@ -1,52 +1,53 @@
 import type { Track } from "@music/shared";
 
+import { fuzzyMatches } from "@/utils/fuzzy.ts";
+
 import {
   compareNullableNumbers,
   type FilterStrategy,
-  searchable,
   type SortStrategy,
 } from "./core.ts";
 
 /** Alphabetical by title. */
 export const byTitle: SortStrategy<Track> = {
   id: "title",
-  label: "Titolo",
-  compare: (a, b) => a.title.localeCompare(b.title, "it"),
+  labelKey: "tracks.title",
+  compare: (a, b) => a.title.localeCompare(b.title, "en"),
 };
 
 /** Alphabetical by the first credited artist. */
 export const byArtist: SortStrategy<Track> = {
   id: "artist",
-  label: "Artista",
+  labelKey: "tracks.artist",
   compare: (a, b) =>
-    (a.artists[0]?.name ?? "").localeCompare(b.artists[0]?.name ?? "", "it"),
+    (a.artists[0]?.name ?? "").localeCompare(b.artists[0]?.name ?? "", "en"),
 };
 
 /** Alphabetical by album. */
 export const byAlbum: SortStrategy<Track> = {
   id: "album",
-  label: "Album",
-  compare: (a, b) => a.album.name.localeCompare(b.album.name, "it"),
+  labelKey: "tracks.album",
+  compare: (a, b) => a.album.name.localeCompare(b.album.name, "en"),
 };
 
 /** Ascending by release year, unknown years last. */
 export const byYear: SortStrategy<Track> = {
   id: "year",
-  label: "Anno",
+  labelKey: "tracks.year",
   compare: (a, b) => compareNullableNumbers(a.releaseYear, b.releaseYear),
 };
 
 /** Ascending by length. */
 export const byTrackDuration: SortStrategy<Track> = {
   id: "duration",
-  label: "Durata",
+  labelKey: "tracks.duration",
   compare: (a, b) => a.durationMs - b.durationMs,
 };
 
 /** Ascending by when the track was added. */
 export const byAddedAt: SortStrategy<Track> = {
   id: "added",
-  label: "Aggiunto il",
+  labelKey: "tracks.added",
   compare: (a, b) => a.addedAt.localeCompare(b.addedAt),
 };
 
@@ -64,20 +65,19 @@ export const TRACK_SORTS = [
 export type TrackSortId = (typeof TRACK_SORTS)[number]["id"];
 
 /**
- * Matches tracks whose title, artists or album contain the text.
+ * Fuzzy-matches tracks by title, artists or album.
  * @param query - Free text; blank matches everything
  * @returns The filter
  */
 export function trackTextFilter(query: string): FilterStrategy<Track> {
-  const needle = searchable(query.trim());
   return {
     id: "text",
     test: (track) =>
-      needle === "" ||
-      [
+      fuzzyMatches(
+        query,
         track.title,
         track.album.name,
         ...track.artists.map((artist) => artist.name),
-      ].some((value) => searchable(value).includes(needle)),
+      ),
   };
 }

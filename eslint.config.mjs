@@ -41,6 +41,8 @@ export default tseslint.config(
     },
     settings: { jsdoc: { mode: "typescript" } },
     rules: {
+      /* TypeScript already reports undefined names, including Vite's build-time constants. */
+      "no-undef": "off",
       "@typescript-eslint/no-explicit-any": "error",
       "@typescript-eslint/consistent-type-imports": [
         "error",

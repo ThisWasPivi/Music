@@ -81,7 +81,7 @@ export function findSecrets(
   }
   for (const literal of literals) {
     if (literal.length >= 8 && text.includes(literal))
-      findings.push({ rule: "Valore di .env", excerpt: excerpt(literal) });
+      findings.push({ rule: ".env value", excerpt: excerpt(literal) });
   }
   return findings;
 }

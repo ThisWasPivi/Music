@@ -1,11 +1,10 @@
 import { defineStore } from "pinia";
-import { ref, watch } from "vue";
+import { computed, ref, watch } from "vue";
 
-/** The user's colour-scheme choice; "system" follows the OS. */
+/** The colour-scheme choice; "system" follows the OS until the user picks one. */
 export type ThemeChoice = "system" | "light" | "dark";
 
 const STORAGE_KEY = "pivi-theme";
-const ORDER: readonly ThemeChoice[] = ["system", "light", "dark"];
 
 /**
  * Reads the stored choice, tolerating blocked storage.
@@ -14,9 +13,7 @@ const ORDER: readonly ThemeChoice[] = ["system", "light", "dark"];
 function readStored(): ThemeChoice {
   try {
     const value = localStorage.getItem(STORAGE_KEY);
-    return ORDER.includes(value as ThemeChoice)
-      ? (value as ThemeChoice)
-      : "system";
+    return value === "light" || value === "dark" ? value : "system";
   } catch {
     return "system";
   }
@@ -25,6 +22,21 @@ function readStored(): ThemeChoice {
 /** Colour-scheme preference, mirrored on `<html data-theme>`. */
 export const useThemeStore = defineStore("theme", () => {
   const choice = ref<ThemeChoice>(readStored());
+  const media = window.matchMedia("(prefers-color-scheme: dark)");
+  const systemDark = ref(media.matches);
+  media.addEventListener(
+    "change",
+    (event) => (systemDark.value = event.matches),
+  );
+
+  /** The theme actually on screen. */
+  const resolved = computed<"light" | "dark">(() =>
+    choice.value === "system"
+      ? systemDark.value
+        ? "dark"
+        : "light"
+      : choice.value,
+  );
 
   watch(
     choice,
@@ -33,22 +45,23 @@ export const useThemeStore = defineStore("theme", () => {
       if (value === "system") delete root.dataset.theme;
       else root.dataset.theme = value;
       try {
-        localStorage.setItem(STORAGE_KEY, value);
+        if (value === "system") localStorage.removeItem(STORAGE_KEY);
+        else localStorage.setItem(STORAGE_KEY, value);
       } catch {
-        /* Private mode: the choice simply lasts for this visit. */
+        /* Private mode: the choice lasts for this visit. */
       }
     },
     { immediate: true },
   );
 
   /**
-   * Moves to the next choice: system → light → dark → system.
+   * Switches to the opposite of what is on screen, so one click always
+   * changes the theme.
    * @returns Nothing
    */
-  function cycle(): void {
-    choice.value =
-      ORDER[(ORDER.indexOf(choice.value) + 1) % ORDER.length] ?? "system";
+  function toggle(): void {
+    choice.value = resolved.value === "dark" ? "light" : "dark";
   }
 
-  return { choice, cycle };
+  return { choice, resolved, toggle };
 });

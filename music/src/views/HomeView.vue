@@ -1,22 +1,19 @@
 <script setup lang="ts">
 /**
  * HomeView component
- * Showcase of the series: the latest issue as hero, then every issue in a
- * grid that can be searched, sorted and filtered.
+ * Every issue of the series in a grid that can be fuzzy-searched, sorted
+ * and filtered.
  */
 import type { Playlist } from "@music/shared";
 import { storeToRefs } from "pinia";
 import { computed } from "vue";
+import { useI18n } from "vue-i18n";
 
-import SpotifyLink from "@/components/player/SpotifyLink.vue";
 import PlaylistCard from "@/components/playlists/PlaylistCard.vue";
 import PlaylistToolbar from "@/components/playlists/PlaylistToolbar.vue";
-import RotationSection from "@/components/playlists/RotationSection.vue";
-import CoverImage from "@/components/ui/CoverImage.vue";
-import IssueTitle from "@/components/ui/IssueTitle.vue";
 import { useAccent } from "@/composables/useAccent.ts";
 import { useCatalog } from "@/composables/useCatalog.ts";
-import { releaseDistribution, summarize, tracksOf } from "@/services/stats";
+import { releaseDistribution, tracksOf } from "@/services/stats";
 import { useBrowserStore } from "@/stores/browser.ts";
 import {
   type FilterStrategy,
@@ -30,18 +27,13 @@ import {
   tagFilter,
   textFilter,
 } from "@/strategies/playlists.ts";
-import {
-  formatDate,
-  formatLongDuration,
-  formatNumber,
-} from "@/utils/format.ts";
 
-const { playlists, issues, latest } = useCatalog();
+const { t } = useI18n();
+const { playlists, latest } = useCatalog();
 const { sortId, direction, query, artistId, decade, tag } =
   storeToRefs(useBrowserStore());
 useAccent(() => latest?.palette);
 
-const totals = summarize(tracksOf(playlists));
 const decades = releaseDistribution(tracksOf(playlists), 10)
   .filter((bucket) => bucket.count > 0)
   .map((bucket) => bucket.key);
@@ -60,110 +52,27 @@ const visible = computed(() => {
 
 <template>
   <div class="stack">
-    <section v-if="latest" class="hero glass" aria-labelledby="hero-title">
-      <RouterLink
-        :to="{ name: 'playlist', params: { id: latest.id } }"
-        class="hero__cover"
-        tabindex="-1"
-        aria-hidden="true"
+    <h1 class="sr-only">{{ t("home.title") }}</h1>
+    <PlaylistToolbar :decades="decades" :result-count="visible.length" />
+    <TransitionGroup
+      v-if="visible.length > 0"
+      tag="ul"
+      name="grid"
+      class="grid"
+    >
+      <li
+        v-for="(playlist, index) in visible"
+        :key="playlist.id"
+        :style="{ '--i': Math.min(index, 12) }"
       >
-        <CoverImage :src="latest.coverUrl" :palette="latest.palette" eager />
-      </RouterLink>
-      <div class="hero__body">
-        <p class="eyebrow">
-          Ultima uscita · {{ formatDate(latest.firstAddedAt) }}
-        </p>
-        <h1 id="hero-title" class="page-title">
-          <RouterLink
-            :to="{ name: 'playlist', params: { id: latest.id } }"
-            class="hero__link"
-            ><IssueTitle :name="latest.name"
-          /></RouterLink>
-        </h1>
-        <p v-if="latest.description" class="hero__text muted">
-          {{ latest.description }}
-        </p>
-        <div class="chips">
-          <span class="chip">{{ latest.trackCount }} brani</span>
-          <span class="chip">{{ formatLongDuration(latest.durationMs) }}</span>
-          <span v-for="value in latest.tags" :key="value" class="chip"
-            >#{{ value }}</span
-          >
-        </div>
-        <SpotifyLink :href="latest.url" />
-      </div>
-    </section>
-
-    <p class="intro muted">
-      <strong class="intro__name">Pivəəkly</strong> è una serie di playlist che
-      esce quando c'è abbastanza musica da dire: {{ issues.length }} numeri,
-      {{ formatNumber(totals.trackCount) }} brani,
-      {{ formatLongDuration(totals.totalMs) }} di ascolto,
-      {{ formatNumber(totals.uniqueArtistCount) }} artisti.
-    </p>
-
-    <RotationSection />
-
-    <section aria-labelledby="all-title" class="stack">
-      <h2 id="all-title" class="section-title all-title">Tutti i numeri</h2>
-      <PlaylistToolbar :decades="decades" :result-count="visible.length" />
-      <ul v-if="visible.length > 0" class="grid">
-        <li v-for="playlist in visible" :key="playlist.id">
-          <PlaylistCard :playlist="playlist" />
-        </li>
-      </ul>
-      <p v-else class="glass panel muted empty">
-        Nessuna playlist corrisponde ai filtri. Prova ad azzerarli.
-      </p>
-    </section>
+        <PlaylistCard :playlist="playlist" />
+      </li>
+    </TransitionGroup>
+    <p v-else class="glass panel muted empty">{{ t("home.empty") }}</p>
   </div>
 </template>
 
 <style scoped>
-.hero {
-  display: grid;
-  gap: 24px;
-  padding: clamp(16px, 2.5vw, 24px);
-}
-@media (min-width: 760px) {
-  .hero {
-    grid-template-columns: minmax(220px, 320px) minmax(0, 1fr);
-    align-items: center;
-  }
-}
-.hero__cover {
-  display: block;
-  inline-size: 100%;
-  max-inline-size: 260px;
-  --cover-radius: 18px;
-  filter: drop-shadow(
-    0 28px 50px color-mix(in oklab, var(--c1) 55%, transparent)
-  );
-}
-.hero__body {
-  display: grid;
-  gap: 14px;
-  justify-items: start;
-  min-width: 0;
-}
-.hero__link {
-  text-decoration: none;
-}
-.hero__text {
-  margin: 0;
-  max-inline-size: 60ch;
-}
-.intro {
-  margin: 0;
-  max-inline-size: 70ch;
-  font-size: 16px;
-}
-.intro__name {
-  color: var(--text);
-}
-.all-title {
-  margin: 8px 0 0;
-}
 .grid {
   list-style: none;
   margin: 0;
@@ -176,6 +85,34 @@ const visible = computed(() => {
   .grid {
     grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
   }
+}
+.grid li {
+  animation: card-in 600ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
+  animation-delay: calc(var(--i) * 40ms);
+}
+@keyframes card-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.97);
+  }
+}
+.grid-move {
+  transition: transform 500ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.grid-enter-active,
+.grid-leave-active {
+  transition:
+    opacity 250ms ease,
+    transform 250ms ease;
+}
+.grid-enter-from,
+.grid-leave-to {
+  opacity: 0;
+  transform: scale(0.94);
+}
+.grid-leave-active {
+  position: absolute;
+  visibility: hidden;
 }
 .empty {
   margin: 0;

@@ -15,6 +15,8 @@ import { useEntered } from "@/composables/useEntered.ts";
  * @property sublabel - Optional secondary text
  * @property value - Numeric value the bar is proportional to
  * @property display - Formatted value shown at the end of the row
+ * @property image - Optional picture shown before the label
+ * @property round - Draws the picture as a circle
  */
 export interface BarRow {
   key: string;
@@ -22,6 +24,8 @@ export interface BarRow {
   sublabel?: string;
   value: number;
   display: string;
+  image?: string | null;
+  round?: boolean;
 }
 
 const props = defineProps<{
@@ -45,6 +49,13 @@ const entered = useEntered();
       :style="{ '--delay': `${index * 60}ms` }"
     >
       <span class="ranking__rank">{{ index + 1 }}</span>
+      <span
+        v-if="row.image !== undefined"
+        class="ranking__image"
+        :class="{ 'ranking__image--round': row.round }"
+      >
+        <img v-if="row.image" :src="row.image" alt="" loading="lazy" />
+      </span>
       <span class="ranking__text">
         <RouterLink
           v-if="link"
@@ -81,8 +92,8 @@ const entered = useEntered();
 }
 .ranking__row {
   display: grid;
-  grid-template-columns: 1.75em 1fr auto;
-  grid-template-areas: "rank text value" ". track track";
+  grid-template-columns: 1.75em auto 1fr auto;
+  grid-template-areas: "rank image text value" ". image track track";
   align-items: baseline;
   column-gap: 8px;
   row-gap: 4px;
@@ -92,6 +103,24 @@ const entered = useEntered();
   font-variant-numeric: tabular-nums;
   color: var(--chart-muted, currentColor);
   font-size: 0.85em;
+}
+.ranking__image {
+  grid-area: image;
+  align-self: center;
+  inline-size: 36px;
+  block-size: 36px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: linear-gradient(135deg, var(--c1), var(--c2));
+}
+.ranking__image--round {
+  border-radius: 50%;
+}
+.ranking__image img {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
 }
 .ranking__text {
   grid-area: text;
@@ -134,7 +163,8 @@ a.ranking__label:hover {
   background: var(--bar, currentColor);
   background-size: 200% 100%;
   border-radius: inherit;
-  transition: inline-size 900ms cubic-bezier(0.2, 0.8, 0.2, 1) var(--delay, 0ms);
+  transition: inline-size 1000ms cubic-bezier(0.22, 1, 0.36, 1)
+    var(--delay, 0ms);
 }
 .ranking__row:hover .ranking__bar {
   filter: brightness(1.25) saturate(1.2);

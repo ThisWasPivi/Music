@@ -104,8 +104,8 @@ describe("runSync", () => {
     ]) {
       expect(json).not.toContain(secret);
     }
-    expect(lines.join("\n")).toContain("Incluse (2)");
-    expect(lines.join("\n")).toContain("non sei owner");
+    expect(lines.join("\n")).toContain("Included (2)");
+    expect(lines.join("\n")).toContain("not the owner");
   });
 
   it("keeps going without the rotation section when top items fail", async () => {
@@ -127,6 +127,6 @@ describe("runSync", () => {
       log: (line) => lines.push(line),
     });
     expect(data.rotation).toEqual({ artists: [], tracks: [] });
-    expect(lines.some((line) => line.includes("In rotazione"))).toBe(true);
+    expect(lines.some((line) => line.includes("In rotation"))).toBe(true);
   });
 });
