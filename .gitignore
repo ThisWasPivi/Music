@@ -1,0 +1,23 @@
+# Dependencies and build output.
+node_modules/
+dist/
+dist-lab/
+coverage/
+.vite/
+*.tsbuildinfo
+*.log
+
+# Credentials. Only the empty template is shared.
+.env
+.env.*
+!.env.example
+
+# Spotify response cache written by `pnpm sync`.
+.sync-cache/
+
+# Local tooling.
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+.claude/settings.local.json

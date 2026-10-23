@@ -1,0 +1,16 @@
+{
+  "name": "@music/sync",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "fixtures": "tsx src/fixtures.ts",
+    "test": "vitest run --passWithNoTests",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@music/shared": "workspace:*"
+  },
+  "devDependencies": {
+    "tsx": "^4.23.15"
+  }
+}

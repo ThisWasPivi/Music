@@ -1,0 +1,15 @@
+packages:
+  - "music"
+  - "shared"
+  - "sync"
+
+# Refuse freshly published releases for a week: most malicious publishes are
+# caught and yanked within days.
+minimumReleaseAge: 10080
+
+blockExoticSubdeps: true
+trustPolicy: no-downgrade
+
+onlyBuiltDependencies:
+  - esbuild
+  - sharp

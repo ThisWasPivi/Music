@@ -1,0 +1,45 @@
+{
+  "name": "music-pivi-dev",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@10.28.0",
+  "engines": {
+    "node": ">=22.22.0",
+    "pnpm": ">=10.28.0"
+  },
+  "scripts": {
+    "auth": "pnpm --filter @music/sync auth",
+    "build": "pnpm --filter music build",
+    "check": "pnpm typecheck && pnpm lint && pnpm format:check && pnpm test",
+    "dev": "pnpm --filter music dev",
+    "format": "prettier . --write",
+    "format:check": "prettier . --check",
+    "lint": "eslint . --report-unused-disable-directives --max-warnings=0",
+    "lint:fix": "eslint . --fix --max-warnings=0",
+    "prepare": "husky",
+    "security:audit": "pnpm audit --audit-level=low",
+    "security:scan": "node scripts/security-scan.mjs",
+    "test": "pnpm -r --if-present test",
+    "typecheck": "pnpm -r --if-present typecheck"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^21.2.3",
+    "@commitlint/config-conventional": "^21.2.3",
+    "@eslint/js": "^10.0.1",
+    "@types/node": "^26.6.5",
+    "eslint": "^10.12.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-jsdoc": "^65.3.6",
+    "eslint-plugin-no-unsanitized": "^4.1.5",
+    "eslint-plugin-simple-import-sort": "^14.0.0",
+    "eslint-plugin-vue": "^10.11.1",
+    "globals": "^17.13.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^17.6.0",
+    "prettier": "^3.9.10",
+    "typescript": "~6.0.3",
+    "typescript-eslint": "^8.71.2",
+    "vitest": "^5.0.5",
+    "vue-eslint-parser": "^10.4.1"
+  }
+}

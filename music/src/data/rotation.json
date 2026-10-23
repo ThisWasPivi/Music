@@ -1,0 +1,191 @@
+{
+  "artists": [
+    {
+      "id": "fxar000000000000000000",
+      "name": "Velvet Harbour",
+      "url": "https://open.spotify.com/artist/fxar000000000000000000",
+      "imageUrl": "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20300%20300%22%3E%3Cdefs%3E%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23ac3939%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23d6d65c%22%2F%3E%3C%2FlinearGradient%3E%3C%2Fdefs%3E%3Crect%20width%3D%22300%22%20height%3D%22300%22%20fill%3D%22url(%23g)%22%2F%3E%3Ccircle%20cx%3D%22215%22%20cy%3D%2285%22%20r%3D%2270%22%20fill%3D%22%23999999%22%20opacity%3D%22.85%22%2F%3E%3Ctext%20x%3D%2224%22%20y%3D%22276%22%20font-family%3D%22sans-serif%22%20font-weight%3D%22700%22%20font-size%3D%2256%22%20fill%3D%22%23fff%22%20opacity%3D%22.92%22%3EV%3C%2Ftext%3E%3C%2Fsvg%3E"
+    },
+    {
+      "id": "fxar000100000000000000",
+      "name": "Nora Kessel",
+      "url": "https://open.spotify.com/artist/fxar000100000000000000",
+      "imageUrl": "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20300%20300%22%3E%3Cdefs%3E%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23ac6539%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23a7d65c%22%2F%3E%3C%2FlinearGradient%3E%3C%2Fdefs%3E%3Crect%20width%3D%22300%22%20height%3D%22300%22%20fill%3D%22url(%23g)%22%2F%3E%3Ccircle%20cx%3D%22215%22%20cy%3D%2285%22%20r%3D%2270%22%20fill%3D%22%23999999%22%20opacity%3D%22.85%22%2F%3E%3Ctext%20x%3D%2224%22%20y%3D%22276%22%20font-family%3D%22sans-serif%22%20font-weight%3D%22700%22%20font-size%3D%2256%22%20fill%3D%22%23fff%22%20opacity%3D%22.92%22%3EN%3C%2Ftext%3E%3C%2Fsvg%3E"
+    },
+    {
+      "id": "fxar000200000000000000",
+      "name": "The Midnight Cartographers",
+      "url": "https://open.spotify.com/artist/fxar000200000000000000",
+      "imageUrl": "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20300%20300%22%3E%3Cdefs%3E%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23ac9139%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%2378d65c%22%2F%3E%3C%2FlinearGradient%3E%3C%2Fdefs%3E%3Crect%20width%3D%22300%22%20height%3D%22300%22%20fill%3D%22url(%23g)%22%2F%3E%3Ccircle%20cx%3D%22215%22%20cy%3D%2285%22%20r%3D%2270%22%20fill%3D%22%23999999%22%20opacity%3D%22.85%22%2F%3E%3Ctext%20x%3D%2224%22%20y%3D%22276%22%20font-family%3D%22sans-serif%22%20font-weight%3D%22700%22%20font-size%3D%2256%22%20fill%3D%22%23fff%22%20opacity%3D%22.92%22%3ET%3C%2Ftext%3E%3C%2Fsvg%3E"
+    },
+    {
+      "id": "fxar000300000000000000",
+      "name": "Lumen Drift",
+      "url": "https://open.spotify.com/artist/fxar000300000000000000",
+      "imageUrl": "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20300%20300%22%3E%3Cdefs%3E%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%239bac39%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%235cd66e%22%2F%3E%3C%2FlinearGradient%3E%3C%2Fdefs%3E%3Crect%20width%3D%22300%22%20height%3D%22300%22%20fill%3D%22url(%23g)%22%2F%3E%3Ccircle%20cx%3D%22215%22%20cy%3D%2285%22%20r%3D%2270%22%20fill%3D%22%23999999%22%20opacity%3D%22.85%22%2F%3E%3Ctext%20x%3D%2224%22%20y%3D%22276%22%20font-family%3D%22sans-serif%22%20font-weight%3D%22700%22%20font-size%3D%2256%22%20fill%3D%22%23fff%22%20opacity%3D%22.92%22%3EL%3C%2Ftext%3E%3C%2Fsvg%3E"
+    },
+    {
+      "id": "fxar000400000000000000",
+      "name": "Okra Sunday",
+      "url": "https://open.spotify.com/artist/fxar000400000000000000",
+      "imageUrl": "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20300%20300%22%3E%3Cdefs%3E%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%236fac39%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%235cd69d%22%2F%3E%3C%2FlinearGradient%3E%3C%2Fdefs%3E%3Crect%20width%3D%22300%22%20height%3D%22300%22%20fill%3D%22url(%23g)%22%2F%3E%3Ccircle%20cx%3D%22215%22%20cy%3D%2285%22%20r%3D%2270%22%20fill%3D%22%23999999%22%20opacity%3D%22.85%22%2F%3E%3Ctext%20x%3D%2224%22%20y%3D%22276%22%20font-family%3D%22sans-serif%22%20font-weight%3D%22700%22%20font-size%3D%2256%22%20fill%3D%22%23fff%22%20opacity%3D%22.92%22%3EO%3C%2Ftext%3E%3C%2Fsvg%3E"
+    },
+    {
+      "id": "fxar000500000000000000",
+      "name": "Juno Vale",
+      "url": "https://open.spotify.com/artist/fxar000500000000000000",
+      "imageUrl": "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20300%20300%22%3E%3Cdefs%3E%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%2343ac39%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%235cd6cc%22%2F%3E%3C%2FlinearGradient%3E%3C%2Fdefs%3E%3Crect%20width%3D%22300%22%20height%3D%22300%22%20fill%3D%22url(%23g)%22%2F%3E%3Ccircle%20cx%3D%22215%22%20cy%3D%2285%22%20r%3D%2270%22%20fill%3D%22%23999999%22%20opacity%3D%22.85%22%2F%3E%3Ctext%20x%3D%2224%22%20y%3D%22276%22%20font-family%3D%22sans-serif%22%20font-weight%3D%22700%22%20font-size%3D%2256%22%20fill%3D%22%23fff%22%20opacity%3D%22.92%22%3EJ%3C%2Ftext%3E%3C%2Fsvg%3E"
+    }
+  ],
+  "tracks": [
+    {
+      "id": "fxtr00fe00000000000000",
+      "title": "Highway Song",
+      "artists": [
+        {
+          "id": "fxar000l00000000000000",
+          "name": "Fax Machine Romance",
+          "url": "https://open.spotify.com/artist/fxar000l00000000000000"
+        }
+      ],
+      "album": {
+        "id": "fxal002t00000000000000",
+        "name": "Gold Tonight",
+        "url": "https://open.spotify.com/album/fxal002t00000000000000",
+        "imageUrl": null
+      },
+      "url": "https://open.spotify.com/track/fxtr00fe00000000000000"
+    },
+    {
+      "id": "fxtr00ff00000000000000",
+      "title": "Riviera Forever",
+      "artists": [
+        {
+          "id": "fxar000a00000000000000",
+          "name": "Saltwater Choir",
+          "url": "https://open.spotify.com/artist/fxar000a00000000000000"
+        }
+      ],
+      "album": {
+        "id": "fxal001n00000000000000",
+        "name": "Salt Love",
+        "url": "https://open.spotify.com/album/fxal001n00000000000000",
+        "imageUrl": null
+      },
+      "url": "https://open.spotify.com/track/fxtr00ff00000000000000"
+    },
+    {
+      "id": "fxtr00fg00000000000000",
+      "title": "Fever Dreams",
+      "artists": [
+        {
+          "id": "fxar000700000000000000",
+          "name": "Marisol Ferro",
+          "url": "https://open.spotify.com/artist/fxar000700000000000000"
+        }
+      ],
+      "album": {
+        "id": "fxal000w00000000000000",
+        "name": "Gold Dreams",
+        "url": "https://open.spotify.com/album/fxal000w00000000000000",
+        "imageUrl": null
+      },
+      "url": "https://open.spotify.com/track/fxtr00fg00000000000000"
+    },
+    {
+      "id": "fxtr00fh00000000000000",
+      "title": "Velvet Blues",
+      "artists": [
+        {
+          "id": "fxar000z00000000000000",
+          "name": "Yuki Harrow",
+          "url": "https://open.spotify.com/artist/fxar000z00000000000000"
+        }
+      ],
+      "album": {
+        "id": "fxal001e00000000000000",
+        "name": "Honey Song",
+        "url": "https://open.spotify.com/album/fxal001e00000000000000",
+        "imageUrl": null
+      },
+      "url": "https://open.spotify.com/track/fxtr00fh00000000000000"
+    },
+    {
+      "id": "fxtr00fi00000000000000",
+      "title": "Velvet Season",
+      "artists": [
+        {
+          "id": "fxar000o00000000000000",
+          "name": "Tessa Mint",
+          "url": "https://open.spotify.com/artist/fxar000o00000000000000"
+        }
+      ],
+      "album": {
+        "id": "fxal002600000000000000",
+        "name": "Paper Season",
+        "url": "https://open.spotify.com/album/fxal002600000000000000",
+        "imageUrl": null
+      },
+      "url": "https://open.spotify.com/track/fxtr00fi00000000000000"
+    },
+    {
+      "id": "fxtr00fj00000000000000",
+      "title": "Summer Season",
+      "artists": [
+        {
+          "id": "fxar000x00000000000000",
+          "name": "Cassette Ghosts",
+          "url": "https://open.spotify.com/artist/fxar000x00000000000000"
+        }
+      ],
+      "album": {
+        "id": "fxal002d00000000000000",
+        "name": "Honey Heart",
+        "url": "https://open.spotify.com/album/fxal002d00000000000000",
+        "imageUrl": null
+      },
+      "url": "https://open.spotify.com/track/fxtr00fj00000000000000"
+    },
+    {
+      "id": "fxtr00fk00000000000000",
+      "title": "Ghost Dreams",
+      "artists": [
+        {
+          "id": "fxar000100000000000000",
+          "name": "Nora Kessel",
+          "url": "https://open.spotify.com/artist/fxar000100000000000000"
+        },
+        {
+          "id": "fxar000000000000000000",
+          "name": "Velvet Harbour",
+          "url": "https://open.spotify.com/artist/fxar000000000000000000"
+        }
+      ],
+      "album": {
+        "id": "fxal001c00000000000000",
+        "name": "Midnight Song",
+        "url": "https://open.spotify.com/album/fxal001c00000000000000",
+        "imageUrl": null
+      },
+      "url": "https://open.spotify.com/track/fxtr00fk00000000000000"
+    },
+    {
+      "id": "fxtr00fl00000000000000",
+      "title": "Echo Blues",
+      "artists": [
+        {
+          "id": "fxar000m00000000000000",
+          "name": "Low Tide Society",
+          "url": "https://open.spotify.com/artist/fxar000m00000000000000"
+        }
+      ],
+      "album": {
+        "id": "fxal002p00000000000000",
+        "name": "Harbour Season",
+        "url": "https://open.spotify.com/album/fxal002p00000000000000",
+        "imageUrl": null
+      },
+      "url": "https://open.spotify.com/track/fxtr00fl00000000000000"
+    }
+  ]
+}
