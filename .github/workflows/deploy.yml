@@ -25,6 +25,13 @@ jobs:
           node-version: 22.22.0
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      - name: Download the published data
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p music/src/data
+          gh release download data --repo "${{ github.repository }}" --dir music/src/data --pattern '*.json' --clobber \
+            || echo "No data release yet: building with the sample issues."
       - run: pnpm security:audit
       - run: pnpm typecheck
       - run: pnpm lint

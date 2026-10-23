@@ -4,6 +4,15 @@ All notable changes to music.pivi.dev. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 [Semantic Versioning](https://semver.org/). Data syncs are not listed.
 
+## [1.2.0] - 2026-10-23
+
+### Changed
+
+- The published data is no longer in git: `pnpm release` uploads it to the `data` GitHub
+  Release and starts the deploy, which downloads it before building.
+- `pnpm dev`, `pnpm build`, `pnpm check` and `pnpm test` write the sample issues when the data
+  is missing, so a fresh clone works straight away.
+
 ## [1.1.0] - 2026-10-23
 
 ### Added

@@ -5,5 +5,6 @@
 - The UI reads data only through `PlaylistRepository`; statistics are pure functions in `music/src/services/stats`; sorting and filtering are strategies in `music/src/strategies`.
 - Everything in code, URLs and comments is English; user-facing text goes through vue-i18n and lives only in `music/src/i18n/locales/` (`en-GB`, `it-IT`).
 - Search and filters use the shared fuzzy matcher in `music/src/utils/fuzzy.ts`; tooltips use `v-tooltip`, never `title` attributes.
+- `music/src/data/` is gitignored: `pnpm release` uploads it to the `data` GitHub Release and the deploy downloads it; `pnpm data:ensure` writes sample data when it is missing. Never commit it.
 - Never commit `.env`, tokens or real user identifiers. Published data must pass `sync/src/sanitize.ts` and `pnpm security:scan`.
 - Before finishing: `pnpm check`, `pnpm build`, `pnpm security:scan`.

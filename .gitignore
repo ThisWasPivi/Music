@@ -15,6 +15,10 @@ coverage/
 # Spotify response cache written by `pnpm sync`.
 .sync-cache/
 
+# Published data: `pnpm release` uploads it to the `data` GitHub Release,
+# the deploy downloads it, and `pnpm data:ensure` writes sample data.
+music/src/data/
+
 # Local tooling.
 .DS_Store
 Thumbs.db

@@ -44,25 +44,42 @@ pnpm dev                # http://localhost:5173
 `SPOTIFY_REDIRECT_URI` must match **exactly** a Redirect URI of the app: `pnpm auth` listens on
 that port and path, prints the authorization link and waits for Spotify to redirect back.
 
-Without a login, `pnpm fixtures` writes invented sample issues to `music/src/data/`, and the
-site shows a notice saying so.
+`music/src/data/` is gitignored. When it is empty, `pnpm dev`, `pnpm build`, `pnpm check` and
+`pnpm test` first write invented sample issues there (`pnpm data:ensure`), and the site shows a
+notice saying so.
 
 ## 3. Commands
 
-| Command                                                  | What it does                                                                                    |
-| -------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
-| `pnpm auth`                                              | Authorization Code flow with PKCE on a local server; saves the refresh token to `.env`.         |
-| `pnpm sync`                                              | Downloads, adapts, sanitizes and writes the data. `pnpm sync -- --no-cache` skips the cache.    |
-| `pnpm release`                                           | From `main`: sync, check, build, security scan, then commits only `music/src/data/` and pushes. |
-| `pnpm dev`                                               | Web app dev server.                                                                             |
-| `pnpm build`                                             | Production build in `music/dist/`, with `404.html` for deep links on GitHub Pages.              |
-| `pnpm check`                                             | Type check, lint, format check and unit tests.                                                  |
-| `pnpm security:scan`                                     | Looks for tokens, secrets, user ids and forbidden keys in the data and the build.               |
-| `pnpm security:audit`                                    | `pnpm audit` of the dependencies.                                                               |
-| `pnpm fixtures`                                          | Writes the invented sample data.                                                                |
-| `pnpm version:patch` · `version:minor` · `version:major` | Bumps the app version.                                                                          |
+| Command                                                  | What it does                                                                                   |
+| -------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| `pnpm auth`                                              | Authorization Code flow with PKCE on a local server; saves the refresh token to `.env`.        |
+| `pnpm sync`                                              | Downloads, adapts, sanitizes and writes the data. `pnpm sync -- --no-cache` skips the cache.   |
+| `pnpm release`                                           | From `main`: sync, check, build, security scan, upload the data to the `data` release, deploy. |
+| `pnpm dev`                                               | Web app dev server.                                                                            |
+| `pnpm build`                                             | Production build in `music/dist/`, with `404.html` for deep links on GitHub Pages.             |
+| `pnpm check`                                             | Type check, lint, format check and unit tests.                                                 |
+| `pnpm security:scan`                                     | Looks for tokens, secrets, user ids and forbidden keys in the data and the build.              |
+| `pnpm security:audit`                                    | `pnpm audit` of the dependencies.                                                              |
+| `pnpm fixtures`                                          | Writes the invented sample data, replacing what is there.                                      |
+| `pnpm data:ensure`                                       | Writes the sample data only when `music/src/data/` is missing a file.                          |
+| `pnpm version:patch` · `version:minor` · `version:major` | Bumps the app version.                                                                         |
 
 The script is called `release` because `deploy` is a built-in pnpm command.
+
+### Publishing the data
+
+The playlist data never enters git. `pnpm release` needs the [GitHub CLI](https://cli.github.com/)
+signed in on your machine (`gh auth login`, or a `GH_TOKEN` in the environment):
+
+1. it syncs, then runs `pnpm check`, `pnpm build` and `pnpm security:scan`;
+2. if the data differs from what is published, it uploads the four JSON files as assets of the
+   GitHub Release tagged `data` (created on the first run);
+3. it starts the `Deploy` workflow, which downloads those assets into `music/src/data/`, checks
+   and scans them again, builds and publishes the site.
+
+A push to `main` deploys with the same published data. Before the first release the workflow
+builds with the sample issues. No GitHub secret is needed: the workflow reads the release with
+its own `GITHUB_TOKEN`.
 
 ## 4. Choosing the Pivəəkly
 
@@ -104,7 +121,7 @@ to `.env` automatically.
 music/    web app: reads only the static JSON, knows nothing about the Spotify API
 sync/     downloads, adapts and sanitizes the data
 shared/   domain model, zod schemas, series and security rules, fixtures
-scripts/  release and security scan
+scripts/  release, data fallback and security scan
 ```
 
 - **Adapter** (`sync/src/adapter.ts`): maps the Spotify DTOs, validated in
@@ -163,6 +180,8 @@ The repository is public:
 - client ID, client secret and refresh token live only in the gitignored `.env`; no GitHub
   secrets are used;
 - the bundle holds no token and never calls Spotify;
+- the published data is not in git: it lives in the `data` release, which only `pnpm release`
+  writes after the security scan passes;
 - the sanitizer whitelists the domain fields, rejects forbidden keys and removes account and
   collaborator identifiers from playlist names and descriptions;
 - `pnpm security:scan` fails on anything that looks like a Spotify token, a Bearer header, a

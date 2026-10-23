@@ -11,8 +11,8 @@
 A static showcase of the **Pivəəkly** Spotify playlist series. Every issue with its cover,
 tracklist and the official Spotify player, plus statistics, a release timeline that shows the
 busy spells and the pauses, recurring artists and repeated tracks. The site never calls the
-Spotify API and holds no credentials: a local sync downloads the data, cleans it and commits it
-as JSON, and GitHub Actions publishes the site.
+Spotify API and holds no credentials: a local sync downloads the data, cleans it and uploads it
+as JSON to a GitHub Release, and GitHub Actions builds and publishes the site.
 
 ![Vue](https://img.shields.io/badge/vue.js-%2335495e.svg?style=for-the-badge&logo=vuedotjs&logoColor=%234FC08D) ![TypeScript](https://img.shields.io/badge/typescript-%23007ACC.svg?style=for-the-badge&logo=typescript&logoColor=white) ![pnpm](https://img.shields.io/badge/pnpm-%23F69220.svg?style=for-the-badge&logo=pnpm&logoColor=white) ![Node.js](https://img.shields.io/badge/node.js-6DA55F?style=for-the-badge&logo=node.js&logoColor=white) ![Vite](https://img.shields.io/badge/vite-%23646CFF.svg?style=for-the-badge&logo=vite&logoColor=white) ![Tailwind CSS](https://img.shields.io/badge/tailwind_css-%2338B2AC.svg?style=for-the-badge&logo=tailwind-css&logoColor=white) ![Pinia](https://img.shields.io/badge/pinia-FFD859.svg?style=for-the-badge&logo=pinia&logoColor=black) ![Vue i18n](https://img.shields.io/badge/vue_i18n-41B883.svg?style=for-the-badge&logo=vuedotjs&logoColor=white) ![Zod](https://img.shields.io/badge/zod-3E67B1.svg?style=for-the-badge&logo=zod&logoColor=white) ![Vitest](https://img.shields.io/badge/vitest-6E9F18.svg?style=for-the-badge&logo=vitest&logoColor=white) ![Spotify](https://img.shields.io/badge/spotify_web_api-1ED760.svg?style=for-the-badge&logo=spotify&logoColor=black) ![ESLint](https://img.shields.io/badge/eslint-4B3263.svg?style=for-the-badge&logo=eslint&logoColor=white) ![Prettier](https://img.shields.io/badge/prettier-F7B93E.svg?style=for-the-badge&logo=prettier&logoColor=black) ![GitHub Pages](https://img.shields.io/badge/github_pages-222222.svg?style=for-the-badge&logo=github&logoColor=white)
 
@@ -71,8 +71,9 @@ keyboard navigation and reduced-motion support.
    playlist was skipped.
 3. The adapter maps Spotify's JSON onto the domain model; the sanitizer drops anything that
    identifies people.
-4. `pnpm release` verifies everything, commits only `music/src/data/` and pushes to `main`.
-5. GitHub Actions checks, builds and deploys the static site to GitHub Pages.
+4. `pnpm release` verifies everything and uploads the JSON to the `data` GitHub Release; the
+   data never enters git.
+5. GitHub Actions downloads it, checks, builds and deploys the static site to GitHub Pages.
 
 There is no server, database or API call at runtime. Credentials never leave your machine.
 
@@ -90,11 +91,12 @@ pnpm dev
 
 Open <http://localhost:5173>. The app starts with invented sample issues and says so on screen.
 
-To publish your own playlists, fill in `.env` from `.env.example` and run:
+To publish your own playlists, fill in `.env` from `.env.example`, sign in to the
+[GitHub CLI](https://cli.github.com/) with `gh auth login` and run:
 
 ```bash
 pnpm auth      # once, and again when the token expires (every 6 months)
-pnpm release   # sync, verify, commit the data and deploy
+pnpm release   # sync, verify, upload the data and deploy
 ```
 
 A **Spotify Premium** account is required: Spotify apps in Development Mode only work for
@@ -126,8 +128,9 @@ domain schemas of `@music/shared`, which keep only declared fields.
 
 `.github/workflows/deploy.yml` runs on every push to `main` and on demand. It installs, audits,
 type checks, lints, tests, builds and scans the site, then publishes `music/dist/` with
-`actions/deploy-pages`. There is no `gh-pages` branch, and no secrets are needed: the data is
-already in the repository.
+`actions/deploy-pages`. Before building it downloads the published data from the `data` release
+(falling back to the sample issues before the first release). There is no `gh-pages` branch, and
+no secrets are needed: the workflow's own token reads the release.
 
 Releases of the app itself follow Semantic Versioning: see
 [Versioning](./docs/GUIDE.md#7-versioning) and the [changelog](./CHANGELOG.md).
@@ -136,7 +139,8 @@ Releases of the app itself follow Semantic Versioning: see
 
 - `.env` holds the client ID, client secret and refresh token, and is gitignored.
 - `.sync-cache/` keeps raw Spotify responses locally to save API calls, and is gitignored.
-- `music/src/data/` holds only the sanitized, public data the site shows.
+- `music/src/data/` holds only the sanitized, public data the site shows, and is gitignored too:
+  it is published as a release asset, never committed.
 
 The sanitizer removes `added_by`, owner and collaborator ids and your account name, and the
 security scan fails a release if a token, secret or user identifier ever slips into the data or
@@ -159,10 +163,10 @@ the built site.
 .
 ├── music/             Vue web app (the published site)
 │   ├── public/        Static files: CNAME, favicon, brand marks
-│   └── src/data/      Sanitized JSON written by the sync
+│   └── src/data/      Sanitized JSON (gitignored): sync output or sample issues
 ├── sync/              Spotify auth, sync, adapter and sanitizer
 ├── shared/            Domain model, schemas, series and security rules, fixtures
-├── scripts/           Release and security scan
+├── scripts/           Release, data fallback and security scan
 ├── eslint/            Repository-local ESLint rules
 └── docs/              Guide
 ```
