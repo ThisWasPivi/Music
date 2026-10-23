@@ -97,9 +97,10 @@ const max = computed(() => {
               ? 'matrix__cell--on'
               : '',
           ]"
-          :style="
-            i === j ? undefined : { fillOpacity: 0.08 + (value / max) * 0.92 }
-          "
+          :style="{
+            fillOpacity: i === j ? undefined : 0.08 + (value / max) * 0.92,
+            animationDelay: `${(i + j) * 18}ms`,
+          }"
           @click="i !== j && emit('select', i, j)"
         >
           <title>
@@ -126,6 +127,23 @@ const max = computed(() => {
 }
 .matrix__cell {
   fill: var(--matrix-hi, currentColor);
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: matrix-in 500ms cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+  transition:
+    transform 150ms ease,
+    stroke-width 150ms ease;
+}
+.matrix__cell--pick:hover {
+  transform: scale(1.18);
+  stroke: var(--chart-ink, currentColor);
+  stroke-width: 1.5;
+}
+@keyframes matrix-in {
+  from {
+    opacity: 0;
+    transform: scale(0.4);
+  }
 }
 .matrix__cell--pick {
   cursor: pointer;

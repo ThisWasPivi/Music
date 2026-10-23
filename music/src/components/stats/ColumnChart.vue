@@ -5,7 +5,7 @@
  * width at a fixed height; labels are HTML so they keep their size.
  * Uses `--bar-fill`, `--bar-highlight`, `--chart-grid` and `--chart-muted`.
  */
-import { computed } from "vue";
+import { computed, useId } from "vue";
 
 /**
  * One column.
@@ -40,6 +40,7 @@ const props = withDefaults(
   { height: 180, labelEvery: 1 },
 );
 
+const gradient = `${useId()}-bars`;
 const max = computed(() =>
   Math.max(1, ...props.columns.map((column) => column.value)),
 );
@@ -61,6 +62,12 @@ const peak = computed(() =>
         role="img"
         :aria-label="`${label}. Massimo: ${peak?.title ?? '—'}`"
       >
+        <defs>
+          <linearGradient :id="gradient" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" class="columns__stop-top" />
+            <stop offset="1" class="columns__stop-bottom" />
+          </linearGradient>
+        </defs>
         <line
           x1="0"
           :x2="columns.length"
@@ -84,6 +91,12 @@ const peak = computed(() =>
           :y="100 - (column.value / max) * 100"
           width="0.68"
           :height="(column.value / max) * 100"
+          :fill="column.highlight ? undefined : `url(#${gradient})`"
+          :style="{
+            y: `${100 - (column.value / max) * 100}px`,
+            height: `${(column.value / max) * 100}px`,
+            animationDelay: `${index * 35}ms`,
+          }"
           :class="
             column.highlight
               ? 'columns__bar columns__bar--highlight'
@@ -130,8 +143,28 @@ const peak = computed(() =>
   stroke: var(--chart-grid, currentColor);
   stroke-dasharray: 2 4;
 }
+.columns__stop-top {
+  stop-color: var(--bar-top, var(--bar-fill, currentColor));
+}
+.columns__stop-bottom {
+  stop-color: var(--bar-bottom, var(--bar-fill, currentColor));
+}
 .columns__bar {
-  fill: var(--bar-fill, currentColor);
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  animation: columns-grow 800ms cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+  transition:
+    y 600ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    height 600ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    filter 200ms ease;
+}
+.columns__bar:hover {
+  filter: brightness(1.3) saturate(1.2);
+}
+@keyframes columns-grow {
+  from {
+    transform: scaleY(0);
+  }
 }
 .columns__bar--highlight {
   fill: var(--bar-highlight, var(--bar-fill, currentColor));

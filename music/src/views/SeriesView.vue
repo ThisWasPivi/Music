@@ -59,7 +59,7 @@ function days(days: number | null | undefined): string {
   <div class="stack">
     <header>
       <p class="eyebrow">La serie</p>
-      <h1 class="page-title">Pivəəkly nel tempo</h1>
+      <h1 class="page-title">Pivəəkly <span class="grad">nel tempo</span></h1>
     </header>
 
     <section class="glass panel" aria-labelledby="timeline-title">

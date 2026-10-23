@@ -5,7 +5,8 @@
  * they happened. Uses `--chart-ink`, `--chart-accent`, `--chart-muted` and
  * `--chart-grid`.
  */
-import { computed } from "vue";
+import { computed, useId } from "vue";
+import { useRouter } from "vue-router";
 
 import type { Release } from "@/services/stats";
 import { formatDate } from "@/utils/format.ts";
@@ -27,7 +28,11 @@ const props = withDefaults(
   { highlight: null, radius: 7, colored: false },
 );
 
+const router = useRouter();
+const gradient = `${useId()}-axis`;
 const WIDTH = 1000;
+/* The axis draws itself left to right; each dot appears as the line reaches it. */
+const SWEEP_MS = 1400;
 const HEIGHT = 130;
 const PAD = 24;
 const AXIS_Y = 70;
@@ -86,12 +91,29 @@ const summary = computed(() => {
 <template>
   <div class="timeline" tabindex="0" :aria-label="summary">
     <svg :viewBox="`0 0 ${WIDTH} ${HEIGHT}`" role="img" :aria-label="summary">
+      <defs>
+        <linearGradient
+          :id="gradient"
+          gradientUnits="userSpaceOnUse"
+          :x1="PAD"
+          :y1="AXIS_Y"
+          :x2="WIDTH - PAD"
+          :y2="AXIS_Y"
+        >
+          <stop offset="0" class="timeline__stop timeline__stop--1" />
+          <stop offset="0.5" class="timeline__stop timeline__stop--2" />
+          <stop offset="1" class="timeline__stop timeline__stop--3" />
+        </linearGradient>
+      </defs>
       <line
         :x1="PAD"
         :x2="WIDTH - PAD"
         :y1="AXIS_Y"
         :y2="AXIS_Y"
+        pathLength="1"
+        :stroke="`url(#${gradient})`"
         class="timeline__axis"
+        :style="{ animationDuration: `${SWEEP_MS}ms` }"
       />
       <g v-for="tick in yearTicks" :key="tick.label">
         <line
@@ -105,7 +127,24 @@ const summary = computed(() => {
           {{ tick.label }}
         </text>
       </g>
-      <g v-for="point in points" :key="point.release.playlist.id">
+      <a
+        v-for="point in points"
+        :key="point.release.playlist.id"
+        :href="
+          router.resolve({
+            name: 'playlist',
+            params: { id: point.release.playlist.id },
+          }).href
+        "
+        class="timeline__point"
+        :style="{ animationDelay: `${(point.x / WIDTH) * SWEEP_MS}ms` }"
+        @click.prevent="
+          router.push({
+            name: 'playlist',
+            params: { id: point.release.playlist.id },
+          })
+        "
+      >
         <line
           :x1="point.x"
           :x2="point.x"
@@ -139,7 +178,7 @@ const summary = computed(() => {
         >
           {{ point.label }}
         </text>
-      </g>
+      </a>
     </svg>
   </div>
 </template>
@@ -159,8 +198,61 @@ const summary = computed(() => {
   block-size: auto;
 }
 .timeline__axis {
-  stroke: var(--chart-ink, currentColor);
-  stroke-width: 2;
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-dasharray: 1;
+  animation: timeline-draw ease-in-out both;
+}
+.timeline__stop--1 {
+  stop-color: var(--c1, currentColor);
+}
+.timeline__stop--2 {
+  stop-color: var(--c2, currentColor);
+}
+.timeline__stop--3 {
+  stop-color: var(--c3, currentColor);
+}
+@keyframes timeline-draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+.timeline__point {
+  cursor: pointer;
+  animation: timeline-pop 500ms cubic-bezier(0.3, 1.6, 0.5, 1) backwards;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.timeline__point:focus-visible {
+  outline: none;
+}
+.timeline__point:hover .timeline__dot,
+.timeline__point:focus-visible .timeline__dot {
+  transform-box: fill-box;
+  transform-origin: center;
+  transition:
+    transform 200ms cubic-bezier(0.3, 1.6, 0.5, 1),
+    filter 200ms ease;
+  transform: scale(1.45);
+  filter: drop-shadow(0 0 8px var(--chart-accent, currentColor));
+}
+.timeline__point:focus-visible .timeline__dot {
+  transform-box: fill-box;
+  transform-origin: center;
+  transition:
+    transform 200ms cubic-bezier(0.3, 1.6, 0.5, 1),
+    filter 200ms ease;
+  stroke: var(--focus, currentColor);
+  stroke-width: 3;
+}
+@keyframes timeline-pop {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
 }
 .timeline__tick {
   stroke: var(--chart-grid, currentColor);
@@ -174,6 +266,11 @@ const summary = computed(() => {
   stroke: var(--chart-grid, currentColor);
 }
 .timeline__dot {
+  transform-box: fill-box;
+  transform-origin: center;
+  transition:
+    transform 200ms cubic-bezier(0.3, 1.6, 0.5, 1),
+    filter 200ms ease;
   fill: var(--chart-ink, currentColor);
   stroke: var(--chart-bg, transparent);
   stroke-width: 2;

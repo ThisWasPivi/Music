@@ -65,7 +65,9 @@ const labelEvery = computed(() =>
     <header class="top">
       <div>
         <p class="eyebrow">Statistiche</p>
-        <h1 class="page-title">I numeri dei numeri</h1>
+        <h1 class="page-title">
+          I numeri <span class="grad">dei numeri</span>
+        </h1>
       </div>
       <label class="scope">
         <span class="muted">Mostra</span>
@@ -189,7 +191,7 @@ const labelEvery = computed(() =>
 .tiles {
   display: grid;
   gap: 14px;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 170px), 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr));
 }
 .head {
   display: flex;

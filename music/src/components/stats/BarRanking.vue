@@ -6,6 +6,8 @@
  */
 import { computed } from "vue";
 
+import { useEntered } from "@/composables/useEntered.ts";
+
 /**
  * One row of the ranking.
  * @property key - Stable key
@@ -31,11 +33,17 @@ const props = defineProps<{
 }>();
 
 const max = computed(() => Math.max(1, ...props.rows.map((row) => row.value)));
+const entered = useEntered();
 </script>
 
 <template>
-  <ol class="ranking">
-    <li v-for="(row, index) in rows" :key="row.key" class="ranking__row">
+  <TransitionGroup tag="ol" name="ranking" class="ranking">
+    <li
+      v-for="(row, index) in rows"
+      :key="row.key"
+      class="ranking__row"
+      :style="{ '--delay': `${index * 60}ms` }"
+    >
       <span class="ranking__rank">{{ index + 1 }}</span>
       <span class="ranking__text">
         <RouterLink
@@ -54,11 +62,13 @@ const max = computed(() => Math.max(1, ...props.rows.map((row) => row.value)));
       <span class="ranking__track" aria-hidden="true">
         <span
           class="ranking__bar"
-          :style="{ inlineSize: `${(row.value / max) * 100}%` }"
+          :style="{
+            inlineSize: entered ? `${(row.value / max) * 100}%` : '0%',
+          }"
         />
       </span>
     </li>
-  </ol>
+  </TransitionGroup>
 </template>
 
 <style scoped>
@@ -122,6 +132,28 @@ a.ranking__label:hover {
   display: block;
   block-size: 100%;
   background: var(--bar, currentColor);
+  background-size: 200% 100%;
   border-radius: inherit;
+  transition: inline-size 900ms cubic-bezier(0.2, 0.8, 0.2, 1) var(--delay, 0ms);
+}
+.ranking__row:hover .ranking__bar {
+  filter: brightness(1.25) saturate(1.2);
+  box-shadow: 0 0 14px
+    color-mix(in oklab, var(--chart-accent, currentColor) 60%, transparent);
+}
+.ranking-move,
+.ranking-enter-active,
+.ranking-leave-active {
+  transition:
+    transform 500ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    opacity 300ms ease;
+}
+.ranking-enter-from,
+.ranking-leave-to {
+  opacity: 0;
+  transform: translateX(-12px);
+}
+.ranking-leave-active {
+  position: absolute;
 }
 </style>

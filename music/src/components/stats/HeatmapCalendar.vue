@@ -100,6 +100,7 @@ const summary = computed(
           v-for="(week, column) in heatmap.weeks"
           :key="week[0]?.date"
           :transform="`translate(${column * pitch} ${LABEL_HEIGHT})`"
+          :style="{ '--d': `${column * 10}ms` }"
         >
           <rect
             v-for="(day, row) in week"
@@ -151,6 +152,25 @@ const summary = computed(
 .heatmap__label {
   font-size: 10px;
   fill: var(--chart-muted, currentColor);
+}
+g .heatmap__cell {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: heat-pop 500ms cubic-bezier(0.2, 0.8, 0.2, 1) var(--d, 0ms)
+    backwards;
+  transition:
+    transform 150ms ease,
+    filter 150ms ease;
+}
+g .heatmap__cell:hover {
+  transform: scale(1.5);
+  filter: brightness(1.3);
+}
+@keyframes heat-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.2);
+  }
 }
 .heatmap__cell--0 {
   fill: var(--heat-0);

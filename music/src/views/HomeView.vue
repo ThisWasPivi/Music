@@ -13,6 +13,7 @@ import PlaylistCard from "@/components/playlists/PlaylistCard.vue";
 import PlaylistToolbar from "@/components/playlists/PlaylistToolbar.vue";
 import RotationSection from "@/components/playlists/RotationSection.vue";
 import CoverImage from "@/components/ui/CoverImage.vue";
+import IssueTitle from "@/components/ui/IssueTitle.vue";
 import { useAccent } from "@/composables/useAccent.ts";
 import { useCatalog } from "@/composables/useCatalog.ts";
 import { releaseDistribution, summarize, tracksOf } from "@/services/stats";
@@ -76,8 +77,8 @@ const visible = computed(() => {
           <RouterLink
             :to="{ name: 'playlist', params: { id: latest.id } }"
             class="hero__link"
-            >{{ latest.name }}</RouterLink
-          >
+            ><IssueTitle :name="latest.name"
+          /></RouterLink>
         </h1>
         <p v-if="latest.description" class="hero__text muted">
           {{ latest.description }}

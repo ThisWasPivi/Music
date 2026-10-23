@@ -11,6 +11,7 @@ import SpotifyLink from "@/components/player/SpotifyLink.vue";
 import SeriesPager from "@/components/playlists/SeriesPager.vue";
 import TrackTable from "@/components/playlists/TrackTable.vue";
 import CoverImage from "@/components/ui/CoverImage.vue";
+import IssueTitle from "@/components/ui/IssueTitle.vue";
 import { useAccent } from "@/composables/useAccent.ts";
 import { useCatalog } from "@/composables/useCatalog.ts";
 import { summarize } from "@/services/stats";
@@ -40,7 +41,10 @@ useAccent(() => playlist.value?.palette);
 
 <template>
   <NotFoundView v-if="!playlist" />
-  <div v-else class="stack">
+  <div v-else class="stack page">
+    <div v-if="playlist.coverUrl" class="backdrop" aria-hidden="true">
+      <img :src="playlist.coverUrl" alt="" />
+    </div>
     <section class="head" aria-labelledby="playlist-title">
       <a
         :href="playlist.url"
@@ -58,7 +62,7 @@ useAccent(() => playlist.value?.palette);
       <div class="head__body">
         <p class="eyebrow">Pivəəkly · {{ formatIssue(playlist.number) }}</p>
         <h1 id="playlist-title" class="page-title head__title">
-          {{ playlist.name }}
+          <IssueTitle :name="playlist.name" />
         </h1>
         <p v-if="playlist.description" class="head__text muted">
           {{ playlist.description }}
@@ -114,6 +118,28 @@ useAccent(() => playlist.value?.palette);
 </template>
 
 <style scoped>
+.page {
+  position: relative;
+}
+/* The cover itself, blurred, glows behind the header as in the Aurora mock-up. */
+.backdrop {
+  position: absolute;
+  inset: -320px calc(-1 * var(--gutter)) auto;
+  block-size: 900px;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+  mask-image: linear-gradient(transparent, #000 30%, #000 55%, transparent);
+}
+.backdrop img {
+  inline-size: 100%;
+  max-inline-size: none;
+  block-size: 100%;
+  object-fit: cover;
+  filter: blur(70px) saturate(1.5);
+  opacity: 0.7;
+  transform: scale(1.2);
+}
 .head {
   display: grid;
   gap: 24px;
