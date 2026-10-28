@@ -179,7 +179,11 @@
     "streak": "Di fila",
     "streakDetail": "la serie più lunga di numeri consecutivi",
     "albums": "Album",
-    "appearances": "Dove compare"
+    "appearances": "Dove compare",
+    "presence": "Nella serie",
+    "presenceInfo": "Tutti i numeri in ordine: quelli in cui compare l'artista mostrano la copertina, gli altri restano vuoti. Pause e serie consecutive si vedono a colpo d'occhio.",
+    "presenceSummary": "In {n} numeri su {total}",
+    "absent": "non presente"
   },
   "notFound": {
     "title": "Questo disco non c'è",

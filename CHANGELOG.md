@@ -6,6 +6,11 @@ All notable changes to music.pivi.dev. The format follows
 
 ## [Unreleased]
 
+### Changed
+
+- The artist page shows a presence map of every issue, lit with the cover where the artist
+  appears, and lists the appearances by year as compact cards with the artist's tracks.
+
 ### Fixed
 
 - Repeated tracks were squeezed on phones when a track appeared in many issues: each track is

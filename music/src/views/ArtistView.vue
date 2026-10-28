@@ -2,15 +2,16 @@
 /**
  * ArtistView component
  * One artist across the series. A hero with picture and key figures, a
- * shelf of their albums, and a vertical timeline of appearances: each issue
- * as a large cover with its number, and under it the artist's tracks in
- * that issue, each with its own album cover.
+ * shelf of their albums, a presence map of every issue of the series with
+ * the ones featuring the artist lit up, and their appearances grouped by
+ * year, each issue with the artist's tracks in it.
  */
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 
 import SpotifyLink from "@/components/player/SpotifyLink.vue";
 import CoverImage from "@/components/ui/CoverImage.vue";
+import SectionTitle from "@/components/ui/SectionTitle.vue";
 import StatTile from "@/components/ui/StatTile.vue";
 import { useAccent } from "@/composables/useAccent.ts";
 import { useBackdrop } from "@/composables/useBackdrop.ts";
@@ -79,7 +80,50 @@ const albums = computed(() => {
 });
 
 /**
- * Colour of an issue's dot on the rail: its liveliest cover colour.
+ * One square of the presence map.
+ * @property playlist - The issue
+ * @property count - The artist's tracks in it, 0 when absent
+ * @property tooltip - Issue name and the artist's track count
+ */
+interface PresenceCell {
+  playlist: (typeof catalog.playlists)[number];
+  count: number;
+  tooltip: string;
+}
+
+/** Every numbered issue in series order, with the artist's tracks in each. */
+const presence = computed<PresenceCell[]>(() => {
+  const counts = new Map(
+    appearances.value.map((entry) => [entry.playlist.id, entry.tracks.length]),
+  );
+  return catalog.issues.map((playlist) => {
+    const count = counts.get(playlist.id) ?? 0;
+    return {
+      playlist,
+      count,
+      tooltip:
+        count > 0
+          ? `${playlist.name} · ${t("common.tracks", { n: count }, count)}`
+          : `${playlist.name} · ${t("artist.absent")}`,
+    };
+  });
+});
+const presentCount = computed(
+  () => presence.value.filter((cell) => cell.count > 0).length,
+);
+
+/** Appearances grouped by year, newest first. */
+const byYear = computed(() => {
+  const groups = new Map<string, typeof appearances.value>();
+  for (const entry of appearances.value) {
+    const year = entry.playlist.firstAddedAt?.slice(0, 4) ?? "—";
+    groups.set(year, [...(groups.get(year) ?? []), entry]);
+  }
+  return [...groups.entries()].map(([year, entries]) => ({ year, entries }));
+});
+
+/**
+ * Colour of an issue in the artist's lists: its liveliest cover colour.
  * @param playlist - The issue
  * @returns A vivid colour
  */
@@ -178,81 +222,120 @@ useBackdrop(() => profile.value?.imageUrl ?? last.value?.coverUrl);
       </ul>
     </section>
 
+    <section
+      v-if="presence.length > 0"
+      class="glass panel"
+      aria-labelledby="presence-title"
+    >
+      <SectionTitle
+        id="presence-title"
+        :title="t('artist.presence')"
+        :info="t('artist.presenceInfo')"
+      />
+      <p class="presence__summary muted">
+        {{
+          t("artist.presenceSummary", {
+            n: presentCount,
+            total: presence.length,
+          })
+        }}
+      </p>
+      <ol class="presence">
+        <li
+          v-for="(cell, index) in presence"
+          :key="cell.playlist.id"
+          :style="{ '--i': index }"
+        >
+          <RouterLink
+            v-tooltip="cell.tooltip"
+            :to="{ name: 'playlist', params: { id: cell.playlist.id } }"
+            class="presence__cell tabular"
+            :class="{ 'presence__cell--on': cell.count > 0 }"
+            :style="{ '--dot': dotColor(cell.playlist) }"
+            :aria-label="cell.tooltip"
+          >
+            <CoverImage
+              v-if="cell.count > 0"
+              :src="cell.playlist.coverUrl"
+              :palette="cell.playlist.palette"
+              class="presence__cover"
+            />
+            <span class="presence__number">{{ cell.playlist.number }}</span>
+          </RouterLink>
+        </li>
+      </ol>
+    </section>
+
     <section aria-labelledby="appearances-title" class="stack">
       <h2 id="appearances-title" class="section-title">
         {{ t("artist.appearances") }}
       </h2>
-      <ol class="rail">
-        <li
-          v-for="(entry, index) in appearances"
-          :key="entry.playlist.id"
-          class="rail__item"
-          :style="{
-            '--i': Math.min(index, 10),
-            '--dot': dotColor(entry.playlist),
-          }"
-        >
-          <span class="rail__dot" aria-hidden="true" />
-          <article class="issue glass">
+      <section
+        v-for="group in byYear"
+        :key="group.year"
+        class="year"
+        :aria-label="group.year"
+      >
+        <h3 class="year__title tabular">{{ group.year }}</h3>
+        <ul class="appearances">
+          <li
+            v-for="(entry, index) in group.entries"
+            :key="entry.playlist.id"
+            class="appearance glass"
+            :style="{
+              '--i': Math.min(index, 10),
+              '--dot': dotColor(entry.playlist),
+            }"
+          >
             <RouterLink
               :to="{ name: 'playlist', params: { id: entry.playlist.id } }"
-              class="issue__cover"
-              :aria-label="entry.playlist.name"
+              class="appearance__head"
             >
               <CoverImage
                 :src="entry.playlist.coverUrl"
                 :palette="entry.playlist.palette"
+                class="appearance__cover"
               />
+              <span class="appearance__text">
+                <strong class="appearance__name">{{
+                  entry.playlist.name
+                }}</strong>
+                <span class="muted tabular">
+                  {{ formatDate(entry.playlist.firstAddedAt) }}
+                </span>
+              </span>
+              <span class="appearance__count tabular">
+                {{
+                  t(
+                    "common.tracks",
+                    { n: entry.tracks.length },
+                    entry.tracks.length,
+                  )
+                }}
+              </span>
             </RouterLink>
-            <div class="issue__body">
-              <header class="issue__head">
-                <h3 class="issue__title">
-                  <RouterLink
-                    :to="{
-                      name: 'playlist',
-                      params: { id: entry.playlist.id },
-                    }"
-                    >{{ entry.playlist.name }}</RouterLink
-                  >
-                </h3>
-                <p class="muted tabular">
-                  {{ formatIssue(entry.playlist.number) }} ·
-                  {{ formatDate(entry.playlist.firstAddedAt) }} ·
-                  {{
-                    t(
-                      "common.tracks",
-                      { n: entry.tracks.length },
-                      entry.tracks.length,
-                    )
-                  }}
-                </p>
-              </header>
-              <ul class="songs">
-                <li v-for="track in entry.tracks" :key="track.id">
-                  <a
-                    :href="track.url"
-                    target="_blank"
-                    rel="noopener"
-                    class="song"
-                  >
-                    <CoverImage
-                      :src="track.album.imageUrl"
-                      class="song__cover"
-                    />
-                    <span class="song__text">
-                      <strong>{{ track.title }}</strong>
-                      <span class="muted"
-                        >{{ track.album.name }} ·
-                        {{ formatTrackDuration(track.durationMs) }}</span
-                      >
-                    </span>
-                  </a>
-                </li>
-              </ul>
-            </div>
-          </article>
-        </li>
-      </ol>
+            <ul class="songs">
+              <li v-for="track in entry.tracks" :key="track.id">
+                <a
+                  :href="track.url"
+                  target="_blank"
+                  rel="noopener"
+                  class="song"
+                >
+                  <CoverImage :src="track.album.imageUrl" class="song__cover" />
+                  <span class="song__text">
+                    <strong>{{ track.title }}</strong>
+                    <span class="muted">{{ track.album.name }}</span>
+                  </span>
+                  <span class="song__time muted tabular">{{
+                    formatTrackDuration(track.durationMs)
+                  }}</span>
+                </a>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </section>
     </section>
   </div>
 </template>
@@ -346,28 +429,118 @@ useBackdrop(() => profile.value?.imageUrl ?? last.value?.coverUrl);
 .shelf__count {
   font-size: 12px;
 }
-.rail {
+.presence__summary {
+  margin: -6px 0 14px;
+  font-size: 14px;
+}
+/* One square per issue in series order: lit with the cover where the artist appears. */
+.presence {
   list-style: none;
   margin: 0;
-  padding: 0 0 0 28px;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(38px, 1fr));
+  gap: 6px;
+}
+@media (min-width: 720px) {
+  .presence {
+    grid-template-columns: repeat(auto-fill, minmax(48px, 1fr));
+    gap: 8px;
+  }
+}
+.presence li {
+  animation: presence-in 420ms cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
+  animation-delay: calc(var(--i) * 18ms);
+}
+@keyframes presence-in {
+  from {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+}
+.presence__cell {
   position: relative;
   display: grid;
-  gap: 18px;
+  place-items: center;
+  aspect-ratio: 1;
+  border-radius: 10px;
+  border: 1px dashed var(--line);
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 650;
+  text-decoration: none;
+  transition:
+    transform 200ms cubic-bezier(0.34, 1.56, 0.64, 1),
+    box-shadow 200ms ease,
+    border-color 160ms ease,
+    color 160ms ease;
 }
-/* The rail: a vertical aurora line linking every appearance, newest at the top. */
-.rail::before {
-  content: "";
+.presence__cell:hover {
+  transform: scale(1.12);
+  border-color: var(--glass-border);
+  color: var(--text);
+  z-index: 1;
+}
+.presence__cell--on {
+  border: 0;
+  color: #fff;
+  box-shadow: 0 6px 16px -8px var(--dot);
+}
+.presence__cell--on:hover {
+  box-shadow:
+    0 0 0 3px color-mix(in oklab, var(--dot) 35%, transparent),
+    0 10px 22px -8px var(--dot);
+}
+.presence__cover {
   position: absolute;
-  inset: 8px auto 8px 8px;
-  inline-size: 3px;
-  border-radius: 3px;
-  background: linear-gradient(var(--c1), var(--c2), var(--c3));
-  box-shadow: 0 0 12px color-mix(in oklab, var(--c2) 50%, transparent);
+  inset: 0;
+  --cover-radius: 10px;
 }
-.rail__item {
-  position: relative;
+/* The number sits on a soft dark wash so it reads on any cover. */
+.presence__cell--on .presence__number {
+  position: absolute;
+  inset: auto 0 0;
+  padding: 1px 0 2px;
+  border-radius: 0 0 10px 10px;
+  background: linear-gradient(transparent, rgb(0 0 0 / 0.55));
+  font-size: 11px;
+  text-align: center;
+  text-shadow: 0 1px 2px rgb(0 0 0 / 0.5);
+}
+.year {
+  display: grid;
+  gap: 12px;
+}
+.year__title {
+  margin: 0;
+  font: 750 15px var(--font-display);
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.year__title::after {
+  content: "";
+  flex: 1;
+  block-size: 1px;
+  background: var(--line);
+}
+.appearances {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr));
+  align-items: start;
+}
+.appearance {
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+  border-radius: 20px;
   animation: rise-in 600ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
-  animation-delay: calc(var(--i) * 60ms);
+  animation-delay: calc(var(--i) * 50ms);
 }
 @keyframes rise-in {
   from {
@@ -375,102 +548,64 @@ useBackdrop(() => profile.value?.imageUrl ?? last.value?.coverUrl);
     transform: translateY(14px);
   }
 }
-/* Centred on the rail (x = 9.5px from the list edge) and on the card's middle. */
-.rail__dot {
-  position: absolute;
-  inset: 50% auto auto -29.5px;
-  inline-size: 22px;
-  block-size: 22px;
-  border-radius: 50%;
-  background: radial-gradient(
-    circle at 35% 30%,
-    color-mix(in oklab, var(--dot) 55%, #fff),
-    var(--dot) 70%
-  );
-  box-shadow:
-    0 0 0 5px color-mix(in oklab, var(--dot) 22%, transparent),
-    0 0 18px var(--dot);
-  transform: translateY(-50%);
-  transition: transform 250ms cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-.rail__item:hover .rail__dot {
-  transform: translateY(-50%) scale(1.2);
-}
-.issue {
+.appearance__head {
   display: grid;
-  gap: 14px 18px;
-  padding: 14px;
-  grid-template-columns: 88px minmax(0, 1fr);
-}
-@media (min-width: 720px) {
-  .issue {
-    grid-template-columns: 170px minmax(0, 1fr);
-  }
-}
-/* On phones the songs take the whole card width under the cover and title. */
-@media (max-width: 560px) {
-  .issue {
-    grid-template-columns: 72px minmax(0, 1fr);
-  }
-  .issue__body {
-    display: contents;
-  }
-  .issue__head {
-    align-self: center;
-  }
-  .songs {
-    grid-column: 1 / -1;
-  }
-}
-.issue__cover {
-  position: relative;
-  display: block;
-  max-inline-size: 170px;
-  --cover-radius: 14px;
-  filter: drop-shadow(
-    0 16px 30px color-mix(in oklab, var(--dot) 45%, transparent)
-  );
-  transition: transform 250ms cubic-bezier(0.22, 1, 0.36, 1);
-}
-.issue__cover:hover {
-  transform: scale(1.03);
-}
-.issue__body {
-  display: grid;
+  grid-template-columns: 56px minmax(0, 1fr) auto;
+  align-items: center;
   gap: 12px;
-  align-content: start;
-  min-width: 0;
+  padding: 4px;
+  margin: -4px;
+  border-radius: 14px;
+  text-decoration: none;
+  transition: background 160ms ease;
 }
-.issue__head p {
-  margin: 2px 0 0;
+.appearance__head:hover {
+  background: var(--glass-strong);
+}
+.appearance__cover {
+  --cover-radius: 12px;
+  box-shadow: 0 10px 24px -12px var(--dot);
+}
+.appearance__head:hover .appearance__cover {
+  transform: scale(1.05) rotate(-2deg);
+}
+.appearance__text {
+  display: grid;
+  min-width: 0;
   font-size: 13px;
 }
-.issue__title {
-  margin: 0;
-  font-size: 20px;
-  font-weight: 750;
-}
-.issue__title a {
-  text-decoration: none;
+.appearance__name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font: 700 16px var(--font-display);
   transition: color 160ms ease;
 }
-.issue__title a:hover {
+.appearance__head:hover .appearance__name {
   color: var(--accent);
+}
+.appearance__count {
+  padding: 2px 9px;
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--dot) 22%, transparent);
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
 }
 .songs {
   list-style: none;
   margin: 0;
   padding: 0;
   display: grid;
-  gap: 8px;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr));
+  gap: 2px;
 }
 .song {
-  display: flex;
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr) auto;
   align-items: center;
   gap: 10px;
-  padding: 6px;
-  border-radius: 12px;
+  padding: 5px 6px;
+  border-radius: 10px;
   text-decoration: none;
   transition: background 150ms ease;
 }
@@ -478,28 +613,30 @@ useBackdrop(() => profile.value?.imageUrl ?? last.value?.coverUrl);
   background: var(--glass-strong);
 }
 .song:hover .song__cover {
-  transform: scale(1.06) rotate(-2deg);
+  transform: scale(1.08) rotate(-2deg);
 }
 .song:hover strong {
   color: var(--accent);
 }
 .song__cover {
-  --cover-radius: 8px;
-  inline-size: 52px;
-  flex: none;
+  --cover-radius: 7px;
 }
 .song__text {
   display: grid;
   min-width: 0;
-  font-size: 14px;
+  font-size: 13px;
+  line-height: 1.3;
 }
-.song__text strong,
-.song__text span {
+.song__text > * {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.song__text span {
+.song__text strong {
+  font-size: 14px;
+  transition: color 160ms ease;
+}
+.song__time {
   font-size: 12px;
 }
 </style>

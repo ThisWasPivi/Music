@@ -179,7 +179,11 @@
     "streak": "In a row",
     "streakDetail": "longest run of consecutive issues",
     "albums": "Albums",
-    "appearances": "Where they appear"
+    "appearances": "Where they appear",
+    "presence": "Across the series",
+    "presenceInfo": "Every numbered issue in order: the ones featuring the artist show their cover, the others stay empty. Gaps and runs show at a glance.",
+    "presenceSummary": "In {n} of {total} issues",
+    "absent": "not featured"
   },
   "notFound": {
     "title": "This record is missing",
