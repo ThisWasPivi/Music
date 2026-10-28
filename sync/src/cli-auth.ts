@@ -6,6 +6,7 @@
 import { randomBytes } from "node:crypto";
 import { createServer } from "node:http";
 
+import { site } from "../../site.config.ts";
 import { loadEnv, writeEnvValue } from "./env.ts";
 import { SyncError } from "./errors.ts";
 import {
@@ -20,7 +21,7 @@ import {
  * @returns The HTML
  */
 function page(message: string): string {
-  return `<!doctype html><meta charset="utf-8"><title>Pivəəkly sync</title><body style="font:16px system-ui;padding:40px"><p>${message}</p></body>`;
+  return `<!doctype html><meta charset="utf-8"><title>${site.series} sync</title><body style="font:16px system-ui;padding:40px"><p>${message}</p></body>`;
 }
 
 try {

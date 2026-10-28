@@ -21,7 +21,11 @@ const rotation = playlistRepository.rotation();
     aria-labelledby="rotation-title"
   >
     <h2 id="rotation-title" class="section-title">{{ t("stats.rotation") }}</h2>
-    <ul v-if="rotation.artists.length > 0" class="rotation__artists">
+    <ul
+      v-if="rotation.artists.length > 0"
+      v-drag-scroll
+      class="rotation__artists"
+    >
       <li v-for="artist in rotation.artists" :key="artist.id">
         <a
           :href="artist.url"
@@ -73,9 +77,19 @@ const rotation = playlistRepository.rotation();
   text-align: center;
   text-decoration: none;
 }
+.rotation__artist {
+  transition: color 160ms ease;
+}
+.rotation__artist:hover {
+  color: var(--accent);
+}
 .rotation__avatar {
   --cover-radius: 50%;
   inline-size: 72px;
+}
+.rotation__artist:hover .rotation__avatar {
+  transform: scale(1.08);
+  box-shadow: 0 10px 26px -10px var(--accent);
 }
 .rotation__tracks {
   list-style: none;
@@ -91,6 +105,16 @@ const rotation = playlistRepository.rotation();
   gap: 10px;
   text-decoration: none;
   font-size: 14px;
+  padding: 6px;
+  margin: -6px;
+  border-radius: 12px;
+  transition: background 160ms ease;
+}
+.rotation__track:hover {
+  background: var(--glass-strong);
+}
+.rotation__track:hover .rotation__cover {
+  transform: scale(1.06) rotate(-2deg);
 }
 .rotation__track > span {
   display: grid;

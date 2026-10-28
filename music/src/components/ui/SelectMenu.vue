@@ -45,8 +45,11 @@ const props = withDefaults(
 
     /** Opens the menu aligned to the right edge of the trigger. */
     alignEnd?: boolean;
+
+    /** Sizes the menu to its options instead of a fixed width. */
+    fit?: boolean;
   }>(),
-  { searchable: undefined, compact: false, alignEnd: false },
+  { searchable: undefined, compact: false, alignEnd: false, fit: false },
 );
 
 const emit = defineEmits<{
@@ -106,12 +109,26 @@ function place(): void {
   const width = Math.min(320, window.innerWidth - 32);
   const left = props.alignEnd ? rect.right - width : rect.left;
   const below = window.innerHeight - rect.bottom > 300 || rect.top < 300;
+  const vertical: Record<string, string> = below
+    ? { top: `${rect.bottom + 8}px` }
+    : { bottom: `${window.innerHeight - rect.top + 8}px` };
+  if (props.fit) {
+    const edge: Record<string, string> = props.alignEnd
+      ? { right: `${Math.max(16, window.innerWidth - rect.right)}px` }
+      : { left: `${Math.max(16, rect.left)}px` };
+    position.value = {
+      ...edge,
+      ...vertical,
+      width: "max-content",
+      minWidth: `${rect.width}px`,
+      maxWidth: `${window.innerWidth - 32}px`,
+    };
+    return;
+  }
   position.value = {
     left: `${Math.max(16, Math.min(left, window.innerWidth - width - 16))}px`,
     width: `${width}px`,
-    ...(below
-      ? { top: `${rect.bottom + 8}px` }
-      : { bottom: `${window.innerHeight - rect.top + 8}px` }),
+    ...vertical,
   };
 }
 
@@ -369,12 +386,18 @@ onBeforeUnmount(() => {
   cursor: pointer;
   transition:
     background 150ms ease,
-    border-color 150ms ease;
+    border-color 150ms ease,
+    transform 200ms cubic-bezier(0.34, 1.56, 0.64, 1),
+    box-shadow 200ms ease;
 }
 .select__trigger:hover,
 .select__trigger[aria-expanded="true"] {
   background: var(--glass-strong);
   border-color: color-mix(in oklab, var(--accent) 45%, var(--glass-border));
+}
+.select__trigger:hover:not([aria-expanded="true"]) {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 20px -12px var(--accent);
 }
 .select__trigger--compact {
   padding: 4px 8px 4px 5px;

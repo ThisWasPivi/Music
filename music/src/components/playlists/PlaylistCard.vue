@@ -68,6 +68,16 @@ const { t } = useI18n();
 .card__cover {
   box-shadow: 0 16px 40px -18px var(--card);
 }
+.card:hover .card__cover {
+  transform: scale(1.02);
+  box-shadow: 0 20px 44px -16px var(--card);
+}
+.card__title {
+  transition: color 160ms ease;
+}
+.card:hover .card__title {
+  color: var(--accent);
+}
 .card__body {
   display: grid;
   gap: 2px;

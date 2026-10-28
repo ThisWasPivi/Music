@@ -12,6 +12,7 @@ import RotationSection from "@/components/playlists/RotationSection.vue";
 import ColumnChart, { type Column } from "@/components/stats/ColumnChart.vue";
 import HeatmapCalendar from "@/components/stats/HeatmapCalendar.vue";
 import TopRankings from "@/components/stats/TopRankings.vue";
+import SectionTitle from "@/components/ui/SectionTitle.vue";
 import SelectMenu, { type SelectOption } from "@/components/ui/SelectMenu.vue";
 import StatTile from "@/components/ui/StatTile.vue";
 import { useCatalog } from "@/composables/useCatalog.ts";
@@ -107,7 +108,7 @@ function describe(track: (typeof summary.value)["longest"]): string {
 <template>
   <div class="stack">
     <header class="top">
-      <h1 class="page-title">{{ t("nav.stats") }}</h1>
+      <h1 class="page-title">{{ t("stats.title") }}</h1>
       <SelectMenu
         v-model="scopeId"
         :options="scopeOptions"
@@ -163,18 +164,22 @@ function describe(track: (typeof summary.value)["longest"]): string {
     </div>
 
     <section class="glass panel" aria-labelledby="added-title">
-      <h2 id="added-title" class="section-title">
-        {{ t("stats.addedTitle") }}
-      </h2>
-      <p class="muted lede">{{ t("stats.addedLede") }}</p>
+      <SectionTitle
+        id="added-title"
+        :title="t('stats.addedTitle')"
+        :info="t('stats.addedLede')"
+      />
       <HeatmapCalendar :key="`h-${scopeId}`" :heatmap="heatmap" />
     </section>
 
     <section class="glass panel" aria-labelledby="years-title">
       <div class="head">
-        <h2 id="years-title" class="section-title">
-          {{ t("stats.yearsTitle") }}
-        </h2>
+        <SectionTitle
+          id="years-title"
+          class="head__title"
+          :title="t('stats.yearsTitle')"
+          :info="t('stats.yearsInfo')"
+        />
         <div class="chips" role="group" :aria-label="t('stats.groupBy')">
           <button
             v-for="option in BUCKETS"
@@ -211,9 +216,13 @@ function describe(track: (typeof summary.value)["longest"]): string {
   gap: 16px;
 }
 .tiles {
-  display: grid;
+  display: flex;
+  flex-wrap: wrap;
   gap: 14px;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr));
+}
+/* Tiles share each row and the last row stretches, so no tile is left alone. */
+.tiles > * {
+  flex: 1 1 150px;
 }
 .head {
   display: flex;
@@ -222,11 +231,7 @@ function describe(track: (typeof summary.value)["longest"]): string {
   gap: 8px;
   margin-bottom: 14px;
 }
-.head .section-title {
+.head__title {
   margin: 0;
-}
-.lede {
-  margin: -6px 0 14px;
-  font-size: 14px;
 }
 </style>

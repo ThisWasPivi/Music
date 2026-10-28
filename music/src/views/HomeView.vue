@@ -50,8 +50,14 @@ const visible = computed(() => {
 
 <template>
   <div class="stack">
-    <h1 class="sr-only">{{ t("home.title") }}</h1>
-    <PlaylistToolbar :decades="decades" :result-count="visible.length" />
+    <header>
+      <h1 class="page-title">{{ t("home.title") }}</h1>
+    </header>
+    <PlaylistToolbar
+      :decades="decades"
+      :result-count="visible.length"
+      :total-count="playlists.length"
+    />
     <TransitionGroup
       v-if="visible.length > 0"
       tag="ul"
@@ -77,7 +83,13 @@ const visible = computed(() => {
   padding: 0;
   display: grid;
   gap: 16px;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  /* Two cards a row even on the narrowest phones. */
+  grid-template-columns: repeat(auto-fill, minmax(min(150px, 42vw), 1fr));
+}
+@media (max-width: 380px) {
+  .grid {
+    gap: 10px;
+  }
 }
 @media (min-width: 700px) {
   .grid {

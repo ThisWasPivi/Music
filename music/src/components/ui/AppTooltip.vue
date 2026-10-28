@@ -41,7 +41,8 @@ const style = computed(() => ({
   border-radius: 12px;
   color: var(--text);
   font: 500 13px/1.35 var(--font-body);
-  text-align: center;
+  text-align: start;
+  text-wrap: pretty;
   pointer-events: none;
   transform: translate(-50%, -100%);
 }

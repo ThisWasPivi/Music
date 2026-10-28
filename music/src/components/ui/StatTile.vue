@@ -101,10 +101,14 @@ onBeforeUnmount(() => cancelAnimationFrame(frame));
   font-size: clamp(20px, 1.9vw, 26px);
   white-space: nowrap;
 }
+/* Details wrap to two lines before they are cut. */
 .tile__detail {
+  display: -webkit-box;
   font-size: 12px;
+  line-height: 1.35;
   overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
 }
 </style>

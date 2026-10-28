@@ -1,6 +1,6 @@
 import { execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
-import { copyFile } from "node:fs/promises";
+import { copyFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { fileURLToPath, URL } from "node:url";
 
@@ -8,6 +8,8 @@ import tailwindcss from "@tailwindcss/vite";
 import vue from "@vitejs/plugin-vue";
 import { type Plugin } from "vite";
 import { defineConfig } from "vitest/config";
+
+import { site } from "../site.config.ts";
 
 /**
  * GitHub Pages has no rewrite rules: it serves 404.html for unknown paths,
@@ -25,6 +27,38 @@ function spaFallback(): Plugin {
     },
     async closeBundle() {
       await copyFile(join(outDir, "index.html"), join(outDir, "404.html"));
+    },
+  };
+}
+
+/**
+ * Fills the site identity from `site.config.ts` into index.html
+ * (`%SITE_TITLE%`, `%SITE_DESCRIPTION%`) and writes the CNAME file for the
+ * custom domain.
+ * @returns The plugin
+ */
+function siteIdentity(): Plugin {
+  let outDir = "dist";
+
+  /**
+   * Escapes text for an HTML attribute or element.
+   * @param text - Plain text
+   * @returns The escaped text
+   */
+  const escape = (text: string): string =>
+    text.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;");
+  return {
+    name: "site-identity",
+    configResolved(config) {
+      outDir = config.build.outDir;
+    },
+    transformIndexHtml(html) {
+      return html
+        .replaceAll("%SITE_TITLE%", escape(`${site.series} · ${site.domain}`))
+        .replaceAll("%SITE_DESCRIPTION%", escape(site.description));
+    },
+    async writeBundle() {
+      await writeFile(join(outDir, "CNAME"), `${site.domain}\n`);
     },
   };
 }
@@ -49,14 +83,14 @@ function currentCommit(): string {
   }
 }
 
-/* Served from the custom domain music.pivi.dev (see public/CNAME): the app lives at the root. */
+/* Served from the custom domain in site.config.ts: the app lives at the root. */
 export default defineConfig({
   base: "/",
   define: {
     __APP_VERSION__: JSON.stringify(version),
     __APP_COMMIT__: JSON.stringify(currentCommit()),
   },
-  plugins: [vue(), tailwindcss(), spaFallback()],
+  plugins: [vue(), tailwindcss(), siteIdentity(), spaFallback()],
   build: {
     /*
      * The data chunk holds the whole catalogue; the sample fixtures inline
@@ -76,7 +110,10 @@ export default defineConfig({
     },
   },
   resolve: {
-    alias: { "@": fileURLToPath(new URL("./src", import.meta.url)) },
+    alias: {
+      "@": fileURLToPath(new URL("./src", import.meta.url)),
+      "@site": fileURLToPath(new URL("../site.config.ts", import.meta.url)),
+    },
   },
   test: {
     environment: "happy-dom",

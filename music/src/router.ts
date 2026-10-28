@@ -1,3 +1,4 @@
+import { site } from "@site";
 import { watch } from "vue";
 import {
   createRouter,
@@ -8,8 +9,6 @@ import {
 import { i18n } from "./i18n/index.ts";
 import { playlistRepository } from "./repositories/PlaylistRepository.ts";
 import HomeView from "./views/HomeView.vue";
-
-const SITE = "Pivəəkly";
 
 /**
  * Finds an artist's name in the published tracks.
@@ -82,11 +81,11 @@ function updateTitle(): void {
   const route = router.currentRoute.value;
   const id = typeof route.params.id === "string" ? route.params.id : "";
   const title = route.meta.title?.(id);
-  if (!title) document.title = `${SITE} · music.pivi.dev`;
+  if (!title) document.title = `${site.series} · ${site.domain}`;
   else
-    document.title = title.includes(SITE)
-      ? `${title} · music.pivi.dev`
-      : `${title} · ${SITE}`;
+    document.title = title.includes(site.series)
+      ? `${title} · ${site.domain}`
+      : `${title} · ${site.series}`;
 }
 
 router.afterEach(updateTitle);

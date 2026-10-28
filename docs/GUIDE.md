@@ -81,14 +81,32 @@ A push to `main` deploys with the same published data. Before the first release 
 builds with the sample issues. No GitHub secret is needed: the workflow reads the release with
 its own `GITHUB_TOKEN`.
 
+### Making it yours
+
+Everything that names this particular series lives in [`site.config.ts`](../site.config.ts) at
+the repository root:
+
+| Field         | Used for                                                                 |
+| ------------- | ------------------------------------------------------------------------ |
+| `series`      | Page titles, the playlist eyebrow and the sync's default name prefix     |
+| `domain`      | Document titles and the `CNAME` file written by the build                |
+| `description` | The search-engine and link-preview description                           |
+| `owner`       | The "Made by" footer link; `null` hides it                               |
+| `repository`  | Source code, changelog and commit links in the footer; `null` hides them |
+
+Interface texts are in `music/src/i18n/locales/` and do not mention the series by name. With
+GitHub Pages, also set the custom domain under Settings → Pages: the workflow deploys with
+`actions/deploy-pages`, which ignores the `CNAME` file.
+
 ## 4. Choosing the Pivəəkly
 
 The rules live in [`sync/playlists.config.ts`](../sync/playlists.config.ts):
 
 - the starting point is `GET /me/playlists`;
 - **only playlists you own** are considered;
-- the name must start with `prefix`, `"Pivəəkly"` by default, with two **ə** (U+0259). Names are
-  compared NFC-normalized and case-insensitive, so `PIVƏƏKLY` and a decomposed ə match too;
+- the name must start with `prefix`, by default the `series` of
+  [`site.config.ts`](../site.config.ts) (`"Pivəəkly"`, with two **ə**, U+0259). Names are compared
+  NFC-normalized and case-insensitive, so `PIVƏƏKLY` and a decomposed ə match too;
 - `exclude`: ids never to publish, whatever their name;
 - `include`: ids to publish even when the name does not match (still only if you own them);
 - `tags`: optional moods per id, used by the site's filters.

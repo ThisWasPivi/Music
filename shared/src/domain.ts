@@ -56,7 +56,7 @@ export interface Track {
 }
 
 /**
- * A published Pivəəkly issue.
+ * A published issue of the series.
  * @property id - Stable Spotify playlist id
  * @property name - Playlist name as shown on Spotify
  * @property number - Issue number parsed from the name, or null when absent

@@ -4,10 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="color-scheme" content="light dark" />
-    <meta
-      name="description"
-      content="Pivəəkly: Pivi's playlist series, with stats and a release timeline."
-    />
+    <meta name="description" content="%SITE_DESCRIPTION%" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta
       name="theme-color"
@@ -19,11 +16,11 @@
       content="#eceef5"
       media="(prefers-color-scheme: light)"
     />
-    <title>Pivəəkly · music.pivi.dev</title>
+    <title>%SITE_TITLE%</title>
     <script>
       /* Apply the saved theme before the first paint, so there is no flash of the other one. */
       try {
-        const theme = localStorage.getItem("pivi-theme");
+        const theme = localStorage.getItem("music:theme");
         if (theme === "light" || theme === "dark")
           document.documentElement.dataset.theme = theme;
       } catch {}

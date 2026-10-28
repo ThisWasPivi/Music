@@ -131,9 +131,16 @@ const entered = useEntered();
 }
 a.ranking__label {
   text-decoration: none;
+  border-radius: 5px;
+  transition:
+    color 160ms ease,
+    background 160ms ease,
+    box-shadow 160ms ease;
 }
 a.ranking__label:hover {
-  text-decoration: underline;
+  color: var(--accent);
+  background: color-mix(in oklab, var(--accent) 16%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--accent) 16%, transparent);
 }
 .ranking__label {
   overflow: hidden;

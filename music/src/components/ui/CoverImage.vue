@@ -69,6 +69,9 @@ watch(
   border-radius: var(--cover-radius, 14px);
   /* Clips the zoomed image on its own layer, without a fringe at the corners. */
   isolation: isolate;
+  transition:
+    transform 260ms cubic-bezier(0.34, 1.56, 0.64, 1),
+    box-shadow 260ms ease;
   background: linear-gradient(135deg, var(--from), var(--to));
 }
 /* The skeleton: the cover's gradient with a sheen sweeping across. */

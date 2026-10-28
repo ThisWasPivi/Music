@@ -33,5 +33,6 @@ const value = computed({
     :searchable="false"
     compact
     align-end
+    fit
   />
 </template>

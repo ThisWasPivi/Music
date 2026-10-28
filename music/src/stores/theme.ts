@@ -4,7 +4,7 @@ import { computed, ref, watch } from "vue";
 /** The colour-scheme choice; "system" follows the OS until the user picks one. */
 export type ThemeChoice = "system" | "light" | "dark";
 
-const STORAGE_KEY = "pivi-theme";
+const STORAGE_KEY = "music:theme";
 
 /**
  * Reads the stored choice, tolerating blocked storage.

@@ -3,11 +3,14 @@
  * HeatmapCalendar component
  * GitHub-style calendar of the days tracks were added, one block per year.
  * Each block is a 53-column grid that fills the available width, so it
- * never scrolls sideways. Colours come from `--heat-0` … `--heat-4`.
+ * never scrolls sideways; on phones a year is split into two half-years of
+ * 27 weeks, which doubles the size of each day. Colours come from
+ * `--heat-0` … `--heat-4`.
  */
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 
+import { useMediaQuery } from "@/composables/useMediaQuery.ts";
 import type { Heatmap, HeatmapDay } from "@/services/stats";
 import { formatDate } from "@/utils/format.ts";
 
@@ -17,29 +20,50 @@ const props = defineProps<{
 }>();
 
 const { t, locale } = useI18n();
+const compact = useMediaQuery("(max-width: 640px)");
 
-/** Month labels per year: the week column where each month starts. */
-const months = computed(() => {
+/* Weeks per row: the whole year, or half of it on phones. */
+const columns = computed(() => (compact.value ? 27 : 53));
+
+/**
+ * One row of weeks with the months that start in it.
+ * @property weeks - The weeks, each a column of seven days
+ * @property labels - Month names and the column each starts in
+ */
+interface Chunk {
+  weeks: (HeatmapDay | null)[][];
+  labels: { column: number; text: string }[];
+}
+
+/** Each year cut into rows of weeks, with month labels per row. */
+const chunks = computed<Chunk[][]>(() => {
   const formatter = new Intl.DateTimeFormat(locale.value, {
     month: "short",
     timeZone: "UTC",
   });
   return props.heatmap.years.map((year) => {
-    const labels: { column: number; text: string }[] = [];
-    let previous = -1;
-    year.weeks.forEach((week, index) => {
-      const day = week.find((entry): entry is HeatmapDay => entry !== null);
-      if (!day) return;
-      const month = Number(day.date.slice(5, 7)) - 1;
-      if (month !== previous && day.date.slice(8) <= "07") {
-        labels.push({
-          column: index + 1,
-          text: formatter.format(new Date(Date.UTC(year.year, month, 1))),
-        });
-      }
-      previous = month;
-    });
-    return labels;
+    const rows: Chunk[] = [];
+    for (let start = 0; start < year.weeks.length; start += columns.value) {
+      const weeks = year.weeks.slice(start, start + columns.value);
+      const labels: Chunk["labels"] = [];
+      let previous = -1;
+      weeks.forEach((week, index) => {
+        const day = week.find((entry): entry is HeatmapDay => entry !== null);
+        if (!day) return;
+        const month = Number(day.date.slice(5, 7)) - 1;
+        if (month !== previous && day.date.slice(8) <= "07") {
+          labels.push({
+            column: index + 1,
+            text: formatter
+              .format(new Date(Date.UTC(year.year, month, 1)))
+              .replace(".", ""),
+          });
+        }
+        previous = month;
+      });
+      rows.push({ weeks, labels });
+    }
+    return rows;
   });
 });
 
@@ -76,33 +100,41 @@ function dayLabel(day: HeatmapDay): string {
           t("charts.tracksAdded", { n: year.total }, year.total)
         }}</span>
       </header>
-      <div class="heatmap__months" aria-hidden="true">
-        <span
-          v-for="month in months[yearIndex]"
-          :key="month.column"
-          :style="{ gridColumn: `${month.column} / span 4` }"
-        >
-          {{ month.text }}
-        </span>
-      </div>
       <div
-        class="heatmap__grid"
+        class="heatmap__rows"
         role="img"
         :aria-label="`${year.year}: ${t('charts.tracksAdded', { n: year.total }, year.total)}`"
       >
-        <template v-for="(week, column) in year.weeks" :key="column">
-          <span
-            v-for="(day, row) in week"
-            :key="`${column}-${row}`"
-            v-tooltip="day ? dayLabel(day) : undefined"
-            :class="
-              day
-                ? `heatmap__cell heatmap__cell--${level(day.count)}`
-                : 'heatmap__cell heatmap__cell--pad'
-            "
-            :style="{ animationDelay: `${column * 10}ms` }"
-          />
-        </template>
+        <div
+          v-for="(chunk, chunkIndex) in chunks[yearIndex]"
+          :key="chunkIndex"
+          class="heatmap__chunk"
+        >
+          <div class="heatmap__months" aria-hidden="true">
+            <span
+              v-for="month in chunk.labels"
+              :key="month.column"
+              :style="{ gridColumn: `${month.column} / span 4` }"
+            >
+              {{ month.text }}
+            </span>
+          </div>
+          <div class="heatmap__grid">
+            <template v-for="(week, column) in chunk.weeks" :key="column">
+              <span
+                v-for="(day, row) in week"
+                :key="`${column}-${row}`"
+                v-tooltip="day ? dayLabel(day) : undefined"
+                :class="
+                  day
+                    ? `heatmap__cell heatmap__cell--${level(day.count)}`
+                    : 'heatmap__cell heatmap__cell--pad'
+                "
+                :style="{ animationDelay: `${column * 10}ms` }"
+              />
+            </template>
+          </div>
+        </div>
       </div>
     </section>
     <figcaption class="heatmap__legend">
@@ -129,7 +161,21 @@ function dayLabel(day: HeatmapDay): string {
   gap: 6px;
 }
 .heatmap__year {
+  --weeks: 53;
   max-inline-size: calc(53 * 18px + 52 * 4px);
+}
+.heatmap__rows,
+.heatmap__chunk {
+  display: grid;
+  gap: 4px;
+}
+.heatmap__rows {
+  gap: 12px;
+}
+@media (max-width: 640px) {
+  .heatmap__year {
+    --weeks: 27;
+  }
 }
 .heatmap__head {
   display: flex;
@@ -140,7 +186,7 @@ function dayLabel(day: HeatmapDay): string {
 .heatmap__months,
 .heatmap__grid {
   display: grid;
-  grid-template-columns: repeat(53, minmax(0, 18px));
+  grid-template-columns: repeat(var(--weeks), minmax(0, 18px));
   justify-content: space-between;
   column-gap: clamp(1px, 0.35vw, 4px);
 }

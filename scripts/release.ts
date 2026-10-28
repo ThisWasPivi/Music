@@ -10,6 +10,8 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { site } from "../site.config.ts";
+
 const ROOT = fileURLToPath(new URL("..", import.meta.url));
 const DATA_DIR = join(ROOT, "music/src/data");
 const DATA_FILES = [
@@ -122,7 +124,7 @@ if (alreadyPublished()) {
 }
 
 const today = new Date().toLocaleDateString("sv-SE");
-const notes = `Sanitized playlist data for music.pivi.dev, synced ${today}. Written by \`pnpm release\`; the deploy downloads it.`;
+const notes = `Sanitized playlist data for ${site.domain}, synced ${today}. Written by \`pnpm release\`; the deploy downloads it.`;
 if (succeeds("gh", ["release", "view", RELEASE_TAG])) {
   run("gh", ["release", "edit", RELEASE_TAG, "--notes", notes]);
 } else {

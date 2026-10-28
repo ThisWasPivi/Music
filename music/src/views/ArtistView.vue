@@ -160,7 +160,7 @@ useBackdrop(() => profile.value?.imageUrl ?? last.value?.coverUrl);
       aria-labelledby="albums-title"
     >
       <h2 id="albums-title" class="section-title">{{ t("artist.albums") }}</h2>
-      <ul class="shelf">
+      <ul v-drag-scroll class="shelf">
         <li v-for="row in albums" :key="row.album.id">
           <a
             :href="row.album.url"
@@ -296,9 +296,13 @@ useBackdrop(() => profile.value?.imageUrl ?? last.value?.coverUrl);
   font-size: 16px;
 }
 .tiles {
-  display: grid;
+  display: flex;
+  flex-wrap: wrap;
   gap: 14px;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr));
+}
+/* Tiles share each row and the last row stretches, so no tile is left alone. */
+.tiles > * {
+  flex: 1 1 150px;
 }
 .shelf {
   list-style: none;
@@ -326,6 +330,13 @@ useBackdrop(() => profile.value?.imageUrl ?? last.value?.coverUrl);
 }
 .shelf__album:hover .shelf__cover {
   transform: translateY(-4px) rotate(-1.5deg);
+  box-shadow: 0 20px 34px -18px var(--accent);
+}
+.shelf__name {
+  transition: color 160ms ease;
+}
+.shelf__album:hover .shelf__name {
+  color: var(--accent);
 }
 .shelf__name {
   font-weight: 650;
@@ -396,6 +407,21 @@ useBackdrop(() => profile.value?.imageUrl ?? last.value?.coverUrl);
     grid-template-columns: 170px minmax(0, 1fr);
   }
 }
+/* On phones the songs take the whole card width under the cover and title. */
+@media (max-width: 560px) {
+  .issue {
+    grid-template-columns: 72px minmax(0, 1fr);
+  }
+  .issue__body {
+    display: contents;
+  }
+  .issue__head {
+    align-self: center;
+  }
+  .songs {
+    grid-column: 1 / -1;
+  }
+}
 .issue__cover {
   position: relative;
   display: block;
@@ -426,6 +452,10 @@ useBackdrop(() => profile.value?.imageUrl ?? last.value?.coverUrl);
 }
 .issue__title a {
   text-decoration: none;
+  transition: color 160ms ease;
+}
+.issue__title a:hover {
+  color: var(--accent);
 }
 .songs {
   list-style: none;
@@ -445,7 +475,13 @@ useBackdrop(() => profile.value?.imageUrl ?? last.value?.coverUrl);
   transition: background 150ms ease;
 }
 .song:hover {
-  background: var(--glass);
+  background: var(--glass-strong);
+}
+.song:hover .song__cover {
+  transform: scale(1.06) rotate(-2deg);
+}
+.song:hover strong {
+  color: var(--accent);
 }
 .song__cover {
   --cover-radius: 8px;

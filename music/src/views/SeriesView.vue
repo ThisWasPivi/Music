@@ -11,6 +11,7 @@ import { useI18n } from "vue-i18n";
 import ReleaseTimeline from "@/components/series/ReleaseTimeline.vue";
 import ColumnChart, { type Column } from "@/components/stats/ColumnChart.vue";
 import CoverImage from "@/components/ui/CoverImage.vue";
+import SectionTitle from "@/components/ui/SectionTitle.vue";
 import StatTile from "@/components/ui/StatTile.vue";
 import { useCatalog } from "@/composables/useCatalog.ts";
 import {
@@ -66,16 +67,15 @@ function days(value: number | null | undefined): string {
 <template>
   <div class="stack">
     <header>
-      <h1 class="page-title">
-        Pivəəkly <span class="grad">{{ t("series.titleAccent") }}</span>
-      </h1>
+      <h1 class="page-title">{{ t("series.title") }}</h1>
     </header>
 
     <section class="glass panel" aria-labelledby="timeline-title">
-      <h2 id="timeline-title" class="section-title">
-        {{ t("series.timelineTitle") }}
-      </h2>
-      <p class="muted lede">{{ t("series.timelineLede") }}</p>
+      <SectionTitle
+        id="timeline-title"
+        :title="t('series.timelineTitle')"
+        :info="t('series.timelineLede')"
+      />
       <ReleaseTimeline
         v-if="timeline.releases.length > 0"
         :releases="timeline.releases"
@@ -116,10 +116,11 @@ function days(value: number | null | undefined): string {
     </section>
 
     <section class="glass panel" aria-labelledby="discovery-title">
-      <h2 id="discovery-title" class="section-title">
-        {{ t("series.discoveryTitle") }}
-      </h2>
-      <p class="muted lede">{{ t("series.discoveryLede") }}</p>
+      <SectionTitle
+        id="discovery-title"
+        :title="t('series.discoveryTitle')"
+        :info="t('series.discoveryLede')"
+      />
       <ColumnChart
         :columns="discoveryColumns"
         :label-every="labelEvery"
@@ -130,10 +131,12 @@ function days(value: number | null | undefined): string {
 
     <div class="grid-2">
       <section class="glass panel" aria-labelledby="recurring-title">
-        <h2 id="recurring-title" class="section-title">
-          {{ t("series.recurringTitle") }}
-        </h2>
-        <div class="scroll">
+        <SectionTitle
+          id="recurring-title"
+          :title="t('series.recurringTitle')"
+          :info="t('series.recurringInfo')"
+        />
+        <div v-drag-scroll class="scroll">
           <table class="table">
             <thead>
               <tr>
@@ -176,9 +179,11 @@ function days(value: number | null | undefined): string {
       </section>
 
       <section class="glass panel" aria-labelledby="repeated-title">
-        <h2 id="repeated-title" class="section-title">
-          {{ t("series.repeatedTitle") }}
-        </h2>
+        <SectionTitle
+          id="repeated-title"
+          :title="t('series.repeatedTitle')"
+          :info="t('series.repeatedInfo')"
+        />
         <ul class="repeats">
           <li v-for="row in repeated" :key="row.track.id">
             <CoverImage
@@ -222,16 +227,15 @@ function days(value: number | null | undefined): string {
 </template>
 
 <style scoped>
-.lede {
-  margin: -6px 0 14px;
-  font-size: 14px;
-  max-inline-size: 70ch;
-}
 .tiles {
-  display: grid;
+  display: flex;
+  flex-wrap: wrap;
   gap: 14px;
   margin-top: 16px;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 170px), 1fr));
+}
+/* Tiles share each row and the last row stretches, so no tile is left alone. */
+.tiles > * {
+  flex: 1 1 130px;
 }
 .missing {
   margin: 14px 0 0;
@@ -268,10 +272,19 @@ function days(value: number | null | undefined): string {
   font-weight: 600;
   text-decoration: none;
 }
+.who {
+  transition: color 160ms ease;
+}
+.who:hover {
+  color: var(--accent);
+}
 .who__image {
   --cover-radius: 50%;
   inline-size: 32px;
   flex: none;
+}
+.who:hover .who__image {
+  transform: scale(1.12);
 }
 .repeats {
   list-style: none;
@@ -297,8 +310,19 @@ function days(value: number | null | undefined): string {
   font-size: 14px;
 }
 .repeats__track a {
+  justify-self: start;
   font-weight: 600;
   text-decoration: none;
+  border-radius: 5px;
+  transition:
+    color 160ms ease,
+    background 160ms ease,
+    box-shadow 160ms ease;
+}
+.repeats__track a:hover {
+  color: var(--accent);
+  background: color-mix(in oklab, var(--accent) 16%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--accent) 16%, transparent);
 }
 .repeats__issues {
   display: flex;

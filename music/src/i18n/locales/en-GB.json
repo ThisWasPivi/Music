@@ -2,10 +2,10 @@
   "app": {
     "skip": "Skip to content",
     "sampleData": "invented sample data",
-    "sampleNotice": "You are looking at {sample}: the real Pivəəkly arrive with the next {command}."
+    "sampleNotice": "You are looking at {sample}: the real playlists arrive with the next {command}."
   },
   "nav": {
-    "home": "Pivəəkly, home",
+    "home": "{site}, home",
     "main": "Main",
     "playlists": "Playlists",
     "stats": "Stats",
@@ -26,7 +26,7 @@
   "footer": {
     "spotify": "Playlists, covers and metadata from {spotify}. Listening through the official Spotify player.",
     "links": "Links",
-    "madeBy": "Made by Pivi",
+    "madeBy": "Made by {owner}",
     "source": "Source code",
     "updated": "Data updated on {date}",
     "changelog": "What's new in this version",
@@ -38,7 +38,8 @@
     "unnumbered": "Special issue",
     "listenOnSpotify": "Listen on Spotify",
     "openOnSpotify": "Open on Spotify",
-    "noData": "No data."
+    "noData": "No data.",
+    "aboutChart": "About “{title}”"
   },
   "sort": {
     "number": "Number",
@@ -51,10 +52,10 @@
     "descending": "descending"
   },
   "home": {
-    "title": "Every Pivəəkly issue",
+    "title": "Playlists",
     "toolbar": "Search, sort and filter",
     "searchLabel": "Search playlists, tracks or artists",
-    "searchPlaceholder": "Search playlists, tracks, artists… typos are fine",
+    "searchPlaceholder": "Search playlists, tracks, artists…",
     "sortBy": "Sort",
     "filterBy": "Filter",
     "artist": "Artist",
@@ -65,7 +66,8 @@
     "decade": "{decade}s",
     "clearFilters": "Clear filters",
     "resultCount": "{n} playlist | {n} playlists",
-    "empty": "No playlist matches these filters. Try clearing them."
+    "empty": "No playlist matches these filters. Try clearing them.",
+    "resultFiltered": "{shown}/{total} playlist | {shown}/{total} playlists"
   },
   "playlist": {
     "released": "Released",
@@ -116,8 +118,8 @@
     "explicit": "Explicit",
     "longest": "Longest",
     "shortest": "Shortest",
-    "topArtists": "Top artists",
-    "topAlbums": "Top albums",
+    "topArtists": "Most featured artists",
+    "topAlbums": "Most featured albums",
     "rankBy": "Rank by",
     "byTracks": "tracks",
     "byMinutes": "minutes",
@@ -131,10 +133,11 @@
     "years": "year",
     "decadeTooltip": "{decade}s: {tracks}",
     "yearTooltip": "{year}: {tracks}",
-    "rotation": "In rotation now"
+    "rotation": "In rotation now",
+    "title": "Stats",
+    "yearsInfo": "How many tracks came out in each year, five-year span or decade."
   },
   "series": {
-    "titleAccent": "over time",
     "timelineTitle": "Release timeline",
     "timelineLede": "One row per year, January to December, and one dot per issue at its release date: busy spells crowd a row, pauses leave it empty. Release dates are approximated by the first track added. The striped stretch is the longest pause.",
     "timelineSummary": "{n} releases from {from} to {to}",
@@ -149,7 +152,7 @@
     "missing": "Missing from the sequence: {list}.",
     "discoveryTitle": "Discovery index",
     "discoveryLede": "How many artists appear for the first time in each issue.",
-    "discoveryTooltip": "{issue}: {n} new artists out of {total} ({share})",
+    "discoveryTooltip": "{issue}: {n} new artist out of {total} ({share}) | {issue}: {n} new artists out of {total} ({share})",
     "recurringTitle": "Recurring artists",
     "artist": "Artist",
     "issues": "Issues",
@@ -159,7 +162,10 @@
     "streakHint": "Longest run of consecutive issues featuring the artist",
     "noneRecurring": "No artist appears in more than one issue.",
     "repeatedTitle": "Repeated tracks",
-    "noneRepeated": "No track appears in more than one issue."
+    "noneRepeated": "No track appears in more than one issue.",
+    "title": "Series",
+    "recurringInfo": "Artists featured in more than one issue: in how many, the first and last, and the longest run of consecutive issues.",
+    "repeatedInfo": "Tracks picked again in later issues, with the covers of every issue they appear in."
   },
   "artist": {
     "eyebrow": "Artist",
@@ -177,7 +183,7 @@
   },
   "notFound": {
     "title": "This record is missing",
-    "text": "The page you are looking for does not exist, or the playlist is not part of the series.",
-    "back": "Back to every issue"
+    "text": "The page you are looking for does not exist, or the playlist is not published here.",
+    "back": "Back to the playlists"
   }
 }

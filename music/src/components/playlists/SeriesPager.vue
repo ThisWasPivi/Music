@@ -108,4 +108,10 @@ const { t } = useI18n();
 a.pager__item:hover {
   background: var(--glass-strong);
 }
+a.pager__item:hover .pager__cover {
+  transform: scale(1.08);
+}
+a.pager__item:hover strong {
+  color: var(--accent);
+}
 </style>

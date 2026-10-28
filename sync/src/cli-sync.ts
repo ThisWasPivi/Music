@@ -1,5 +1,5 @@
 /*
- * `pnpm sync`: downloads the Pivəəkly playlists from Spotify and writes the
+ * `pnpm sync`: downloads the series playlists from Spotify and writes the
  * sanitized JSON the site is built from.
  */
 import config from "../playlists.config.ts";

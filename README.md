@@ -102,6 +102,13 @@ pnpm release   # sync, verify, upload the data and deploy
 A **Spotify Premium** account is required: Spotify apps in Development Mode only work for
 Premium owners. The [guide](./docs/GUIDE.md#1-spotify-app) covers the app setup.
 
+## Make it yours
+
+The site is not tied to one series. Edit [`site.config.ts`](./site.config.ts) with your series
+name, domain, description, footer link and repository; the sync picks playlists whose name starts
+with the series name, and the build writes your domain to `CNAME`. See
+[Making it yours](./docs/GUIDE.md#making-it-yours).
+
 ## Development checks
 
 Run the repository-wide quality gate before pushing:
@@ -162,7 +169,7 @@ the built site.
 ```text
 .
 ├── music/             Vue web app (the published site)
-│   ├── public/        Static files: CNAME, favicon, brand marks
+│   ├── public/        Static files: favicon, brand marks
 │   └── src/data/      Sanitized JSON (gitignored): sync output or sample issues
 ├── sync/              Spotify auth, sync, adapter and sanitizer
 ├── shared/            Domain model, schemas, series and security rules, fixtures

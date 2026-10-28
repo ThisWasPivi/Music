@@ -5,6 +5,7 @@
  * with album covers, and links to the neighbouring issues. The cover,
  * blurred, fills the whole page behind it.
  */
+import { site } from "@site";
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 
@@ -62,7 +63,9 @@ useBackdrop(() => playlist.value?.coverUrl);
         />
       </a>
       <div class="head__body">
-        <p class="eyebrow">Pivəəkly · {{ formatIssue(playlist.number) }}</p>
+        <p class="eyebrow">
+          {{ site.series }} · {{ formatIssue(playlist.number) }}
+        </p>
         <h1 id="playlist-title" class="page-title head__title">
           <IssueTitle :name="playlist.name" />
         </h1>

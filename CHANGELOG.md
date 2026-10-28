@@ -4,9 +4,27 @@ All notable changes to music.pivi.dev. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 [Semantic Versioning](https://semver.org/). Data syncs are not listed.
 
-## [Unreleased]
+## [1.3.0] - 2026-10-28
+
+### Added
+
+- `site.config.ts`: series name, domain, description, footer link and repository in one place,
+  so the site can publish any playlist series; the build writes the `CNAME` from it.
+- A floating tab bar with icons on phones, so every section stays reachable.
+- Icons on the sort options and on the footer buttons.
+- Info buttons next to chart titles, with the explanation in a tooltip.
+- A title on the playlists page; the series page is simply titled "Series".
+- Themed aurora scrollbars, drag-to-scroll with a grab cursor on horizontal strips.
+- Hover feedback on everything clickable: lifting chips and buttons, accent pills on text links,
+  zooming covers.
 
 ### Changed
+
+- While searching or filtering, the count reads "3/36 playlists".
+- The language menu is as wide as its options.
+- On phones the calendar heatmap shows half a year per row, stat tiles sit two by two and the
+  artist page gives songs the full card width.
+- Interface texts no longer name the series; several Italian translations were corrected.
 
 - The aurora keeps its default colours on the home, statistics and series pages; only playlist
   and artist pages take the colours of the cover.

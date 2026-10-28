@@ -8,10 +8,11 @@ import { storeToRefs } from "pinia";
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 
+import AppIcon, { type IconName } from "@/components/ui/AppIcon.vue";
 import SelectMenu, { type SelectOption } from "@/components/ui/SelectMenu.vue";
 import { useCatalog } from "@/composables/useCatalog.ts";
 import { useBrowserStore } from "@/stores/browser.ts";
-import { PLAYLIST_SORTS } from "@/strategies/playlists.ts";
+import { PLAYLIST_SORTS, type PlaylistSortId } from "@/strategies/playlists.ts";
 
 const props = defineProps<{
   /** Decades present in the catalogue. */
@@ -19,12 +20,35 @@ const props = defineProps<{
 
   /** Number of playlists after filtering. */
   resultCount: number;
+
+  /** Number of playlists before filtering. */
+  totalCount: number;
 }>();
+
+/* Icon of each sort option. */
+const SORT_ICONS: Partial<Record<PlaylistSortId, IconName>> = {
+  number: "hash",
+  name: "text",
+  tracks: "tracks",
+  duration: "clock",
+  color: "palette",
+};
 
 const { t } = useI18n();
 const store = useBrowserStore();
 const { sortId, direction, query, artistId, decade, tag, activeFilterCount } =
   storeToRefs(store);
+
+/* "3/36 playlists" while a search or filter is active, otherwise "36 playlists". */
+const countLabel = computed(() =>
+  activeFilterCount.value > 0 || query.value.trim() !== ""
+    ? t(
+        "home.resultFiltered",
+        { shown: props.resultCount, total: props.totalCount },
+        props.totalCount,
+      )
+    : t("home.resultCount", { n: props.totalCount }, props.totalCount),
+);
 const { artists, tags, profile, playlists } = useCatalog();
 
 /* How many issues each artist appears in, shown as a hint in the menu. */
@@ -106,10 +130,13 @@ const decadeOptions = computed<SelectOption<number>[]>(() => [
           :aria-pressed="sortId === strategy.id"
           @click="store.setSort(strategy.id)"
         >
+          <AppIcon :name="SORT_ICONS[strategy.id] ?? 'hash'" />
           {{ t(strategy.labelKey) }}
-          <span v-if="sortId === strategy.id" aria-hidden="true">{{
-            direction === "desc" ? "↓" : "↑"
-          }}</span>
+          <AppIcon
+            v-if="sortId === strategy.id"
+            :name="direction === 'desc' ? 'arrow-down' : 'arrow-up'"
+            class="toolbar__direction"
+          />
           <span v-if="sortId === strategy.id" class="sr-only">
             {{
               direction === "desc" ? t("sort.descending") : t("sort.ascending")
@@ -154,7 +181,7 @@ const decadeOptions = computed<SelectOption<number>[]>(() => [
       </div>
     </div>
     <p class="muted toolbar__count" aria-live="polite">
-      {{ t("home.resultCount", { n: resultCount }, resultCount) }}
+      {{ countLabel }}
     </p>
   </section>
 </template>
@@ -179,6 +206,13 @@ const decadeOptions = computed<SelectOption<number>[]>(() => [
 }
 .toolbar__search .field {
   padding-left: 44px;
+  text-overflow: ellipsis;
+}
+@media (max-width: 380px) {
+  .toolbar__search .field {
+    font-size: 14px;
+    padding-right: 12px;
+  }
 }
 .toolbar__row {
   display: grid;
@@ -189,6 +223,10 @@ const decadeOptions = computed<SelectOption<number>[]>(() => [
 .toolbar__label {
   padding-top: 9px;
   font-size: 13px;
+}
+.toolbar__direction {
+  margin-inline-start: -2px;
+  font-size: 0.95em;
 }
 .toolbar__reset {
   border-style: dashed;

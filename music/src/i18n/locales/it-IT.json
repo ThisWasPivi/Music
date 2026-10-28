@@ -2,10 +2,10 @@
   "app": {
     "skip": "Vai al contenuto",
     "sampleData": "dati di esempio inventati",
-    "sampleNotice": "Stai vedendo {sample}: le vere Pivəəkly arrivano al prossimo {command}."
+    "sampleNotice": "Stai vedendo {sample}: le playlist vere arrivano al prossimo {command}."
   },
   "nav": {
-    "home": "Pivəəkly, home",
+    "home": "{site}, home",
     "main": "Principale",
     "playlists": "Playlist",
     "stats": "Statistiche",
@@ -26,7 +26,7 @@
   "footer": {
     "spotify": "Playlist, copertine e metadati da {spotify}. Ascolto tramite il player ufficiale Spotify.",
     "links": "Link",
-    "madeBy": "Fatto da Pivi",
+    "madeBy": "Fatto da {owner}",
     "source": "Codice sorgente",
     "updated": "Dati aggiornati al {date}",
     "changelog": "Novità di questa versione",
@@ -34,11 +34,12 @@
   },
   "common": {
     "tracks": "{n} brano | {n} brani",
-    "issue": "Nº {n}",
+    "issue": "N° {n}",
     "unnumbered": "Fuori serie",
     "listenOnSpotify": "Ascolta su Spotify",
     "openOnSpotify": "Apri su Spotify",
-    "noData": "Nessun dato."
+    "noData": "Nessun dato.",
+    "aboutChart": "Informazioni su “{title}”"
   },
   "sort": {
     "number": "Numero",
@@ -51,10 +52,10 @@
     "descending": "decrescente"
   },
   "home": {
-    "title": "Tutti i numeri di Pivəəkly",
+    "title": "Playlist",
     "toolbar": "Cerca, ordina e filtra",
     "searchLabel": "Cerca playlist, brani o artisti",
-    "searchPlaceholder": "Cerca playlist, brani, artisti… anche con errori",
+    "searchPlaceholder": "Cerca playlist, brani, artisti…",
     "sortBy": "Ordina",
     "filterBy": "Filtra",
     "artist": "Artista",
@@ -65,7 +66,8 @@
     "decade": "Anni {decade}",
     "clearFilters": "Azzera filtri",
     "resultCount": "{n} playlist | {n} playlist",
-    "empty": "Nessuna playlist corrisponde ai filtri. Prova ad azzerarli."
+    "empty": "Nessuna playlist corrisponde ai filtri. Prova ad azzerarli.",
+    "resultFiltered": "{shown}/{total} playlist | {shown}/{total} playlist"
   },
   "playlist": {
     "released": "Uscita",
@@ -77,7 +79,7 @@
     "explicit": "Espliciti",
     "listen": "Ascolta",
     "openCover": "Apri {name} su Spotify",
-    "neighbours": "Numeri vicini nella serie",
+    "neighbours": "Numeri vicini",
     "previous": "Precedente",
     "next": "Successivo",
     "first": "È il primo",
@@ -109,19 +111,19 @@
     "wholeSeries": "Tutta la serie",
     "tracks": "Brani",
     "unique": "{n} diversi",
-    "listening": "Ascolto",
+    "listening": "Tempo di ascolto",
     "artists": "Artisti unici",
     "albums": "{n} album | {n} album",
     "average": "Durata media",
     "explicit": "Espliciti",
     "longest": "Più lungo",
     "shortest": "Più corto",
-    "topArtists": "Top artisti",
-    "topAlbums": "Top album",
+    "topArtists": "Artisti più presenti",
+    "topAlbums": "Album più presenti",
     "rankBy": "Ordina per",
     "byTracks": "brani",
     "byMinutes": "minuti",
-    "addedTitle": "Quando aggiungo i brani",
+    "addedTitle": "Quando sono stati aggiunti i brani",
     "addedLede": "Un quadrato per giorno: più acceso, più brani aggiunti.",
     "yearsTitle": "Anno di uscita dei brani",
     "groupBy": "Raggruppa per",
@@ -131,10 +133,11 @@
     "years": "anno",
     "decadeTooltip": "Anni {decade}: {tracks}",
     "yearTooltip": "{year}: {tracks}",
-    "rotation": "In rotazione ora"
+    "rotation": "In rotazione ora",
+    "title": "Statistiche",
+    "yearsInfo": "Quanti brani sono usciti in ogni anno, quinquennio o decennio."
   },
   "series": {
-    "titleAccent": "nel tempo",
     "timelineTitle": "Timeline delle uscite",
     "timelineLede": "Una riga per anno, da gennaio a dicembre, e un pallino per numero alla sua data di uscita: i periodi fitti affollano la riga, le pause la lasciano vuota. La data di uscita è approssimata al primo brano aggiunto. Il tratto a righe è la pausa più lunga.",
     "timelineSummary": "{n} uscite dal {from} al {to}",
@@ -149,17 +152,20 @@
     "missing": "Numeri che mancano nella sequenza: {list}.",
     "discoveryTitle": "Indice di scoperta",
     "discoveryLede": "Quanti artisti compaiono per la prima volta in ogni numero.",
-    "discoveryTooltip": "{issue}: {n} artisti nuovi su {total} ({share})",
+    "discoveryTooltip": "{issue}: {n} artista nuovo su {total} ({share}) | {issue}: {n} artisti nuovi su {total} ({share})",
     "recurringTitle": "Artisti ricorrenti",
     "artist": "Artista",
     "issues": "Numeri",
     "first": "Primo",
     "last": "Ultimo",
     "streak": "Di fila",
-    "streakHint": "Numeri consecutivi più lunghi in cui compare l'artista",
+    "streakHint": "La serie più lunga di numeri consecutivi in cui compare l'artista",
     "noneRecurring": "Nessun artista compare in più di un numero.",
     "repeatedTitle": "Brani ripetuti",
-    "noneRepeated": "Nessun brano compare in più di un numero."
+    "noneRepeated": "Nessun brano compare in più di un numero.",
+    "title": "Serie",
+    "recurringInfo": "Artisti presenti in più di un numero: in quanti, il primo e l'ultimo, e la serie più lunga di numeri consecutivi.",
+    "repeatedInfo": "Brani scelti di nuovo in numeri successivi, con le copertine di ogni numero in cui compaiono."
   },
   "artist": {
     "eyebrow": "Artista",
@@ -167,17 +173,17 @@
     "issueCount": "{n} numero | {n} numeri",
     "issues": "Numeri",
     "tracks": "Brani",
-    "listening": "Ascolto",
+    "listening": "Tempo di ascolto",
     "firstSeen": "Prima volta",
     "lastSeen": "Ultima volta",
     "streak": "Di fila",
-    "streakDetail": "numeri consecutivi al massimo",
+    "streakDetail": "la serie più lunga di numeri consecutivi",
     "albums": "Album",
     "appearances": "Dove compare"
   },
   "notFound": {
     "title": "Questo disco non c'è",
-    "text": "La pagina che cerchi non esiste, o la playlist non fa parte della serie.",
-    "back": "Torna a tutti i numeri"
+    "text": "La pagina che cerchi non esiste, o la playlist non è pubblicata qui.",
+    "back": "Torna alle playlist"
   }
 }

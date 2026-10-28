@@ -1,5 +1,7 @@
-/** The series every published playlist belongs to. Note the two U+0259 "ə". */
-export const SERIES_PREFIX = "Pivəəkly";
+import { site } from "../../site.config.ts";
+
+/** The series every published playlist belongs to, from site.config.ts. */
+export const SERIES_PREFIX = site.series;
 
 /**
  * Normalizes a playlist name for comparisons: NFC, lower case, trimmed.

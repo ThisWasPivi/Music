@@ -29,7 +29,7 @@ export const LOCALES: readonly LocaleOption[] = [
   { code: "it-IT", label: "Italiano", flag: itFlag },
 ];
 
-const STORAGE_KEY = "pivi-locale";
+const STORAGE_KEY = "music:locale";
 
 /**
  * Picks the starting locale: the stored choice, else the browser's

@@ -7,6 +7,7 @@ import { createApp } from "vue";
 
 import App from "./App.vue";
 import { vTooltip } from "./composables/useTooltip.ts";
+import { vDragScroll } from "./directives/dragScroll.ts";
 import { currentLocale, i18n } from "./i18n/index.ts";
 import { router } from "./router.ts";
 
@@ -16,6 +17,7 @@ createApp(App)
   .use(i18n)
   .use(router)
   .directive("tooltip", vTooltip)
+  .directive("drag-scroll", vDragScroll)
   .mount("#app");
 
 /* Fade the splash out once the first page is ready, then drop it. */

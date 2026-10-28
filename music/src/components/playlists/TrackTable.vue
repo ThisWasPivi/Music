@@ -249,11 +249,19 @@ td {
   vertical-align: middle;
   border-bottom: 1px solid var(--line);
 }
+/* Links in cells light up with an accent pill instead of an underline. */
 td a {
   text-decoration: none;
+  border-radius: 5px;
+  transition:
+    color 160ms ease,
+    background 160ms ease,
+    box-shadow 160ms ease;
 }
 td a:hover {
-  text-decoration: underline;
+  color: var(--accent);
+  background: color-mix(in oklab, var(--accent) 16%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--accent) 16%, transparent);
 }
 tbody tr {
   transition: background 150ms ease;
