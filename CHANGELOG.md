@@ -4,6 +4,14 @@ All notable changes to music.pivi.dev. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 [Semantic Versioning](https://semver.org/). Data syncs are not listed.
 
+## [Unreleased]
+
+### Changed
+
+- The aurora keeps its default colours on the home, statistics and series pages; only playlist
+  and artist pages take the colours of the cover.
+- Accent colours fade into the new palette instead of switching at once.
+
 ## [1.2.0] - 2026-10-23
 
 ### Changed

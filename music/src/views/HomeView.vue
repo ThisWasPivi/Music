@@ -11,7 +11,6 @@ import { useI18n } from "vue-i18n";
 
 import PlaylistCard from "@/components/playlists/PlaylistCard.vue";
 import PlaylistToolbar from "@/components/playlists/PlaylistToolbar.vue";
-import { useAccent } from "@/composables/useAccent.ts";
 import { useCatalog } from "@/composables/useCatalog.ts";
 import { releaseDistribution, tracksOf } from "@/services/stats";
 import { useBrowserStore } from "@/stores/browser.ts";
@@ -29,10 +28,9 @@ import {
 } from "@/strategies/playlists.ts";
 
 const { t } = useI18n();
-const { playlists, latest } = useCatalog();
+const { playlists } = useCatalog();
 const { sortId, direction, query, artistId, decade, tag } =
   storeToRefs(useBrowserStore());
-useAccent(() => latest?.palette);
 
 const decades = releaseDistribution(tracksOf(playlists), 10)
   .filter((bucket) => bucket.count > 0)

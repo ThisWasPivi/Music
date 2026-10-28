@@ -14,7 +14,6 @@ import HeatmapCalendar from "@/components/stats/HeatmapCalendar.vue";
 import TopRankings from "@/components/stats/TopRankings.vue";
 import SelectMenu, { type SelectOption } from "@/components/ui/SelectMenu.vue";
 import StatTile from "@/components/ui/StatTile.vue";
-import { useAccent } from "@/composables/useAccent.ts";
 import { useCatalog } from "@/composables/useCatalog.ts";
 import {
   buildAddedHeatmap,
@@ -30,7 +29,7 @@ import {
 } from "@/utils/format.ts";
 
 const { t } = useI18n();
-const { playlists, latest } = useCatalog();
+const { playlists } = useCatalog();
 
 const scopeId = ref<string | null>(null);
 const scope = computed(() =>
@@ -51,9 +50,6 @@ const scopeOptions = computed<SelectOption<string>[]>(() => [
     image: playlist.coverUrl,
   })),
 ]);
-useAccent(() =>
-  scope.value.length === 1 ? scope.value[0]?.palette : latest?.palette,
-);
 
 const tracks = computed(() => tracksOf(scope.value));
 const summary = computed(() => summarize(tracks.value));

@@ -12,7 +12,6 @@ import ReleaseTimeline from "@/components/series/ReleaseTimeline.vue";
 import ColumnChart, { type Column } from "@/components/stats/ColumnChart.vue";
 import CoverImage from "@/components/ui/CoverImage.vue";
 import StatTile from "@/components/ui/StatTile.vue";
-import { useAccent } from "@/composables/useAccent.ts";
 import { useCatalog } from "@/composables/useCatalog.ts";
 import {
   discoveryByIssue,
@@ -24,7 +23,6 @@ import { formatDate, formatIssue, formatPercent } from "@/utils/format.ts";
 
 const { t } = useI18n();
 const { playlists, issues, latest, profile } = useCatalog();
-useAccent(() => latest?.palette);
 
 const timeline = releaseTimeline(issues);
 const missing = findMissingIssues(

@@ -2,10 +2,44 @@
 
 /*
  * Aurora: frosted glass panels over blurred blobs painted with the colours
- * extracted from the covers. --c1..--c3 are set at runtime by useAccent from
- * the palette of the playlist in view; everything else is a theme token.
+ * extracted from the covers. --c1..--c3 keep the default aurora colours,
+ * except on a playlist or artist page, where useAccent sets them from the
+ * cover. They are registered as colours so every change fades.
  */
+@property --c1 {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #7c3aed;
+}
+@property --c2 {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #22d3ee;
+}
+@property --c3 {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #f472b6;
+}
+@property --accent-on-light {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #6d28d9;
+}
+@property --accent-on-dark {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #22d3ee;
+}
+
 :root {
+  transition:
+    --c1 1.2s ease,
+    --c2 1.2s ease,
+    --c3 1.2s ease,
+    --accent-on-light 1.2s ease,
+    --accent-on-dark 1.2s ease;
+
   --c1: #7c3aed;
   --c2: #22d3ee;
   --c3: #f472b6;

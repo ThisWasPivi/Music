@@ -22,10 +22,15 @@ const PROPERTIES = [
   "--accent-on-dark",
 ] as const;
 
+/* The component currently painting the accents, so a page that leaves after the next one arrived does not wipe its colours. */
+let owner: symbol | undefined;
+
 /**
  * Paints the page's accents on `<html>` with a cover palette while the
  * calling component is mounted: `--c1`…`--c3` for fills and glows, and two
- * text accents with WCAG AA contrast for each theme.
+ * text accents with WCAG AA contrast for each theme. The properties are
+ * registered colours with a transition, so the aurora fades to the new
+ * colours and back to the defaults when the page is left.
  * @param palette - Cover colours, reactive
  * @returns Nothing
  */
@@ -33,7 +38,9 @@ export function useAccent(
   palette: MaybeRefOrGetter<readonly string[] | undefined>,
 ): void {
   const root = document.documentElement;
+  const self = Symbol("accent");
   watchEffect(() => {
+    owner = self;
     const accent = accentFromPalette(toValue(palette) ?? []);
     root.style.setProperty("--c1", accent.c1);
     root.style.setProperty("--c2", accent.c2);
@@ -48,6 +55,8 @@ export function useAccent(
     );
   });
   onBeforeUnmount(() => {
+    if (owner !== self) return;
+    owner = undefined;
     for (const name of PROPERTIES) root.style.removeProperty(name);
   });
 }
