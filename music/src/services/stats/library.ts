@@ -163,15 +163,19 @@ export interface Bucket {
   count: number;
 }
 
+/** Width of a release histogram bucket, in years. */
+export type BucketSize = 1 | 5 | 10;
+
 /**
- * Counts entries per release year or decade, filling empty buckets.
+ * Counts entries per release year, five-year span or decade, filling
+ * empty buckets.
  * @param tracks - The track entries
- * @param size - Bucket width in years: 1 for years, 10 for decades
+ * @param size - Bucket width in years: 1, 5 or 10
  * @returns Contiguous buckets from the oldest to the newest release
  */
 export function releaseDistribution(
   tracks: readonly Track[],
-  size: 1 | 10 = 10,
+  size: BucketSize = 10,
 ): Bucket[] {
   const counts = new Map<number, number>();
   for (const track of tracks) {

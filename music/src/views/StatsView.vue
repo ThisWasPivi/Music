@@ -16,6 +16,7 @@ import SelectMenu, { type SelectOption } from "@/components/ui/SelectMenu.vue";
 import StatTile from "@/components/ui/StatTile.vue";
 import { useCatalog } from "@/composables/useCatalog.ts";
 import {
+  type BucketSize,
   buildAddedHeatmap,
   releaseDistribution,
   summarize,
@@ -55,27 +56,43 @@ const tracks = computed(() => tracksOf(scope.value));
 const summary = computed(() => summarize(tracks.value));
 const heatmap = computed(() => buildAddedHeatmap(tracks.value));
 
-const bucket = ref<1 | 10>(10);
+/* Bucket widths offered for the release-year chart, finest first. */
+const BUCKETS: readonly { size: BucketSize; label: string }[] = [
+  { size: 1, label: "stats.years" },
+  { size: 5, label: "stats.fiveYears" },
+  { size: 10, label: "stats.decades" },
+];
+const bucket = ref<BucketSize>(1);
 const columns = computed<Column[]>(() =>
   releaseDistribution(tracks.value, bucket.value).map((entry) => ({
     key: String(entry.key),
     label: `'${String(entry.key).slice(2)}`,
     value: entry.count,
-    tooltip:
-      bucket.value === 10
-        ? t("stats.decadeTooltip", {
-            decade: entry.key,
-            tracks: t("common.tracks", { n: entry.count }, entry.count),
-          })
-        : t("stats.yearTooltip", {
-            year: entry.key,
-            tracks: t("common.tracks", { n: entry.count }, entry.count),
-          }),
+    tooltip: bucketTooltip(entry.key, entry.count),
   })),
 );
 const labelEvery = computed(() =>
-  bucket.value === 1 ? Math.max(1, Math.ceil(columns.value.length / 12)) : 1,
+  Math.max(1, Math.ceil(columns.value.length / 12)),
 );
+
+/**
+ * Describes one release-year bucket for its tooltip.
+ * @param start - First year of the bucket
+ * @param count - Tracks in it
+ * @returns The tooltip text
+ */
+function bucketTooltip(start: number, count: number): string {
+  const tracks = t("common.tracks", { n: count }, count);
+  if (bucket.value === 1)
+    return t("stats.yearTooltip", { year: start, tracks });
+  if (bucket.value === 10)
+    return t("stats.decadeTooltip", { decade: start, tracks });
+  return t("stats.spanTooltip", {
+    from: start,
+    to: start + bucket.value - 1,
+    tracks,
+  });
+}
 
 /**
  * Describes a track for a tile detail.
@@ -160,20 +177,14 @@ function describe(track: (typeof summary.value)["longest"]): string {
         </h2>
         <div class="chips" role="group" :aria-label="t('stats.groupBy')">
           <button
+            v-for="option in BUCKETS"
+            :key="option.size"
             type="button"
             class="chip"
-            :aria-pressed="bucket === 10"
-            @click="bucket = 10"
+            :aria-pressed="bucket === option.size"
+            @click="bucket = option.size"
           >
-            {{ t("stats.decades") }}
-          </button>
-          <button
-            type="button"
-            class="chip"
-            :aria-pressed="bucket === 1"
-            @click="bucket = 1"
-          >
-            {{ t("stats.years") }}
+            {{ t(option.label) }}
           </button>
         </div>
       </div>

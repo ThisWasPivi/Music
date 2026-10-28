@@ -1,23 +1,19 @@
 <script setup lang="ts">
 /**
  * ReleaseTimeline component
- * One glowing ball per issue on a real time axis, so dense runs and pauses
- * show up as they happened. Each ball is painted with its own cover colours;
- * the axis draws itself left to right and the balls pop in as it reaches
- * them. Balls link to their issue and show a tooltip.
+ * The series on a calendar: one row per year, January to December, with a
+ * glowing numbered dot for every issue at its release date. Busy spells
+ * crowd a row and pauses leave it empty; issues released close together
+ * stack above and below the line instead of overlapping. The longest
+ * pause is drawn as a striped stretch. Dots link to their issue and show
+ * a tooltip.
  */
-import { computed, useId } from "vue";
+import { computed, onBeforeUnmount, onMounted, ref } from "vue";
 import { useI18n } from "vue-i18n";
-import { useRouter } from "vue-router";
 
+import { useEntered } from "@/composables/useEntered.ts";
 import type { Release } from "@/services/stats";
-import { useThemeStore } from "@/stores/theme.ts";
-import {
-  hexToHsl,
-  hslToHex,
-  markerColor,
-  withContrast,
-} from "@/utils/color.ts";
+import { luminance, markerColor } from "@/utils/color.ts";
 import { formatDate } from "@/utils/format.ts";
 
 const props = withDefaults(
@@ -25,79 +21,129 @@ const props = withDefaults(
     /** Releases in chronological order. */
     releases: readonly Release[];
 
-    /** Release closing the longest gap, drawn larger with a ring. */
+    /** Release closing the longest gap, whose pause is drawn striped. */
     highlight?: Release | null;
   }>(),
   { highlight: null },
 );
 
-const { t } = useI18n();
-const router = useRouter();
-const theme = useThemeStore();
-const id = useId();
-const WIDTH = 1000;
-const HEIGHT = 200;
-const PAD = 30;
-const AXIS_Y = 100;
-const RADIUS = 10;
-/* Label lanes, nearest first: above, below, further above, further below. */
-const LANES = [-30, 30, -58, 58] as const;
-/* Minimum horizontal room, in viewBox units, between two labels in a lane. */
-const LABEL_ROOM = 26;
-/* The axis draws itself left to right; each ball appears as the line reaches it. */
-const SWEEP_MS = 1400;
+const { t, locale } = useI18n();
+const entered = useEntered();
 
-const range = computed(() => {
-  const times = props.releases.map((release) => Date.parse(release.releasedAt));
-  const start = Math.min(...times);
-  return { start, span: Math.max(1, Math.max(...times) - start) };
+/* Dot diameter in pixels, matching --dot-size in the styles. */
+const DOT = 26;
+/* Stacking lanes around the line, nearest first. */
+const LANES = [0, -1, 1, -2, 2, -3, 3, -4, 4] as const;
+
+/* Width of a year's track, measured so close dots can be stacked. */
+const track = ref<HTMLElement | null>(null);
+const trackWidth = ref(800);
+let observer: ResizeObserver | undefined;
+onMounted(() => {
+  if (!track.value || typeof ResizeObserver === "undefined") return;
+  observer = new ResizeObserver(([entry]) => {
+    if (entry) trackWidth.value = entry.contentRect.width;
+  });
+  observer.observe(track.value);
+});
+onBeforeUnmount(() => observer?.disconnect());
+
+/**
+ * Where a moment falls within its year.
+ * @param time - Milliseconds since the epoch
+ * @returns The year and the position in it, in [0, 1)
+ */
+function place(time: number): { year: number; at: number } {
+  const year = new Date(time).getUTCFullYear();
+  const start = Date.UTC(year, 0, 1);
+  return { year, at: (time - start) / (Date.UTC(year + 1, 0, 1) - start) };
+}
+
+/** Initials of the months in the interface language. */
+const months = computed(() => {
+  const format = new Intl.DateTimeFormat(locale.value, {
+    month: "short",
+    timeZone: "UTC",
+  });
+  return Array.from({ length: 12 }, (_, month) =>
+    format.format(new Date(Date.UTC(2000, month, 1))).replace(".", ""),
+  );
 });
 
 /**
- * Projects a timestamp on the horizontal axis.
- * @param iso - An ISO timestamp
- * @returns The x coordinate in viewBox units
+ * One issue on its year's row.
+ * @property release - The release
+ * @property at - Position in the year, in [0, 1)
+ * @property lane - Stacking lane: 0 on the line, negative above
+ * @property order - Position in the whole series, for the entrance
+ * @property color - Dot colour
+ * @property ink - Number colour, readable on the dot
+ * @property label - Issue number shown in the dot
+ * @property tooltip - Tooltip and accessible name
  */
-function x(iso: string): number {
-  return (
-    PAD +
-    ((Date.parse(iso) - range.value.start) / range.value.span) *
-      (WIDTH - 2 * PAD)
-  );
+interface Dot {
+  release: Release;
+  at: number;
+  lane: number;
+  order: number;
+  color: string;
+  ink: string;
+  label: string;
+  tooltip: string;
 }
 
-const points = computed(() => {
-  const lastInLane: number[] = LANES.map(() => Number.NEGATIVE_INFINITY);
-  const total = Math.max(1, props.releases.length - 1);
-  return props.releases.map((release, index) => {
-    const px = x(release.releasedAt);
-    /* First lane with room for this label; when all are full, the emptiest. */
-    let lane = LANES.findIndex(
-      (_, laneIndex) => px - (lastInLane[laneIndex] ?? 0) >= LABEL_ROOM,
-    );
-    if (lane === -1) lane = lastInLane.indexOf(Math.min(...lastInLane));
-    lastInLane[lane] = px;
-    const color = markerColor(release.playlist.palette, index / total);
-    const hsl = hexToHsl(color);
-    return {
+/**
+ * A stretch of the longest pause within one year.
+ * @property from - Start, in [0, 1]
+ * @property to - End, in [0, 1]
+ */
+interface Pause {
+  from: number;
+  to: number;
+}
+
+/**
+ * One year of the calendar.
+ * @property year - The year
+ * @property dots - Its issues, in date order
+ * @property pauses - Stretches of the longest pause inside it
+ * @property reach - Lanes used on each side of the line
+ */
+interface Row {
+  year: number;
+  dots: Dot[];
+  pauses: Pause[];
+  reach: number;
+}
+
+const rows = computed<Row[]>(() => {
+  const releases = props.releases;
+  if (releases.length === 0) return [];
+  const total = Math.max(1, releases.length - 1);
+  const first = place(Date.parse(releases[0]?.releasedAt ?? "")).year;
+  const last = place(Date.parse(releases.at(-1)?.releasedAt ?? "")).year;
+  /* Two dots closer than this, as a fraction of the year, need separate lanes. */
+  const room = (DOT + 3) / Math.max(1, trackWidth.value);
+
+  const byYear = new Map<number, Row>();
+  for (let year = first; year <= last; year += 1) {
+    byYear.set(year, { year, dots: [], pauses: [], reach: 0 });
+  }
+
+  releases.forEach((release, order) => {
+    const { year, at } = place(Date.parse(release.releasedAt));
+    const color = markerColor(release.playlist.palette, order / total);
+    byYear.get(year)?.dots.push({
       release,
-      x: px,
-      offset: LANES[lane] ?? LANES[0],
+      at,
+      lane: 0,
+      order,
+      color,
+      ink: luminance(color) > 0.36 ? "#0b0a12" : "#ffffff",
       label:
         release.playlist.number === null
           ? "R"
           : String(release.playlist.number),
-      color,
-      /* Label text in the ball's colour, darkened or lightened to stay readable on the page. */
-      text: withContrast(
-        color,
-        theme.resolved === "dark" ? "#1a1924" : "#e2e4ec",
-        4.5,
-      ),
-      light: hslToHex({
-        ...hsl,
-        lightness: Math.min(0.85, hsl.lightness + 0.18),
-      }),
       tooltip: t("series.ballTooltip", {
         name: release.playlist.name,
         date: formatDate(release.releasedAt),
@@ -107,27 +153,47 @@ const points = computed(() => {
           release.playlist.trackCount,
         ),
       }),
-    };
+    });
   });
+
+  for (const row of byYear.values()) {
+    const lastInLane = new Map<number, number>();
+    for (const dot of row.dots) {
+      dot.lane =
+        LANES.find(
+          (lane) =>
+            dot.at - (lastInLane.get(lane) ?? Number.NEGATIVE_INFINITY) >= room,
+        ) ?? 0;
+      lastInLane.set(dot.lane, dot.at);
+      row.reach = Math.max(row.reach, Math.abs(dot.lane));
+    }
+  }
+
+  /* The longest pause, split across the years it spans. */
+  const index = props.highlight ? releases.indexOf(props.highlight) : -1;
+  const before = index > 0 ? releases[index - 1] : undefined;
+  if (props.highlight && before) {
+    const start = place(Date.parse(before.releasedAt));
+    const end = place(Date.parse(props.highlight.releasedAt));
+    for (let year = start.year; year <= end.year; year += 1) {
+      byYear.get(year)?.pauses.push({
+        from: year === start.year ? start.at : 0,
+        to: year === end.year ? end.at : 1,
+      });
+    }
+  }
+
+  return [...byYear.values()];
 });
 
-/* Wider than the screen only when there are many releases; it then scrolls. */
-const minWidth = computed(
-  () => `${Math.max(640, props.releases.length * 30)}px`,
-);
-
-/** 1 January of every year the axis covers. */
-const yearTicks = computed(() => {
-  const first = new Date(range.value.start).getUTCFullYear() + 1;
-  const last = new Date(range.value.start + range.value.span).getUTCFullYear();
-  const ticks: { x: number; label: string }[] = [];
-  for (let year = first; year <= last; year += 1) {
-    ticks.push({
-      x: x(new Date(Date.UTC(year, 0, 1)).toISOString()),
-      label: String(year),
-    });
-  }
-  return ticks;
+const pauseLabel = computed(() => {
+  const gap = props.highlight?.gapDays;
+  if (!props.highlight || !gap) return "";
+  const n = Math.round(gap);
+  return t("series.pauseLabel", {
+    days: t("series.days", { n }, n),
+    name: props.highlight.playlist.name,
+  });
 });
 
 const summary = computed(() =>
@@ -137,221 +203,256 @@ const summary = computed(() =>
     to: formatDate(props.releases.at(-1)?.releasedAt ?? null),
   }),
 );
-
-/**
- * Opens an issue from its ball.
- * @param release - The clicked release
- * @returns Resolves after navigation
- */
-async function open(release: Release): Promise<void> {
-  await router.push({ name: "playlist", params: { id: release.playlist.id } });
-}
 </script>
 
 <template>
-  <div class="timeline">
-    <svg
-      :viewBox="`0 0 ${WIDTH} ${HEIGHT}`"
-      role="group"
-      :aria-label="summary"
-      :style="{ minInlineSize: minWidth }"
+  <div
+    class="timeline"
+    :class="{ 'timeline--in': entered }"
+    role="group"
+    :aria-label="summary"
+  >
+    <div class="timeline__row" aria-hidden="true">
+      <span />
+      <div class="timeline__months">
+        <span v-for="month in months" :key="month">{{ month }}</span>
+      </div>
+    </div>
+
+    <div
+      v-for="(row, rowIndex) in rows"
+      :key="row.year"
+      class="timeline__row"
+      :style="{
+        '--reach': row.reach,
+        '--row': rowIndex,
+      }"
     >
-      <defs>
-        <linearGradient
-          :id="`${id}-axis`"
-          gradientUnits="userSpaceOnUse"
-          :x1="PAD"
-          :y1="AXIS_Y"
-          :x2="WIDTH - PAD"
-          :y2="AXIS_Y"
-        >
-          <stop offset="0" class="timeline__stop timeline__stop--1" />
-          <stop offset="0.5" class="timeline__stop timeline__stop--2" />
-          <stop offset="1" class="timeline__stop timeline__stop--3" />
-        </linearGradient>
-        <radialGradient
-          v-for="(point, index) in points"
-          :id="`${id}-ball-${index}`"
-          :key="point.release.playlist.id"
-          cx="0.38"
-          cy="0.32"
-          r="0.7"
-        >
-          <stop offset="0" :stop-color="point.light" />
-          <stop offset="1" :stop-color="point.color" />
-        </radialGradient>
-      </defs>
-
-      <line
-        :x1="PAD"
-        :x2="WIDTH - PAD"
-        :y1="AXIS_Y"
-        :y2="AXIS_Y"
-        pathLength="1"
-        :stroke="`url(#${id}-axis)`"
-        class="timeline__axis"
-        :style="{ animationDuration: `${SWEEP_MS}ms` }"
-      />
-      <g v-for="tick in yearTicks" :key="tick.label" aria-hidden="true">
-        <line
-          :x1="tick.x"
-          :x2="tick.x"
-          :y1="AXIS_Y - 72"
-          :y2="AXIS_Y + 72"
-          class="timeline__tick"
-        />
-        <text :x="tick.x + 6" :y="HEIGHT - 6" class="timeline__year">
-          {{ tick.label }}
-        </text>
-      </g>
-
-      <a
-        v-for="(point, index) in points"
-        :key="point.release.playlist.id"
-        v-tooltip="point.tooltip"
-        :href="
-          router.resolve({
-            name: 'playlist',
-            params: { id: point.release.playlist.id },
-          }).href
-        "
-        :aria-label="point.tooltip"
-        class="timeline__point"
-        :style="{
-          animationDelay: `${(point.x / WIDTH) * SWEEP_MS}ms`,
-          '--glow': point.color,
-        }"
-        @click.prevent="open(point.release)"
+      <span class="timeline__year tabular">{{ row.year }}</span>
+      <div
+        :ref="rowIndex === 0 ? (el) => (track = el as HTMLElement) : undefined"
+        class="timeline__track"
       >
-        <line
-          :x1="point.x"
-          :x2="point.x"
-          :y1="AXIS_Y"
-          :y2="AXIS_Y + point.offset * 0.72"
-          class="timeline__stem"
-          :style="{ stroke: point.color }"
+        <span class="timeline__line" aria-hidden="true" />
+        <span
+          v-for="pause in row.pauses"
+          :key="pause.from"
+          class="timeline__pause"
+          :style="{
+            insetInlineStart: `${pause.from * 100}%`,
+            inlineSize: `${(pause.to - pause.from) * 100}%`,
+          }"
+          aria-hidden="true"
         />
-        <circle
-          v-if="point.release === highlight"
-          :cx="point.x"
-          :cy="AXIS_Y"
-          :r="RADIUS + 5"
-          class="timeline__ring"
-          :style="{ stroke: point.color }"
-        />
-        <circle
-          :cx="point.x"
-          :cy="AXIS_Y"
-          :r="RADIUS"
-          :fill="`url(#${id}-ball-${index})`"
-          class="timeline__ball"
-        />
-        <text
-          :x="point.x"
-          :y="
-            point.offset < 0
-              ? AXIS_Y + point.offset - 2
-              : AXIS_Y + point.offset + 12
-          "
-          text-anchor="middle"
-          class="timeline__label"
-          :style="{ fill: point.text }"
-        >
-          {{ point.label }}
-        </text>
-      </a>
-    </svg>
+        <ol class="timeline__dots">
+          <li
+            v-for="dot in row.dots"
+            :key="dot.release.playlist.id"
+            class="timeline__slot"
+            :style="{
+              insetInlineStart: `${dot.at * 100}%`,
+              '--lane': dot.lane,
+              '--order': dot.order,
+              '--dot': dot.color,
+              '--ink': dot.ink,
+            }"
+          >
+            <RouterLink
+              v-tooltip="dot.tooltip"
+              :to="{
+                name: 'playlist',
+                params: { id: dot.release.playlist.id },
+              }"
+              :aria-label="dot.tooltip"
+              class="timeline__dot tabular"
+              :class="{
+                'timeline__dot--long': dot.label.length > 2,
+                'timeline__dot--after-pause': dot.release === highlight,
+              }"
+            >
+              {{ dot.label }}
+            </RouterLink>
+          </li>
+        </ol>
+      </div>
+    </div>
+
+    <p v-if="pauseLabel" class="timeline__legend">
+      <span class="timeline__swatch" aria-hidden="true" />
+      {{ pauseLabel }}
+    </p>
   </div>
 </template>
 
 <style scoped>
 .timeline {
-  overflow-x: auto;
-  overscroll-behavior-x: contain;
+  --dot-size: 26px;
+  --step: 22px;
+  --label: 52px;
+  display: grid;
+  gap: 4px;
 }
-.timeline svg {
-  display: block;
-  inline-size: 100%;
-  block-size: auto;
-  overflow: visible;
-}
-.timeline__axis {
-  stroke-width: 4;
-  stroke-linecap: round;
-  stroke-dasharray: 1;
-  animation: timeline-draw ease-in-out both;
-}
-.timeline__stop--1 {
-  stop-color: var(--c1);
-}
-.timeline__stop--2 {
-  stop-color: var(--c2);
-}
-.timeline__stop--3 {
-  stop-color: var(--c3);
-}
-@keyframes timeline-draw {
-  from {
-    stroke-dashoffset: 1;
-  }
-  to {
-    stroke-dashoffset: 0;
+@media (max-width: 560px) {
+  .timeline {
+    --label: 40px;
   }
 }
-.timeline__tick {
-  stroke: var(--chart-grid);
-  stroke-dasharray: 2 5;
+.timeline__row {
+  display: grid;
+  grid-template-columns: var(--label) minmax(0, 1fr);
+  align-items: center;
+}
+/* Months and tracks are inset by half a dot, so dots at the year's edges stay inside. */
+.timeline__months,
+.timeline__track {
+  margin-inline: calc(var(--dot-size) / 2);
+}
+.timeline__months {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--chart-muted);
+  text-transform: capitalize;
+}
+.timeline__months span {
+  padding-inline-start: 4px;
+  border-inline-start: 1px solid var(--chart-grid);
+  overflow: hidden;
+  white-space: nowrap;
+}
+@media (max-width: 560px) {
+  .timeline__months span {
+    font-size: 0;
+  }
+  .timeline__months span::first-letter {
+    font-size: 10px;
+  }
 }
 .timeline__year {
-  font: 600 12px var(--font-body);
-  fill: var(--chart-muted);
+  font: 700 13px var(--font-display);
+  color: var(--muted);
 }
-.timeline__point {
-  cursor: pointer;
-  animation: timeline-pop 520ms cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
+/* A row grows with the dots stacked on it; month lines run across it. */
+.timeline__track {
+  position: relative;
+  block-size: calc((2 * var(--reach) + 1) * var(--step) + 18px);
+  background-image: linear-gradient(
+    90deg,
+    var(--chart-grid) 1px,
+    transparent 1px
+  );
+  background-size: calc(100% / 12) 100%;
 }
-.timeline__point:focus-visible {
-  outline: none;
+.timeline__line {
+  position: absolute;
+  inset: 50% 0 auto;
+  block-size: 3px;
+  margin-block-start: -1.5px;
+  border-radius: 3px;
+  background: linear-gradient(90deg, var(--c1), var(--c2), var(--c3));
+  opacity: 0.55;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 900ms cubic-bezier(0.22, 1, 0.36, 1);
+  transition-delay: calc(var(--row) * 120ms);
 }
-@keyframes timeline-pop {
+.timeline--in .timeline__line {
+  transform: none;
+}
+.timeline__pause {
+  position: absolute;
+  inset-block: 6px;
+  border-radius: 10px;
+  background: repeating-linear-gradient(
+    -45deg,
+    color-mix(in oklab, var(--c3) 22%, transparent) 0 6px,
+    transparent 6px 12px
+  );
+  opacity: 0;
+  transition: opacity 600ms ease 700ms;
+}
+.timeline--in .timeline__pause {
+  opacity: 1;
+}
+.timeline__legend {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 8px 0 0;
+  padding-inline-start: var(--label);
+  font-size: 12px;
+  color: var(--muted);
+}
+.timeline__swatch {
+  inline-size: 28px;
+  block-size: 14px;
+  border-radius: 5px;
+  background: repeating-linear-gradient(
+    -45deg,
+    color-mix(in oklab, var(--c3) 45%, transparent) 0 4px,
+    transparent 4px 8px
+  );
+}
+.timeline__dots {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.timeline__slot {
+  position: absolute;
+  inset-block-start: 50%;
+  translate: -50% calc(-50% + var(--lane) * var(--step));
+  z-index: 1;
+  animation: dot-in 460ms cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
+  animation-delay: calc(300ms + var(--order) * 35ms);
+}
+@keyframes dot-in {
   from {
     opacity: 0;
-    transform: translateY(8px);
+    scale: 0.3;
   }
 }
-.timeline__stem {
-  stroke-width: 1.5;
-  stroke-opacity: 0.6;
+.timeline__slot:hover,
+.timeline__slot:focus-within {
+  z-index: 2;
 }
-.timeline__ball {
-  stroke: var(--bg);
-  stroke-width: 2.5;
-  transform-box: fill-box;
-  transform-origin: center;
-  filter: drop-shadow(0 0 6px var(--glow));
+.timeline__dot {
+  display: grid;
+  place-items: center;
+  inline-size: var(--dot-size);
+  block-size: var(--dot-size);
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at 35% 30%,
+    color-mix(in oklab, var(--dot) 55%, #fff),
+    var(--dot) 72%
+  );
+  box-shadow:
+    0 0 0 3px color-mix(in oklab, var(--dot) 18%, transparent),
+    0 4px 14px -2px color-mix(in oklab, var(--dot) 70%, transparent);
+  color: var(--ink);
+  font: 800 11px/1 var(--font-display);
+  text-decoration: none;
   transition:
-    transform 220ms cubic-bezier(0.34, 1.56, 0.64, 1),
-    filter 220ms ease;
+    scale 220ms cubic-bezier(0.34, 1.56, 0.64, 1),
+    box-shadow 200ms ease;
 }
-.timeline__ring {
-  fill: none;
-  stroke-width: 2;
-  stroke-dasharray: 3 3;
+.timeline__dot--long {
+  font-size: 9.5px;
+  letter-spacing: -0.04em;
 }
-.timeline__point:hover .timeline__ball,
-.timeline__point:focus-visible .timeline__ball {
-  transform: scale(1.4);
-  filter: drop-shadow(0 0 12px var(--glow));
+/* The issue that ended the longest pause gets a soft halo. */
+.timeline__dot--after-pause {
+  box-shadow:
+    0 0 0 4px color-mix(in oklab, var(--dot) 30%, transparent),
+    0 0 22px var(--dot);
 }
-.timeline__point:focus-visible .timeline__ball {
-  stroke: var(--focus);
-  stroke-width: 3;
-}
-.timeline__label {
-  font: 800 13px var(--font-display);
-  font-variant-numeric: tabular-nums;
-  paint-order: stroke;
-  stroke: var(--bg);
-  stroke-width: 3px;
+.timeline__dot:hover,
+.timeline__dot:focus-visible {
+  scale: 1.3;
+  box-shadow:
+    0 0 0 4px color-mix(in oklab, var(--dot) 28%, transparent),
+    0 0 24px var(--dot);
 }
 </style>

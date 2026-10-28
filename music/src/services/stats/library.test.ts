@@ -116,6 +116,20 @@ describe("releaseDistribution", () => {
     ]);
   });
 
+  it("buckets by five years", () => {
+    expect(
+      releaseDistribution(
+        [track({ releaseYear: 1994 }), track({ releaseYear: 2006 })],
+        5,
+      ),
+    ).toEqual([
+      { key: 1990, count: 1 },
+      { key: 1995, count: 0 },
+      { key: 2000, count: 0 },
+      { key: 2005, count: 1 },
+    ]);
+  });
+
   it("is empty when no year is known", () => {
     expect(releaseDistribution([track({ releaseYear: null })])).toEqual([]);
   });

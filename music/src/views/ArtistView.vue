@@ -376,9 +376,8 @@ useBackdrop(() => profile.value?.imageUrl ?? last.value?.coverUrl);
     color-mix(in oklab, var(--dot) 55%, #fff),
     var(--dot) 70%
   );
-  border: 3px solid var(--bg);
   box-shadow:
-    0 0 0 2px color-mix(in oklab, var(--dot) 45%, transparent),
+    0 0 0 5px color-mix(in oklab, var(--dot) 22%, transparent),
     0 0 18px var(--dot);
   transform: translateY(-50%);
   transition: transform 250ms cubic-bezier(0.34, 1.56, 0.64, 1);

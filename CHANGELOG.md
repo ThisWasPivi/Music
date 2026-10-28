@@ -11,6 +11,17 @@ All notable changes to music.pivi.dev. The format follows
 - The aurora keeps its default colours on the home, statistics and series pages; only playlist
   and artist pages take the colours of the cover.
 - Accent colours fade into the new palette instead of switching at once.
+- The release timeline is a calendar: one row per year, numbered dots at each release date,
+  close issues stacked instead of overlapping, and the longest pause drawn as a striped stretch.
+- The release-year chart shows single years by default, with five-year and decade views.
+- Column bars are rounded only at the top.
+- Keyboard focus rings are thicker, high-contrast and follow each element's shape.
+
+### Fixed
+
+- A hairline of dark placeholder showed around some covers.
+- Dark borders around the timeline dots, their numbers and the artist page's rail dots.
+- The focus ring of the header links was clipped.
 
 ## [1.2.0] - 2026-10-23
 

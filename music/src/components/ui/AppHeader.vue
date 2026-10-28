@@ -75,6 +75,9 @@ const LINKS = [
   margin-inline: auto;
   overflow-x: auto;
   scrollbar-width: none;
+  /* Room for the focus ring, which the scrolling strip would otherwise clip. */
+  padding: 7px;
+  margin-block: -7px;
 }
 .header__link {
   padding: 8px 14px;

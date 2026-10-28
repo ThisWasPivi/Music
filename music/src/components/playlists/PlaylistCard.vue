@@ -99,8 +99,9 @@ const { t } = useI18n();
   outline: none;
 }
 .card:has(.card__link:focus-visible) {
-  outline: 2px solid var(--focus);
-  outline-offset: 3px;
+  outline: 3px solid var(--focus);
+  outline-offset: 4px;
+  animation: focus-in 180ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 .card__meta {
   margin: 0;

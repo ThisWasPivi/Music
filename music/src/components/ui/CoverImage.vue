@@ -4,6 +4,11 @@
  * Square cover art. While the image loads, a shimmering skeleton tinted
  * with the cover's colours holds its place; the image then fades and
  * sharpens in. Missing covers keep a palette gradient.
+ *
+ * Once loaded, the placeholder colour is dropped and the image is zoomed by
+ * 2%: otherwise the rounded clip lets a hairline of the (often dark)
+ * placeholder show around the edge, and many Spotify covers carry a 1px
+ * dark border from being resized.
  */
 import { ref, watch } from "vue";
 
@@ -34,7 +39,7 @@ watch(
 <template>
   <div
     class="cover"
-    :class="{ 'cover--loading': src && !loaded }"
+    :class="{ 'cover--loading': src && !loaded, 'cover--loaded': loaded }"
     :style="{
       '--from': palette[0] ?? 'var(--c1)',
       '--to': palette[1] ?? 'var(--c2)',
@@ -62,6 +67,8 @@ watch(
   max-inline-size: 100%;
   overflow: hidden;
   border-radius: var(--cover-radius, 14px);
+  /* Clips the zoomed image on its own layer, without a fringe at the corners. */
+  isolation: isolate;
   background: linear-gradient(135deg, var(--from), var(--to));
 }
 /* The skeleton: the cover's gradient with a sheen sweeping across. */
@@ -99,9 +106,12 @@ watch(
     filter 600ms ease,
     transform 700ms cubic-bezier(0.22, 1, 0.36, 1);
 }
+.cover--loaded {
+  background: transparent;
+}
 .cover img.cover__img--in {
   opacity: 1;
   filter: none;
-  transform: none;
+  transform: scale(1.02);
 }
 </style>

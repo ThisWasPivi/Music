@@ -119,13 +119,13 @@ const max = computed(() =>
   cursor: default;
 }
 .columns__slot:focus-visible {
-  outline: 2px solid var(--focus);
+  outline: 3px solid var(--focus);
   outline-offset: 2px;
 }
 .columns__bar {
   display: block;
   inline-size: 100%;
-  border-radius: 10px 10px 3px 3px;
+  border-radius: 10px 10px 0 0;
   background: linear-gradient(180deg, var(--bar-top), var(--bar-bottom));
   box-shadow: 0 -6px 18px -10px var(--bar-top);
   transition:

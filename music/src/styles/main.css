@@ -64,7 +64,7 @@
   --glass-highlight: rgb(255 255 255 / 0.85);
   --spotify: #1ed760;
   --on-spotify: #000000;
-  --focus: var(--accent-on-light);
+  --focus: color-mix(in oklab, var(--accent-on-light) 70%, #000);
   --shadow: 0 18px 40px -24px rgb(18 18 40 / 0.35);
 
   --font-display: "Montserrat Variable", "Avenir Next", system-ui, sans-serif;
@@ -122,7 +122,7 @@
     --tint-opacity: 0.22;
     --glass-pop: rgb(30 28 44 / 0.42);
     --glass-highlight: rgb(255 255 255 / 0.16);
-    --focus: var(--accent-on-dark);
+    --focus: color-mix(in oklab, var(--accent-on-dark) 30%, #fff);
     --shadow: 0 24px 60px -30px rgb(0 0 0 / 0.8);
     --chart-grid: rgb(255 255 255 / 0.18);
     --bar: linear-gradient(90deg, var(--c1), var(--c2));
@@ -150,7 +150,7 @@
   --on-accent: #08070d;
   --blob-opacity: 0.8;
   --cover-opacity: 0.5;
-  --focus: var(--accent-on-dark);
+  --focus: color-mix(in oklab, var(--accent-on-dark) 30%, #fff);
   --tint-opacity: 0.22;
   --glass-pop: rgb(30 28 44 / 0.42);
   --glass-highlight: rgb(255 255 255 / 0.16);
@@ -193,10 +193,21 @@
   a {
     color: inherit;
   }
+  /*
+   * Keyboard focus: a thick ring in near-white (dark theme) or deep ink
+   * (light theme) tinted with the accent, following each element's own
+   * corners, that snaps in from a little further out.
+   */
   :focus-visible {
-    outline: 2px solid var(--focus);
-    outline-offset: 2px;
-    border-radius: 6px;
+    outline: 3px solid var(--focus);
+    outline-offset: 3px;
+    animation: focus-in 180ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  @keyframes focus-in {
+    from {
+      outline-offset: 7px;
+      outline-color: transparent;
+    }
   }
   @media (prefers-reduced-motion: reduce) {
     *,
