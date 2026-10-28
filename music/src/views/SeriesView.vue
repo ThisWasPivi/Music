@@ -185,12 +185,9 @@ function days(value: number | null | undefined): string {
           :info="t('series.repeatedInfo')"
         />
         <ul class="repeats">
-          <li v-for="row in repeated" :key="row.track.id">
-            <CoverImage
-              :src="row.track.album.imageUrl"
-              class="repeats__cover"
-            />
-            <span class="repeats__track">
+          <li v-for="row in repeated" :key="row.track.id" class="repeat">
+            <CoverImage :src="row.track.album.imageUrl" class="repeat__cover" />
+            <span class="repeat__track">
               <a :href="row.track.url" target="_blank" rel="noopener">{{
                 row.track.title
               }}</a>
@@ -198,7 +195,16 @@ function days(value: number | null | undefined): string {
                 row.track.artists.map((artist) => artist.name).join(", ")
               }}</span>
             </span>
-            <span class="repeats__issues">
+            <span class="repeat__count tabular">
+              {{
+                t(
+                  "artist.issueCount",
+                  { n: row.issues.length },
+                  row.issues.length,
+                )
+              }}
+            </span>
+            <span class="repeat__issues">
               <RouterLink
                 v-for="issue in row.issues"
                 :key="issue"
@@ -207,13 +213,15 @@ function days(value: number | null | undefined): string {
                   name: 'playlist',
                   params: { id: byNumber.get(issue)?.id ?? '' },
                 }"
-                class="repeats__issue"
+                class="repeat__issue tabular"
                 :aria-label="byNumber.get(issue)?.name"
               >
                 <CoverImage
                   :src="byNumber.get(issue)?.coverUrl ?? null"
                   :palette="byNumber.get(issue)?.palette"
+                  class="repeat__thumb"
                 />
+                {{ issue }}
               </RouterLink>
             </span>
           </li>
@@ -291,27 +299,56 @@ function days(value: number | null | undefined): string {
   margin: 0;
   padding: 0;
   display: grid;
-  gap: 12px;
+  gap: 10px;
 }
-.repeats li {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-.repeats__cover {
-  --cover-radius: 8px;
-  inline-size: 44px;
-  flex: none;
-}
-.repeats__track {
+/*
+ * One repeated track: cover, title and artists with the issue count on
+ * the first row; the issues it appears in as numbered pills underneath,
+ * wrapping as needed, so long titles and many issues never squeeze.
+ */
+.repeat {
   display: grid;
-  flex: 1;
+  grid-template-columns: 48px minmax(0, 1fr) auto;
+  grid-template-areas:
+    "cover track count"
+    "cover issues issues";
+  align-items: center;
+  gap: 4px 12px;
+  padding: 10px;
+  border-radius: 16px;
+  background: color-mix(in oklab, var(--glass) 60%, transparent);
+  border: 1px solid var(--line);
+}
+.repeat__cover {
+  grid-area: cover;
+  align-self: start;
+  inline-size: 48px;
+  --cover-radius: 10px;
+}
+.repeat__track {
+  grid-area: track;
+  display: grid;
   min-width: 0;
   font-size: 14px;
+  line-height: 1.3;
 }
-.repeats__track a {
+.repeat__track > * {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+/* Titles may take two lines before they are cut; artists keep one. */
+.repeat__track > a {
+  display: -webkit-box;
+  white-space: normal;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+}
+.repeat__track a {
   justify-self: start;
-  font-weight: 600;
+  max-inline-size: 100%;
+  font-weight: 650;
   text-decoration: none;
   border-radius: 5px;
   transition:
@@ -319,24 +356,63 @@ function days(value: number | null | undefined): string {
     background 160ms ease,
     box-shadow 160ms ease;
 }
-.repeats__track a:hover {
+.repeat__track a:hover {
   color: var(--accent);
   background: color-mix(in oklab, var(--accent) 16%, transparent);
   box-shadow: 0 0 0 3px color-mix(in oklab, var(--accent) 16%, transparent);
 }
-.repeats__issues {
+.repeat__count {
+  grid-area: count;
+  align-self: start;
+  padding: 2px 9px;
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--accent) 16%, transparent);
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.repeat__issues {
+  grid-area: issues;
   display: flex;
   flex-wrap: wrap;
-  justify-content: flex-end;
-  gap: 4px;
+  gap: 6px;
+  margin-top: 4px;
 }
-.repeats__issue {
-  display: block;
-  inline-size: 30px;
-  --cover-radius: 6px;
-  transition: transform 150ms ease;
+.repeat__issue {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 9px 3px 3px;
+  border-radius: 999px;
+  border: 1px solid var(--glass-border);
+  background: var(--glass);
+  font-size: 12px;
+  font-weight: 700;
+  text-decoration: none;
+  transition:
+    background 160ms ease,
+    border-color 160ms ease,
+    transform 200ms cubic-bezier(0.34, 1.56, 0.64, 1);
 }
-.repeats__issue:hover {
-  transform: scale(1.15);
+.repeat__issue:hover {
+  background: var(--glass-strong);
+  border-color: color-mix(in oklab, var(--accent) 45%, var(--glass-border));
+  transform: translateY(-1px);
+}
+.repeat__thumb {
+  inline-size: 22px;
+  --cover-radius: 50%;
+}
+/* On phones the issues run under the cover too, using the full width. */
+@media (max-width: 480px) {
+  .repeat {
+    grid-template-areas:
+      "cover track count"
+      "issues issues issues";
+  }
+  .repeat__cover {
+    align-self: center;
+  }
 }
 </style>

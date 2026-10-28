@@ -4,6 +4,13 @@ All notable changes to music.pivi.dev. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 [Semantic Versioning](https://semver.org/). Data syncs are not listed.
 
+## [Unreleased]
+
+### Fixed
+
+- Repeated tracks were squeezed on phones when a track appeared in many issues: each track is
+  now a card with the title on top and its issues as numbered pills that wrap underneath.
+
 ## [1.3.0] - 2026-10-28
 
 ### Added
