@@ -1,18 +1,18 @@
 <script setup lang="ts">
 /**
  * PlaylistCard component
- * One issue in the showcase grid: cover with its own colour glow, name,
- * number, track count and duration.
+ * One playlist in the showcase grid: cover with its own colour glow,
+ * release date, name, track count and duration.
  */
 import type { Playlist } from "@music/shared";
 import { useI18n } from "vue-i18n";
 
 import CoverImage from "@/components/ui/CoverImage.vue";
 import { markerColor } from "@/utils/color.ts";
-import { formatIssue, formatLongDuration } from "@/utils/format.ts";
+import { formatDate, formatLongDuration } from "@/utils/format.ts";
 
 defineProps<{
-  /** The issue to show. */
+  /** The playlist to show. */
   playlist: Playlist;
 }>();
 
@@ -30,7 +30,7 @@ const { t } = useI18n();
       class="card__cover"
     />
     <div class="card__body">
-      <p class="card__issue tabular">{{ formatIssue(playlist.number) }}</p>
+      <p class="card__issue tabular">{{ formatDate(playlist.firstAddedAt) }}</p>
       <h3 class="card__title">
         <RouterLink
           :to="{ name: 'playlist', params: { id: playlist.id } }"

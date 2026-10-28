@@ -11,17 +11,25 @@ import {
   withDirection,
 } from "./core.ts";
 
-/** Unnumbered playlists always sink to the bottom, whatever the direction. */
-export const unnumberedLast: SortStrategy<Playlist> = {
-  id: "unnumbered-last",
-  labelKey: "sort.unnumberedLast",
-  compare: (a, b) => Number(a.number === null) - Number(b.number === null),
+/** Playlists without tracks, so without a date, sink to the bottom whatever the direction. */
+export const undatedLast: SortStrategy<Playlist> = {
+  id: "undated-last",
+  labelKey: "sort.date",
+  compare: (a, b) =>
+    Number(a.firstAddedAt === null) - Number(b.firstAddedAt === null),
 };
 
-/** Ascending by issue number. */
+/** Oldest release first: the release date is the first track's `added_at`. */
+export const byDate: SortStrategy<Playlist> = {
+  id: "date",
+  labelKey: "sort.date",
+  compare: (a, b) => (a.firstAddedAt ?? "").localeCompare(b.firstAddedAt ?? ""),
+};
+
+/** Ascending by the number in the name, as a tie-breaker. */
 export const byNumber: SortStrategy<Playlist> = {
   id: "number",
-  labelKey: "sort.number",
+  labelKey: "sort.date",
   compare: (a, b) => compareNullableNumbers(a.number, b.number),
 };
 
@@ -61,7 +69,7 @@ export const byColor: SortStrategy<Playlist> = {
 
 /** Every playlist sort the UI offers, with its natural direction. */
 export const PLAYLIST_SORTS = [
-  { strategy: byNumber, defaultDirection: "desc" },
+  { strategy: byDate, defaultDirection: "desc" },
   { strategy: byName, defaultDirection: "asc" },
   { strategy: byTrackCount, defaultDirection: "desc" },
   { strategy: byDuration, defaultDirection: "desc" },
@@ -78,7 +86,7 @@ export type PlaylistSortId = (typeof PLAYLIST_SORTS)[number]["strategy"]["id"];
  * Resolves the chain of strategies for a UI sort choice.
  * @param id - The chosen sort
  * @param direction - The chosen direction
- * @returns The strategies to pass to `sortWith`, number as the tie-breaker
+ * @returns The strategies to pass to `sortWith`, date then number as tie-breakers
  */
 export function playlistSortChain(
   id: PlaylistSortId,
@@ -87,8 +95,9 @@ export function playlistSortChain(
   const entry =
     PLAYLIST_SORTS.find((sort) => sort.strategy.id === id) ?? PLAYLIST_SORTS[0];
   return [
-    unnumberedLast,
+    undatedLast,
     withDirection(entry.strategy, direction),
+    withDirection(byDate, "desc"),
     withDirection(byNumber, "desc"),
   ];
 }

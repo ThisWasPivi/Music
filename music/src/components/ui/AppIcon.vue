@@ -21,7 +21,8 @@ export type IconName =
   | "external"
   | "grid"
   | "chart"
-  | "timeline";
+  | "timeline"
+  | "calendar";
 
 defineProps<{
   /** Which icon to draw. */
@@ -60,6 +61,12 @@ const PATHS: Record<IconName, string[]> = {
     "M7 6v2",
     "M14 16v2",
     "M19 6v2",
+  ],
+  calendar: [
+    "M5 5h14a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1Z",
+    "M4 10h16",
+    "M8 3v4",
+    "M16 3v4",
   ],
   external: [
     "M14 4h6v6",

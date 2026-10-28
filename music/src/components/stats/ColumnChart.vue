@@ -8,20 +8,21 @@
 import { computed } from "vue";
 
 import { useEntered } from "@/composables/useEntered.ts";
+import type { TooltipContent } from "@/composables/useTooltip.ts";
 
 /**
  * One column.
  * @property key - Stable key
  * @property label - Axis label
  * @property value - Column height
- * @property tooltip - Tooltip and accessible text
+ * @property tooltip - Tooltip: text, or rich content with a picture
  * @property highlight - Draws the column in the highlight colour
  */
 export interface Column {
   key: string;
   label: string;
   value: number;
-  tooltip: string;
+  tooltip: string | TooltipContent;
   highlight?: boolean;
 }
 
@@ -59,7 +60,11 @@ const max = computed(() =>
         class="columns__slot"
         tabindex="0"
         role="img"
-        :aria-label="column.tooltip"
+        :aria-label="
+          typeof column.tooltip === 'string'
+            ? column.tooltip
+            : `${column.tooltip.text}: ${column.tooltip.detail ?? ''}`
+        "
       >
         <span
           class="columns__bar"

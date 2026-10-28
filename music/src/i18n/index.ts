@@ -79,3 +79,18 @@ export function setLocale(code: LocaleCode): void {
     /* Private mode: the choice lasts for this visit. */
   }
 }
+
+/*
+ * The messages are read once, when the i18n instance is created. In
+ * development, push edits of the message files into it, so new keys show up
+ * without a full reload (for instance after a git pull).
+ */
+if (import.meta.hot) {
+  import.meta.hot.accept(
+    ["./locales/en-GB.json", "./locales/it-IT.json"],
+    ([english, italian]) => {
+      if (english) i18n.global.setLocaleMessage("en-GB", english.default);
+      if (italian) i18n.global.setLocaleMessage("it-IT", italian.default);
+    },
+  );
+}

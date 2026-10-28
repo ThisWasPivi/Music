@@ -2,9 +2,9 @@
 /**
  * ArtistView component
  * One artist across the series. A hero with picture and key figures, a
- * shelf of their albums, a presence map of every issue of the series with
- * the ones featuring the artist lit up, and their appearances grouped by
- * year, each issue with the artist's tracks in it.
+ * shelf of their albums, a map of every playlist of the series by cover,
+ * with the ones featuring the artist lit up and the others faded, and
+ * their appearances grouped by year with the artist's tracks in each.
  */
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
@@ -16,14 +16,15 @@ import StatTile from "@/components/ui/StatTile.vue";
 import { useAccent } from "@/composables/useAccent.ts";
 import { useBackdrop } from "@/composables/useBackdrop.ts";
 import { useCatalog } from "@/composables/useCatalog.ts";
+import type { TooltipContent } from "@/composables/useTooltip.ts";
 import { recurringArtists } from "@/services/stats";
 import { markerColor } from "@/utils/color.ts";
 import {
   formatDate,
-  formatIssue,
   formatLongDuration,
   formatTrackDuration,
 } from "@/utils/format.ts";
+import { playlistTooltip } from "@/utils/tooltips.ts";
 
 import NotFoundView from "./NotFoundView.vue";
 
@@ -81,30 +82,34 @@ const albums = computed(() => {
 
 /**
  * One square of the presence map.
- * @property playlist - The issue
+ * @property playlist - The playlist
  * @property count - The artist's tracks in it, 0 when absent
- * @property tooltip - Issue name and the artist's track count
+ * @property tooltip - Cover, name and the artist's track count
+ * @property label - Accessible name
  */
 interface PresenceCell {
   playlist: (typeof catalog.playlists)[number];
   count: number;
-  tooltip: string;
+  tooltip: TooltipContent;
+  label: string;
 }
 
-/** Every numbered issue in series order, with the artist's tracks in each. */
+/** Every playlist in series order, with the artist's tracks in each. */
 const presence = computed<PresenceCell[]>(() => {
   const counts = new Map(
     appearances.value.map((entry) => [entry.playlist.id, entry.tracks.length]),
   );
   return catalog.issues.map((playlist) => {
     const count = counts.get(playlist.id) ?? 0;
+    const detail =
+      count > 0
+        ? t("artist.tracksHere", { n: count }, count)
+        : t("artist.absent");
     return {
       playlist,
       count,
-      tooltip:
-        count > 0
-          ? `${playlist.name} · ${t("common.tracks", { n: count }, count)}`
-          : `${playlist.name} · ${t("artist.absent")}`,
+      tooltip: playlistTooltip(playlist, detail),
+      label: `${playlist.name}: ${detail}`,
     };
   });
 });
@@ -124,7 +129,7 @@ const byYear = computed(() => {
 
 /**
  * Colour of an issue in the artist's lists: its liveliest cover colour.
- * @param playlist - The issue
+ * @param playlist - The playlist
  * @returns A vivid colour
  */
 function dotColor(playlist: (typeof catalog.playlists)[number]): string {
@@ -155,8 +160,8 @@ useBackdrop(() => profile.value?.imageUrl ?? last.value?.coverUrl);
         <p class="hero__lede muted">
           {{
             t("artist.lede", {
-              issues: t(
-                "artist.issueCount",
+              playlists: t(
+                "common.playlistCount",
                 { n: appearances.length },
                 appearances.length,
               ),
@@ -181,14 +186,14 @@ useBackdrop(() => profile.value?.imageUrl ?? last.value?.coverUrl);
       <StatTile
         v-if="first"
         :label="t('artist.firstSeen')"
-        :value="formatIssue(first.number)"
-        :detail="formatDate(first.firstAddedAt)"
+        :value="formatDate(first.firstAddedAt)"
+        :detail="first.name"
       />
       <StatTile
         v-if="last"
         :label="t('artist.lastSeen')"
-        :value="formatIssue(last.number)"
-        :detail="formatDate(last.firstAddedAt)"
+        :value="formatDate(last.firstAddedAt)"
+        :detail="last.name"
       />
       <StatTile
         v-if="stats"
@@ -249,18 +254,16 @@ useBackdrop(() => profile.value?.imageUrl ?? last.value?.coverUrl);
           <RouterLink
             v-tooltip="cell.tooltip"
             :to="{ name: 'playlist', params: { id: cell.playlist.id } }"
-            class="presence__cell tabular"
+            class="presence__cell"
             :class="{ 'presence__cell--on': cell.count > 0 }"
             :style="{ '--dot': dotColor(cell.playlist) }"
-            :aria-label="cell.tooltip"
+            :aria-label="cell.label"
           >
             <CoverImage
-              v-if="cell.count > 0"
               :src="cell.playlist.coverUrl"
               :palette="cell.playlist.palette"
               class="presence__cover"
             />
-            <span class="presence__number">{{ cell.playlist.number }}</span>
           </RouterLink>
         </li>
       </ol>
@@ -460,52 +463,41 @@ useBackdrop(() => profile.value?.imageUrl ?? last.value?.coverUrl);
 }
 .presence__cell {
   position: relative;
-  display: grid;
-  place-items: center;
+  display: block;
   aspect-ratio: 1;
   border-radius: 10px;
-  border: 1px dashed var(--line);
-  color: var(--muted);
-  font-size: 12px;
-  font-weight: 650;
-  text-decoration: none;
   transition:
     transform 200ms cubic-bezier(0.34, 1.56, 0.64, 1),
     box-shadow 200ms ease,
-    border-color 160ms ease,
-    color 160ms ease;
-}
-.presence__cell:hover {
-  transform: scale(1.12);
-  border-color: var(--glass-border);
-  color: var(--text);
-  z-index: 1;
-}
-.presence__cell--on {
-  border: 0;
-  color: #fff;
-  box-shadow: 0 6px 16px -8px var(--dot);
-}
-.presence__cell--on:hover {
-  box-shadow:
-    0 0 0 3px color-mix(in oklab, var(--dot) 35%, transparent),
-    0 10px 22px -8px var(--dot);
+    opacity 200ms ease;
 }
 .presence__cover {
   position: absolute;
   inset: 0;
   --cover-radius: 10px;
 }
-/* The number sits on a soft dark wash so it reads on any cover. */
-.presence__cell--on .presence__number {
-  position: absolute;
-  inset: auto 0 0;
-  padding: 1px 0 2px;
-  border-radius: 0 0 10px 10px;
-  background: linear-gradient(transparent, rgb(0 0 0 / 0.55));
-  font-size: 11px;
-  text-align: center;
-  text-shadow: 0 1px 2px rgb(0 0 0 / 0.5);
+/* Playlists without the artist: a faded, greyed cover. */
+.presence__cell:not(.presence__cell--on) {
+  opacity: 0.28;
+  filter: grayscale(1);
+}
+.presence__cell:not(.presence__cell--on):hover {
+  opacity: 0.7;
+  filter: none;
+}
+.presence__cell--on {
+  box-shadow:
+    0 0 0 2px var(--dot),
+    0 6px 16px -6px var(--dot);
+}
+.presence__cell:hover {
+  transform: scale(1.15);
+  z-index: 1;
+}
+.presence__cell--on:hover {
+  box-shadow:
+    0 0 0 2px var(--dot),
+    0 10px 24px -6px var(--dot);
 }
 .year {
   display: grid;

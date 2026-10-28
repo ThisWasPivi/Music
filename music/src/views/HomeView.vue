@@ -1,7 +1,7 @@
 <script setup lang="ts">
 /**
  * HomeView component
- * Every issue of the series in a grid that can be fuzzy-searched, sorted
+ * Every playlist of the series in a grid that can be fuzzy-searched, sorted
  * and filtered.
  */
 import type { Playlist } from "@music/shared";

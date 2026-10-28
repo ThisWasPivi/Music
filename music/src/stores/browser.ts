@@ -9,7 +9,7 @@ import { PLAYLIST_SORTS, type PlaylistSortId } from "@/strategies/playlists.ts";
  * store so it survives navigating to a playlist and back.
  */
 export const useBrowserStore = defineStore("browser", () => {
-  const sortId = ref<PlaylistSortId>("number");
+  const sortId = ref<PlaylistSortId>("date");
   const direction = ref<SortDirection>("desc");
   const query = ref("");
   const artistId = ref<string | null>(null);

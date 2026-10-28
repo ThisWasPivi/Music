@@ -1,8 +1,9 @@
 <script setup lang="ts">
 /**
  * SeriesView component
- * The series over time: real-time release timeline, gaps between issues,
- * new artists per issue, recurring artists and repeated tracks.
+ * The series over time: real-time release timeline, gaps between
+ * playlists, new artists per playlist, recurring artists and repeated
+ * tracks. Playlists are always shown by cover and name.
  */
 import { findMissingIssues } from "@music/shared";
 import { computed } from "vue";
@@ -20,7 +21,8 @@ import {
   releaseTimeline,
   repeatedTracks,
 } from "@/services/stats";
-import { formatDate, formatIssue, formatPercent } from "@/utils/format.ts";
+import { formatDate, formatPercent } from "@/utils/format.ts";
+import { playlistTooltip } from "@/utils/tooltips.ts";
 
 const { t } = useI18n();
 const { playlists, issues, latest, profile } = useCatalog();
@@ -34,23 +36,32 @@ const recurring = recurringArtists(playlists)
   .filter((row) => row.issueCount > 1)
   .slice(0, 20);
 const repeated = repeatedTracks(playlists).slice(0, 20);
-const byNumber = new Map(issues.map((issue) => [issue.number, issue]));
 
 const discoveryColumns = computed<Column[]>(() =>
-  discovery.map((row) => ({
-    key: row.playlist.id,
-    label: String(row.playlist.number),
-    value: row.newArtists.length,
-    highlight: row.playlist.id === latest?.id,
-    tooltip: t("series.discoveryTooltip", {
-      issue: formatIssue(row.playlist.number),
-      n: row.newArtists.length,
-      total: row.artistCount,
-      share: formatPercent(row.discoveryRate),
-    }),
-  })),
+  discovery.map((row, index) => {
+    /* The axis names a year under its first playlist, so labels never crowd. */
+    const year = row.playlist.firstAddedAt?.slice(0, 4) ?? "";
+    const previous = discovery[index - 1]?.playlist.firstAddedAt?.slice(0, 4);
+    return {
+      key: row.playlist.id,
+      label: year !== previous ? year : "",
+      value: row.newArtists.length,
+      highlight: row.playlist.id === latest?.id,
+      tooltip: playlistTooltip(
+        row.playlist,
+        t(
+          "series.discoveryTooltip",
+          {
+            n: row.newArtists.length,
+            total: row.artistCount,
+            share: formatPercent(row.discoveryRate),
+          },
+          row.newArtists.length,
+        ),
+      ),
+    };
+  }),
 );
-const labelEvery = Math.max(1, Math.ceil(discovery.length / 12));
 
 /**
  * Formats a gap in days.
@@ -123,7 +134,6 @@ function days(value: number | null | undefined): string {
       />
       <ColumnChart
         :columns="discoveryColumns"
-        :label-every="labelEvery"
         :height="170"
         :label="t('series.discoveryTitle')"
       />
@@ -166,8 +176,20 @@ function days(value: number | null | undefined): string {
                   </RouterLink>
                 </td>
                 <td class="tabular">{{ row.issueCount }}</td>
-                <td class="tabular">{{ formatIssue(row.firstIssue) }}</td>
-                <td class="tabular">{{ formatIssue(row.lastIssue) }}</td>
+                <td v-for="edge in [row.first, row.last]" :key="edge.id">
+                  <RouterLink
+                    v-tooltip="playlistTooltip(edge)"
+                    :to="{ name: 'playlist', params: { id: edge.id } }"
+                    :aria-label="edge.name"
+                    class="edge"
+                  >
+                    <CoverImage
+                      :src="edge.coverUrl"
+                      :palette="edge.palette"
+                      class="edge__cover"
+                    />
+                  </RouterLink>
+                </td>
                 <td class="tabular">{{ row.longestStreak }}</td>
               </tr>
             </tbody>
@@ -198,7 +220,7 @@ function days(value: number | null | undefined): string {
             <span class="repeat__count tabular">
               {{
                 t(
-                  "artist.issueCount",
+                  "common.playlistCount",
                   { n: row.issues.length },
                   row.issues.length,
                 )
@@ -207,21 +229,17 @@ function days(value: number | null | undefined): string {
             <span class="repeat__issues">
               <RouterLink
                 v-for="issue in row.issues"
-                :key="issue"
-                v-tooltip="byNumber.get(issue)?.name"
-                :to="{
-                  name: 'playlist',
-                  params: { id: byNumber.get(issue)?.id ?? '' },
-                }"
-                class="repeat__issue tabular"
-                :aria-label="byNumber.get(issue)?.name"
+                :key="issue.id"
+                v-tooltip="playlistTooltip(issue)"
+                :to="{ name: 'playlist', params: { id: issue.id } }"
+                class="repeat__issue"
               >
                 <CoverImage
-                  :src="byNumber.get(issue)?.coverUrl ?? null"
-                  :palette="byNumber.get(issue)?.palette"
+                  :src="issue.coverUrl"
+                  :palette="issue.palette"
                   class="repeat__thumb"
                 />
-                {{ issue }}
+                <span class="repeat__name">{{ issue.name }}</span>
               </RouterLink>
             </span>
           </li>
@@ -400,9 +418,30 @@ function days(value: number | null | undefined): string {
   border-color: color-mix(in oklab, var(--accent) 45%, var(--glass-border));
   transform: translateY(-1px);
 }
+.repeat__issue {
+  max-inline-size: 100%;
+}
 .repeat__thumb {
+  flex: none;
   inline-size: 22px;
   --cover-radius: 50%;
+}
+.repeat__name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.edge {
+  display: inline-block;
+  border-radius: 8px;
+  vertical-align: middle;
+}
+.edge__cover {
+  inline-size: 32px;
+  --cover-radius: 8px;
+}
+.edge:hover .edge__cover {
+  transform: scale(1.15) rotate(-3deg);
 }
 /* On phones the issues run under the cover too, using the full width. */
 @media (max-width: 480px) {

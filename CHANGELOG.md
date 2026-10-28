@@ -8,10 +8,20 @@ All notable changes to music.pivi.dev. The format follows
 
 ### Changed
 
+- Playlists are shown by cover and name everywhere, never by number: the timeline dots, the
+  artist page's map, repeated tracks and the recurring artists' first and last playlists all use
+  covers, and tooltips show the cover, name and date.
+- The series order is the release date, so series without numbers work the same way; "Date"
+  replaces "Number" among the sort options.
+- Every Italian and English text was reviewed: playlists are called playlists, and the wording
+  is shorter and more natural.
+
 - The artist page shows a presence map of every issue, lit with the cover where the artist
   appears, and lists the appearances by year as compact cards with the artist's tracks.
 
 ### Fixed
+
+- Message files now hot-reload in development, so new texts never show up as raw keys.
 
 - Repeated tracks were squeezed on phones when a track appeared in many issues: each track is
   now a card with the title on top and its issues as numbered pills that wrap underneath.

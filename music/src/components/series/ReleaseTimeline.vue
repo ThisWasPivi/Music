@@ -1,20 +1,21 @@
 <script setup lang="ts">
 /**
  * ReleaseTimeline component
- * The series on a calendar: one row per year, January to December, with a
- * glowing numbered dot for every issue at its release date. Busy spells
- * crowd a row and pauses leave it empty; issues released close together
- * stack above and below the line instead of overlapping. The longest
- * pause is drawn as a striped stretch. Dots link to their issue and show
- * a tooltip.
+ * The series on a calendar: one row per year, January to December, with
+ * every playlist's cover as a round dot at its release date, ringed in its
+ * own colour. Busy spells crowd a row and pauses leave it empty; playlists
+ * released close together stack above and below the line instead of
+ * overlapping. The longest pause is drawn as a striped stretch. Dots link
+ * to their playlist and show its cover, name and date in a tooltip.
  */
 import { computed, onBeforeUnmount, onMounted, ref } from "vue";
 import { useI18n } from "vue-i18n";
 
 import { useEntered } from "@/composables/useEntered.ts";
 import type { Release } from "@/services/stats";
-import { luminance, markerColor } from "@/utils/color.ts";
+import { markerColor } from "@/utils/color.ts";
 import { formatDate } from "@/utils/format.ts";
+import { playlistTooltip } from "@/utils/tooltips.ts";
 
 const props = withDefaults(
   defineProps<{
@@ -71,15 +72,12 @@ const months = computed(() => {
 });
 
 /**
- * One issue on its year's row.
+ * One playlist on its year's row.
  * @property release - The release
  * @property at - Position in the year, in [0, 1)
  * @property lane - Stacking lane: 0 on the line, negative above
  * @property order - Position in the whole series, for the entrance
- * @property color - Dot colour
- * @property ink - Number colour, readable on the dot
- * @property label - Issue number shown in the dot
- * @property tooltip - Tooltip and accessible name
+ * @property color - Ring and glow colour
  */
 interface Dot {
   release: Release;
@@ -87,9 +85,6 @@ interface Dot {
   lane: number;
   order: number;
   color: string;
-  ink: string;
-  label: string;
-  tooltip: string;
 }
 
 /**
@@ -123,7 +118,7 @@ const rows = computed<Row[]>(() => {
   const first = place(Date.parse(releases[0]?.releasedAt ?? "")).year;
   const last = place(Date.parse(releases.at(-1)?.releasedAt ?? "")).year;
   /* Two dots closer than this, as a fraction of the year, need separate lanes. */
-  const room = (DOT + 3) / Math.max(1, trackWidth.value);
+  const room = (DOT + 6) / Math.max(1, trackWidth.value);
 
   const byYear = new Map<number, Row>();
   for (let year = first; year <= last; year += 1) {
@@ -139,20 +134,6 @@ const rows = computed<Row[]>(() => {
       lane: 0,
       order,
       color,
-      ink: luminance(color) > 0.36 ? "#0b0a12" : "#ffffff",
-      label:
-        release.playlist.number === null
-          ? "R"
-          : String(release.playlist.number),
-      tooltip: t("series.ballTooltip", {
-        name: release.playlist.name,
-        date: formatDate(release.releasedAt),
-        tracks: t(
-          "common.tracks",
-          { n: release.playlist.trackCount },
-          release.playlist.trackCount,
-        ),
-      }),
     });
   });
 
@@ -254,23 +235,30 @@ const summary = computed(() =>
               '--lane': dot.lane,
               '--order': dot.order,
               '--dot': dot.color,
-              '--ink': dot.ink,
+              '--from': dot.release.playlist.palette[0] ?? dot.color,
             }"
           >
             <RouterLink
-              v-tooltip="dot.tooltip"
+              v-tooltip="playlistTooltip(dot.release.playlist)"
               :to="{
                 name: 'playlist',
                 params: { id: dot.release.playlist.id },
               }"
-              :aria-label="dot.tooltip"
-              class="timeline__dot tabular"
+              :aria-label="`${dot.release.playlist.name}, ${formatDate(dot.release.releasedAt)}`"
+              class="timeline__dot"
               :class="{
-                'timeline__dot--long': dot.label.length > 2,
                 'timeline__dot--after-pause': dot.release === highlight,
               }"
             >
-              {{ dot.label }}
+              <img
+                v-if="dot.release.playlist.coverUrl"
+                :src="dot.release.playlist.coverUrl"
+                alt=""
+                loading="lazy"
+                decoding="async"
+                width="64"
+                height="64"
+              />
             </RouterLink>
           </li>
         </ol>
@@ -287,7 +275,7 @@ const summary = computed(() =>
 <style scoped>
 .timeline {
   --dot-size: 26px;
-  --step: 22px;
+  --step: 26px;
   --label: 52px;
   display: grid;
   gap: 4px;
@@ -422,37 +410,40 @@ const summary = computed(() =>
   place-items: center;
   inline-size: var(--dot-size);
   block-size: var(--dot-size);
+  overflow: hidden;
   border-radius: 50%;
+  /* Shown while the cover loads, or when there is none. */
   background: radial-gradient(
     circle at 35% 30%,
-    color-mix(in oklab, var(--dot) 55%, #fff),
-    var(--dot) 72%
+    color-mix(in oklab, var(--from) 55%, #fff),
+    var(--from) 72%
   );
+  /* A ring in the playlist's own colour, then its glow. */
   box-shadow:
-    0 0 0 3px color-mix(in oklab, var(--dot) 18%, transparent),
+    0 0 0 2px var(--dot),
     0 4px 14px -2px color-mix(in oklab, var(--dot) 70%, transparent);
-  color: var(--ink);
-  font: 800 11px/1 var(--font-display);
   text-decoration: none;
   transition:
     scale 220ms cubic-bezier(0.34, 1.56, 0.64, 1),
     box-shadow 200ms ease;
 }
-.timeline__dot--long {
-  font-size: 9.5px;
-  letter-spacing: -0.04em;
+.timeline__dot img {
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
 }
-/* The issue that ended the longest pause gets a soft halo. */
+/* The playlist that ended the longest pause gets a soft halo. */
 .timeline__dot--after-pause {
   box-shadow:
-    0 0 0 4px color-mix(in oklab, var(--dot) 30%, transparent),
+    0 0 0 2px var(--dot),
+    0 0 0 6px color-mix(in oklab, var(--dot) 30%, transparent),
     0 0 22px var(--dot);
 }
 .timeline__dot:hover,
 .timeline__dot:focus-visible {
-  scale: 1.3;
+  scale: 1.45;
   box-shadow:
-    0 0 0 4px color-mix(in oklab, var(--dot) 28%, transparent),
+    0 0 0 2px var(--dot),
     0 0 24px var(--dot);
 }
 </style>

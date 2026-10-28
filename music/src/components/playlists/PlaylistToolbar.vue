@@ -27,7 +27,7 @@ const props = defineProps<{
 
 /* Icon of each sort option. */
 const SORT_ICONS: Partial<Record<PlaylistSortId, IconName>> = {
-  number: "hash",
+  date: "calendar",
   name: "text",
   tracks: "tracks",
   duration: "clock",
@@ -51,7 +51,7 @@ const countLabel = computed(() =>
 );
 const { artists, tags, profile, playlists } = useCatalog();
 
-/* How many issues each artist appears in, shown as a hint in the menu. */
+/* How many playlists each artist appears in, shown as a hint in the menu. */
 const issueCounts = new Map<string, number>();
 for (const playlist of playlists) {
   for (const id of new Set(
@@ -69,7 +69,7 @@ const artistOptions = computed<SelectOption<string>[]>(() => [
     value: artist.id,
     label: artist.name,
     hint: t(
-      "home.issueCount",
+      "common.playlistCount",
       { n: issueCounts.get(artist.id) ?? 0 },
       issueCounts.get(artist.id) ?? 0,
     ),

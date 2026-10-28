@@ -4,10 +4,10 @@ import { playlist, track } from "@/test/builders.ts";
 
 import {
   discoveryByIssue,
-  numberedIssues,
   recurringArtists,
   releaseTimeline,
   repeatedTracks,
+  seriesOrder,
 } from "./series.ts";
 
 /**
@@ -30,14 +30,15 @@ function issue(number: number | null, day: string, artists: string[]) {
   });
 }
 
-describe("numberedIssues", () => {
-  it("drops unnumbered playlists and sorts by number", () => {
-    const result = numberedIssues([
-      issue(3, "2024-01-03", []),
-      issue(null, "2024-01-01", []),
-      issue(1, "2024-01-02", []),
+describe("seriesOrder", () => {
+  it("sorts by release date, whatever the numbers, undated last", () => {
+    const result = seriesOrder([
+      issue(3, "2024-01-03", ["a"]),
+      playlist({ number: 9, name: "Empty" }),
+      issue(null, "2024-01-01", ["a"]),
+      issue(1, "2024-01-02", ["a"]),
     ]);
-    expect(result.map((entry) => entry.number)).toEqual([1, 3]);
+    expect(result.map((entry) => entry.number)).toEqual([null, 1, 3, 9]);
   });
 });
 
@@ -70,7 +71,7 @@ describe("releaseTimeline", () => {
 });
 
 describe("recurringArtists", () => {
-  it("counts issues, first/last and the longest run of published issues", () => {
+  it("counts playlists, first/last and the longest run in series order", () => {
     const rows = recurringArtists([
       issue(1, "2024-01-01", ["a", "b"]),
       issue(2, "2024-01-02", ["a"]),
@@ -80,20 +81,11 @@ describe("recurringArtists", () => {
     ]);
     const a = rows.find((row) => row.artist.id === "a");
     const b = rows.find((row) => row.artist.id === "b");
-    /* Issue 3 is missing: 2 → 4 still counts as consecutive. */
-    expect(a).toMatchObject({
-      issueCount: 4,
-      firstIssue: 1,
-      lastIssue: 6,
-      longestStreak: 3,
-      trackCount: 4,
-    });
-    expect(b).toMatchObject({
-      issueCount: 3,
-      firstIssue: 1,
-      lastIssue: 5,
-      longestStreak: 2,
-    });
+    /* No playlist 3: 2 → 4 are neighbours in the series, so the run goes on. */
+    expect(a).toMatchObject({ issueCount: 4, longestStreak: 3, trackCount: 4 });
+    expect([a?.first.number, a?.last.number]).toEqual([1, 6]);
+    expect(b).toMatchObject({ issueCount: 3, longestStreak: 2 });
+    expect([b?.first.number, b?.last.number]).toEqual([1, 5]);
     expect(rows[0]?.artist.id).toBe("a");
   });
 });
@@ -114,12 +106,17 @@ describe("discoveryByIssue", () => {
 });
 
 describe("repeatedTracks", () => {
-  it("lists tracks in more than one issue with their numbers", () => {
-    const shared = track({ id: "shared" });
-    const rows = repeatedTracks([
-      playlist({ number: 3, tracks: [shared] }),
-      playlist({ number: 1, tracks: [shared, track({ id: "solo" })] }),
-    ]);
-    expect(rows).toEqual([{ track: shared, issues: [1, 3] }]);
+  it("lists tracks in more than one playlist, in series order", () => {
+    const shared = track({ id: "shared", addedAt: "2024-02-01T00:00:00.000Z" });
+    const later = playlist({ number: 3, tracks: [shared] });
+    const earlier = playlist({
+      number: 1,
+      tracks: [
+        { ...shared, addedAt: "2024-01-01T00:00:00.000Z" },
+        track({ id: "solo", addedAt: "2024-01-01T00:00:00.000Z" }),
+      ],
+    });
+    const rows = repeatedTracks([later, earlier]);
+    expect(rows.map((row) => row.issues)).toEqual([[earlier, later]]);
   });
 });

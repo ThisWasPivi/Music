@@ -1,20 +1,20 @@
 import type { ArtistProfile, ArtistRef, Playlist } from "@music/shared";
 
 import { playlistRepository } from "@/repositories/PlaylistRepository.ts";
-import { numberedIssues } from "@/services/stats";
+import { seriesOrder } from "@/services/stats";
 import { sortWith } from "@/strategies/core.ts";
 import { playlistSortChain } from "@/strategies/playlists.ts";
 
 /**
  * Derived, read-only views of the catalogue shared by every page. The data
  * is bundled at build time, so this is computed once.
- * @property playlists - Every playlist, newest issue first, unnumbered last
- * @property issues - Numbered issues, oldest first
- * @property latest - The newest issue
+ * @property playlists - Every playlist, newest release first
+ * @property issues - Every playlist in series order: oldest release first
+ * @property latest - The newest playlist
  * @property artists - Every credited artist, by name
  * @property tags - Every configured tag, sorted
  * @property profile - Finds the profile (with image) of a top artist
- * @property neighbours - Previous and next issue in the series
+ * @property neighbours - Previous and next playlist in series order
  * @property byId - Finds a playlist by id
  */
 export interface Catalog {
@@ -35,9 +35,9 @@ export interface Catalog {
 function buildCatalog(): Catalog {
   const playlists = sortWith(
     playlistRepository.all(),
-    ...playlistSortChain("number", "desc"),
+    ...playlistSortChain("date", "desc"),
   );
-  const issues = numberedIssues(playlists);
+  const issues = seriesOrder(playlists);
   const artistMap = new Map<string, ArtistRef>();
   for (const track of playlists.flatMap((playlist) => playlist.tracks)) {
     for (const artist of track.artists) artistMap.set(artist.id, artist);

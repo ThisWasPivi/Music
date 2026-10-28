@@ -3,14 +3,24 @@ import type { ArtistRef, Playlist, Track } from "@music/shared";
 import { artistsOf } from "./artists.ts";
 
 /**
- * Keeps the numbered issues and sorts them by number.
+ * Puts the playlists in series order: by release date, oldest first.
+ *
+ * The release date (the first `added_at`) is what every series has; a
+ * number in the name is only a tie-breaker, so series without numbers work
+ * the same way. Playlists without any track, and so without a date, go
+ * last.
  * @param playlists - Any published playlists
- * @returns The numbered issues, oldest number first
+ * @returns The playlists in series order
  */
-export function numberedIssues(playlists: readonly Playlist[]): Playlist[] {
-  return playlists
-    .filter((playlist) => playlist.number !== null)
-    .sort((a, b) => (a.number ?? 0) - (b.number ?? 0));
+export function seriesOrder(playlists: readonly Playlist[]): Playlist[] {
+  return [...playlists].sort(
+    (a, b) =>
+      Number(a.firstAddedAt === null) - Number(b.firstAddedAt === null) ||
+      (a.firstAddedAt ?? "").localeCompare(b.firstAddedAt ?? "") ||
+      (a.number ?? Number.POSITIVE_INFINITY) -
+        (b.number ?? Number.POSITIVE_INFINITY) ||
+      a.name.localeCompare(b.name, "en", { numeric: true }),
+  );
 }
 
 /**
@@ -97,48 +107,46 @@ export function releaseTimeline(
 /**
  * How an artist recurs across the series.
  * @property artist - The artist
- * @property issueCount - Issues the artist appears in
- * @property firstIssue - Lowest issue number
- * @property lastIssue - Highest issue number
- * @property longestStreak - Most consecutive published issues featuring them
+ * @property issueCount - Playlists the artist appears in
+ * @property first - The earliest playlist featuring them
+ * @property last - The latest playlist featuring them
+ * @property longestStreak - Most consecutive playlists featuring them
  * @property trackCount - Entries crediting the artist across the series
  */
 export interface RecurringArtist {
   artist: ArtistRef;
   issueCount: number;
-  firstIssue: number;
-  lastIssue: number;
+  first: Playlist;
+  last: Playlist;
   longestStreak: number;
   trackCount: number;
 }
 
 /**
- * Measures how every artist recurs across the numbered issues.
+ * Measures how every artist recurs across the series.
  *
- * A streak counts consecutive *published* issues, so a number missing from
- * the sequence does not break it.
+ * A streak counts consecutive playlists in series order.
  * @param playlists - Any published playlists
  * @returns One row per artist, most recurring first
  */
 export function recurringArtists(
   playlists: readonly Playlist[],
 ): RecurringArtist[] {
-  const issues = numberedIssues(playlists);
+  const issues = seriesOrder(playlists);
   const rows = new Map<
     string,
     RecurringArtist & { lastIndex: number; streak: number }
   >();
 
   issues.forEach((issue, index) => {
-    const number = issue.number ?? 0;
     for (const artist of artistsOf(issue).values()) {
       const row = rows.get(artist.id);
       if (!row) {
         rows.set(artist.id, {
           artist,
           issueCount: 1,
-          firstIssue: number,
-          lastIssue: number,
+          first: issue,
+          last: issue,
           longestStreak: 1,
           trackCount: 0,
           lastIndex: index,
@@ -147,7 +155,7 @@ export function recurringArtists(
         continue;
       }
       row.issueCount += 1;
-      row.lastIssue = number;
+      row.last = issue;
       row.streak = row.lastIndex === index - 1 ? row.streak + 1 : 1;
       row.longestStreak = Math.max(row.longestStreak, row.streak);
       row.lastIndex = index;
@@ -187,13 +195,13 @@ export interface IssueDiscovery {
 /**
  * Counts, issue by issue, the artists never seen in an earlier issue.
  * @param playlists - Any published playlists
- * @returns One row per numbered issue, in series order
+ * @returns One row per playlist, in series order
  */
 export function discoveryByIssue(
   playlists: readonly Playlist[],
 ): IssueDiscovery[] {
   const seen = new Set<string>();
-  return numberedIssues(playlists).map((playlist) => {
+  return seriesOrder(playlists).map((playlist) => {
     const artists = [...artistsOf(playlist).values()];
     const newArtists = artists.filter((artist) => !seen.has(artist.id));
     for (const artist of artists) seen.add(artist.id);
@@ -208,17 +216,17 @@ export function discoveryByIssue(
 }
 
 /**
- * A track that appears in more than one issue.
+ * A track that appears in more than one playlist.
  * @property track - The track, as first seen
- * @property issues - Numbers of the issues containing it, ascending
+ * @property issues - The playlists containing it, in series order
  */
 export interface RepeatedTrack {
   track: Track;
-  issues: number[];
+  issues: Playlist[];
 }
 
 /**
- * Finds the tracks featured in several numbered issues.
+ * Finds the tracks featured in several playlists.
  * @param playlists - Any published playlists
  * @returns The repeats, most repeated first
  */
@@ -226,11 +234,10 @@ export function repeatedTracks(
   playlists: readonly Playlist[],
 ): RepeatedTrack[] {
   const rows = new Map<string, RepeatedTrack>();
-  for (const issue of numberedIssues(playlists)) {
+  for (const issue of seriesOrder(playlists)) {
     for (const track of issue.tracks) {
       const row = rows.get(track.id) ?? { track, issues: [] };
-      if (!row.issues.includes(issue.number ?? 0))
-        row.issues.push(issue.number ?? 0);
+      if (!row.issues.includes(issue)) row.issues.push(issue);
       rows.set(track.id, row);
     }
   }

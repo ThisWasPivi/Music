@@ -1,4 +1,4 @@
-import { currentLocale, i18n } from "@/i18n/index.ts";
+import { currentLocale } from "@/i18n/index.ts";
 
 /**
  * Formats a track length as `m:ss`.
@@ -59,16 +59,4 @@ export function formatPercent(share: number): string {
  */
 export function formatNumber(value: number): string {
   return value.toLocaleString(currentLocale(), { maximumFractionDigits: 1 });
-}
-
-/**
- * Formats an issue number for display.
- * @param issue - The issue number, or null
- * @returns "No. 12" / "Nº 12", or the special-issue label
- */
-export function formatIssue(issue: number | null): string {
-  const { t } = i18n.global;
-  return issue === null
-    ? t("common.unnumbered")
-    : t("common.issue", { n: issue });
 }

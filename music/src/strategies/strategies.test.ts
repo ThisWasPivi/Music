@@ -20,7 +20,13 @@ const p1 = playlist({
   tags: ["chill"],
   palette: ["#0000ff"],
   tracks: [
-    track({ id: "a", title: "Città", artists: ["Bruno"], releaseYear: 1994 }),
+    track({
+      id: "a",
+      title: "Città",
+      artists: ["Bruno"],
+      releaseYear: 1994,
+      addedAt: "2024-01-01T10:00:00.000Z",
+    }),
   ],
 });
 const p2 = playlist({
@@ -28,29 +34,43 @@ const p2 = playlist({
   name: "Pivəəkly 2",
   tags: ["night"],
   palette: ["#ff0000"],
-  tracks: [track({ id: "b", artists: ["Ada"], releaseYear: 2021 })],
+  tracks: [
+    track({
+      id: "b",
+      artists: ["Ada"],
+      releaseYear: 2021,
+      addedAt: "2024-02-01T10:00:00.000Z",
+    }),
+  ],
 });
 const p10 = playlist({
   number: 10,
   name: "Pivəəkly 10",
   palette: ["#808080"],
-  tracks: [track({ id: "c", artists: ["Ada"], releaseYear: 2023 })],
+  tracks: [
+    track({
+      id: "c",
+      artists: ["Ada"],
+      releaseYear: 2023,
+      addedAt: "2024-10-01T10:00:00.000Z",
+    }),
+  ],
 });
 const loose = playlist({ number: null, name: "Pivəəkly Rarities" });
 const all = [p2, loose, p10, p1];
 
 describe("playlist sorting", () => {
-  it("defaults to newest number first with unnumbered playlists last", () => {
+  it("defaults to the newest release first, undated playlists last", () => {
     expect(
-      sortWith(all, ...playlistSortChain("number", "desc")).map(
+      sortWith(all, ...playlistSortChain("date", "desc")).map(
         (entry) => entry.number,
       ),
     ).toEqual([10, 2, 1, null]);
   });
 
-  it("keeps unnumbered playlists last in ascending order too", () => {
+  it("keeps undated playlists last in ascending order too", () => {
     expect(
-      sortWith(all, ...playlistSortChain("number", "asc")).map(
+      sortWith(all, ...playlistSortChain("date", "asc")).map(
         (entry) => entry.number,
       ),
     ).toEqual([1, 2, 10, null]);

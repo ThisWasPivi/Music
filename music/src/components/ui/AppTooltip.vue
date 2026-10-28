@@ -26,7 +26,23 @@ const style = computed(() => ({
         :class="{ 'tip--below': below }"
         :style="style"
       >
-        {{ tooltip.text }}
+        <img
+          v-if="tooltip.image"
+          :src="tooltip.image"
+          alt=""
+          class="tip__image"
+          width="40"
+          height="40"
+        />
+        <span class="tip__text">
+          <strong v-if="tooltip.detail || tooltip.image">{{
+            tooltip.text
+          }}</strong>
+          <template v-else>{{ tooltip.text }}</template>
+          <span v-if="tooltip.detail" class="tip__detail">{{
+            tooltip.detail
+          }}</span>
+        </span>
       </div>
     </Transition>
   </Teleport>
@@ -45,6 +61,28 @@ const style = computed(() => ({
   text-wrap: pretty;
   pointer-events: none;
   transform: translate(-50%, -100%);
+}
+.tip:has(.tip__image) {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 12px 6px 6px;
+}
+.tip__image {
+  flex: none;
+  inline-size: 40px;
+  block-size: 40px;
+  border-radius: 8px;
+  object-fit: cover;
+}
+.tip__text {
+  display: grid;
+  gap: 1px;
+}
+.tip__detail {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 500;
 }
 .tip--below {
   transform: translate(-50%, 0);

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 /**
  * SeriesPager component
- * Links to the previous and next issue of the series, with their covers.
+ * Links to the previous and next playlist of the series, with their covers.
  */
 import type { Playlist } from "@music/shared";
 import { useI18n } from "vue-i18n";
@@ -9,10 +9,10 @@ import { useI18n } from "vue-i18n";
 import CoverImage from "@/components/ui/CoverImage.vue";
 
 defineProps<{
-  /** The issue before, if any. */
+  /** The playlist before, if any. */
   previous?: Playlist;
 
-  /** The issue after, if any. */
+  /** The playlist after, if any. */
   next?: Playlist;
 }>();
 

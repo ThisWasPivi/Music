@@ -13,11 +13,7 @@ import {
   vivid,
   withContrast,
 } from "./color.ts";
-import {
-  formatIssue,
-  formatLongDuration,
-  formatTrackDuration,
-} from "./format.ts";
+import { formatLongDuration, formatTrackDuration } from "./format.ts";
 
 describe("format", () => {
   it("formats durations", () => {
@@ -25,11 +21,6 @@ describe("format", () => {
     expect(formatLongDuration(45 * 60_000)).toBe("45 min");
     expect(formatLongDuration(120 * 60_000)).toBe("2 h");
     expect(formatLongDuration(102 * 60_000)).toBe("1 h 42 min");
-  });
-
-  it("formats issue numbers", () => {
-    expect(formatIssue(12)).toBe("No. 12");
-    expect(formatIssue(null)).toBe("Special issue");
   });
 });
 

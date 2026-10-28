@@ -1,7 +1,7 @@
 <script setup lang="ts">
 /**
  * IssueTitle component
- * A playlist name with its issue number painted in the aurora gradient,
+ * A playlist name with its trailing number, if any, in the aurora gradient,
  * e.g. "Pivəəkly" + gradient "24".
  */
 import { computed } from "vue";

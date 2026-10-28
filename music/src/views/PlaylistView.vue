@@ -1,7 +1,7 @@
 <script setup lang="ts">
 /**
  * PlaylistView component
- * One issue: header with cover and facts, the Spotify player, the tracklist
+ * One playlist: header with cover and facts, the Spotify player, the tracklist
  * with album covers, and links to the neighbouring issues. The cover,
  * blurred, fills the whole page behind it.
  */
@@ -21,7 +21,6 @@ import { useCatalog } from "@/composables/useCatalog.ts";
 import { summarize } from "@/services/stats";
 import {
   formatDate,
-  formatIssue,
   formatLongDuration,
   formatPercent,
   formatTrackDuration,
@@ -64,7 +63,7 @@ useBackdrop(() => playlist.value?.coverUrl);
       </a>
       <div class="head__body">
         <p class="eyebrow">
-          {{ site.series }} · {{ formatIssue(playlist.number) }}
+          {{ site.series }}
         </p>
         <h1 id="playlist-title" class="page-title head__title">
           <IssueTitle :name="playlist.name" />

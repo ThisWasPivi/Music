@@ -1,7 +1,7 @@
 <script setup lang="ts">
 /**
  * StatsView component
- * Statistics of the whole series or of one issue: headline figures, top
+ * Statistics of the whole series or of one playlist: headline figures, top
  * artists and albums, when tracks were added, release years and what is in
  * rotation now.
  */
