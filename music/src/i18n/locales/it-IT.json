@@ -234,6 +234,13 @@
     "title": "Copertine",
     "orderBy": "Ordina per",
     "byColor": "Colore",
-    "byName": "Nome"
+    "byName": "Nome",
+    "show": "Mostra",
+    "showCovers": "Copertine",
+    "showGlyphs": "Glifi",
+    "glyphTitle": "Come si legge un glifo",
+    "glyphInfo": "Ogni playlist disegnata dai suoi brani: un raggio per brano, in ordine in senso orario dall'alto. Più è lungo, più dura il brano; il colore dice quando è uscito, dal viola (vecchio) al rosa (recente). Un puntino in cima segna i brani espliciti, il disco al centro ha il colore della copertina.",
+    "glyphOf": "Il glifo",
+    "glyphWall": "Vedi tutti i glifi"
   }
 }

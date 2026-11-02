@@ -3,8 +3,10 @@
  * CoversView component
  * Every cover of the series in one tight mosaic, sorted along the rainbow
  * by its liveliest colour or alphabetically by name. Switching order
- * slides each cover to its new place. The order lives in the URL
- * (`?by=name`), so a link opens the same wall.
+ * slides each cover to its new place. The wall can also show each
+ * playlist's glyph, a fingerprint drawn from its tracks, instead of its
+ * cover. Order and view live in the URL (`?by=name&show=glyphs`), so a
+ * link opens the same wall.
  */
 import type { Playlist } from "@music/shared";
 import { computed } from "vue";
@@ -13,6 +15,8 @@ import { useRoute, useRouter } from "vue-router";
 
 import AppIcon, { type IconName } from "@/components/ui/AppIcon.vue";
 import CoverImage from "@/components/ui/CoverImage.vue";
+import PlaylistGlyph from "@/components/ui/PlaylistGlyph.vue";
+import SectionTitle from "@/components/ui/SectionTitle.vue";
 import { useCatalog } from "@/composables/useCatalog.ts";
 import { colorSortKey, colourfulOf, hexToHsl } from "@/utils/color.ts";
 import { playlistTooltip } from "@/utils/tooltips.ts";
@@ -25,6 +29,14 @@ const ORDERS: readonly { id: WallOrder; label: string; icon: IconName }[] = [
   { id: "name", label: "covers.byName", icon: "text" },
 ];
 
+/** What each tile shows. */
+type WallView = "covers" | "glyphs";
+
+const VIEWS: readonly { id: WallView; label: string; icon: IconName }[] = [
+  { id: "covers", label: "covers.showCovers", icon: "wall" },
+  { id: "glyphs", label: "covers.showGlyphs", icon: "sparkle" },
+];
+
 const { t } = useI18n();
 const route = useRoute();
 const router = useRouter();
@@ -32,6 +44,9 @@ const { playlists } = useCatalog();
 
 const order = computed<WallOrder>(() =>
   route.query.by === "name" ? "name" : "color",
+);
+const view = computed<WallView>(() =>
+  route.query.show === "glyphs" ? "glyphs" : "covers",
 );
 
 /**
@@ -63,12 +78,25 @@ const wall = computed(() => {
 });
 
 /**
- * Switches the order, keeping it in the URL.
- * @param next - The new order
+ * Changes the order or the view, keeping both in the URL; defaults are
+ * left out so the plain /covers link stays clean.
+ * @param next - The new order and view
+ * @param next.by - Sort order
+ * @param next.show - What the tiles show
  * @returns Resolves after navigation
  */
-async function setOrder(next: WallOrder): Promise<void> {
-  await router.replace({ query: next === "color" ? {} : { by: next } });
+async function update(next: {
+  by?: WallOrder;
+  show?: WallView;
+}): Promise<void> {
+  const by = next.by ?? order.value;
+  const show = next.show ?? view.value;
+  await router.replace({
+    query: {
+      ...(by === "color" ? {} : { by }),
+      ...(show === "covers" ? {} : { show }),
+    },
+  });
 }
 </script>
 
@@ -76,25 +104,54 @@ async function setOrder(next: WallOrder): Promise<void> {
   <div class="stack">
     <header class="head">
       <h1 class="page-title">{{ t("covers.title") }}</h1>
-      <div class="chips" role="group" :aria-label="t('covers.orderBy')">
-        <button
-          v-for="option in ORDERS"
-          :key="option.id"
-          type="button"
-          class="chip"
-          :aria-pressed="order === option.id"
-          @click="setOrder(option.id)"
-        >
-          <AppIcon :name="option.icon" />
-          {{ t(option.label) }}
-        </button>
+      <div class="controls">
+        <div class="chips" role="group" :aria-label="t('covers.show')">
+          <button
+            v-for="option in VIEWS"
+            :key="option.id"
+            type="button"
+            class="chip"
+            :aria-pressed="view === option.id"
+            @click="update({ show: option.id })"
+          >
+            <AppIcon :name="option.icon" />
+            {{ t(option.label) }}
+          </button>
+        </div>
+        <div class="chips" role="group" :aria-label="t('covers.orderBy')">
+          <button
+            v-for="option in ORDERS"
+            :key="option.id"
+            type="button"
+            class="chip"
+            :aria-pressed="order === option.id"
+            @click="update({ by: option.id })"
+          >
+            <AppIcon :name="option.icon" />
+            {{ t(option.label) }}
+          </button>
+        </div>
       </div>
     </header>
-    <p class="muted lede">
-      {{ t("common.playlistCount", { n: wall.length }, wall.length) }}
-    </p>
+    <div class="sub">
+      <p class="muted lede">
+        {{ t("common.playlistCount", { n: wall.length }, wall.length) }}
+      </p>
+      <SectionTitle
+        v-if="view === 'glyphs'"
+        id="glyph-legend"
+        class="legend"
+        :title="t('covers.glyphTitle')"
+        :info="t('covers.glyphInfo')"
+      />
+    </div>
 
-    <TransitionGroup tag="ol" name="wall" class="wall">
+    <TransitionGroup
+      tag="ol"
+      name="wall"
+      class="wall"
+      :class="{ 'wall--glyphs': view === 'glyphs' }"
+    >
       <li
         v-for="(playlist, index) in wall"
         :key="playlist.id"
@@ -106,7 +163,12 @@ async function setOrder(next: WallOrder): Promise<void> {
           :aria-label="playlist.name"
           class="wall__link"
         >
-          <CoverImage :src="playlist.coverUrl" :palette="playlist.palette" />
+          <PlaylistGlyph v-if="view === 'glyphs'" :playlist="playlist" />
+          <CoverImage
+            v-else
+            :src="playlist.coverUrl"
+            :palette="playlist.palette"
+          />
         </RouterLink>
       </li>
     </TransitionGroup>
@@ -121,9 +183,39 @@ async function setOrder(next: WallOrder): Promise<void> {
   justify-content: space-between;
   gap: 14px;
 }
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+}
+.sub {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+  margin-top: -8px;
+}
 .lede {
-  margin: -8px 0 0;
+  margin: 0;
   font-size: 14px;
+}
+.legend {
+  margin: 0;
+}
+.legend :deep(.section-title) {
+  font-size: 15px;
+}
+/* Glyphs breathe a little more than covers. */
+.wall--glyphs {
+  gap: 10px;
+}
+.wall--glyphs .wall__link {
+  border-radius: 50%;
+}
+.wall--glyphs .wall__link:hover,
+.wall--glyphs .wall__link:focus-visible {
+  box-shadow: 0 18px 40px -16px var(--accent);
 }
 /* A tight mosaic: small gaps, covers lift out of it on hover. */
 .wall {

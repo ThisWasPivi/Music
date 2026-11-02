@@ -15,6 +15,8 @@ import SeriesPager from "@/components/playlists/SeriesPager.vue";
 import TrackTable from "@/components/playlists/TrackTable.vue";
 import CoverImage from "@/components/ui/CoverImage.vue";
 import IssueTitle from "@/components/ui/IssueTitle.vue";
+import PlaylistGlyph from "@/components/ui/PlaylistGlyph.vue";
+import SectionTitle from "@/components/ui/SectionTitle.vue";
 import { useAccent } from "@/composables/useAccent.ts";
 import { useBackdrop } from "@/composables/useBackdrop.ts";
 import { useCatalog } from "@/composables/useCatalog.ts";
@@ -117,6 +119,21 @@ useBackdrop(() => playlist.value?.coverUrl);
       <TrackTable :tracks="playlist.tracks" />
       <aside class="aside" :aria-label="t('playlist.listen')">
         <SpotifyEmbed :playlist="playlist" />
+        <section class="glass panel glyph-panel" aria-labelledby="glyph-title">
+          <SectionTitle
+            id="glyph-title"
+            :title="t('covers.glyphOf')"
+            :info="t('covers.glyphInfo')"
+          />
+          <RouterLink
+            v-tooltip="t('covers.glyphWall')"
+            :to="{ name: 'covers', query: { show: 'glyphs' } }"
+            class="glyph__link"
+            :aria-label="t('covers.glyphWall')"
+          >
+            <PlaylistGlyph :key="playlist.id" :playlist="playlist" />
+          </RouterLink>
+        </section>
         <SeriesPager :previous="neighbours.previous" :next="neighbours.next" />
         <p class="muted note"><sup>*</sup> {{ t("playlist.releaseNote") }}</p>
       </aside>
@@ -202,5 +219,18 @@ useBackdrop(() => playlist.value?.coverUrl);
 .note {
   margin: 0;
   font-size: 12px;
+}
+.glyph-panel :deep(.title) {
+  margin-block-end: 8px;
+}
+.glyph__link {
+  display: block;
+  inline-size: min(100%, 260px);
+  margin-inline: auto;
+  border-radius: 50%;
+  transition: transform 300ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.glyph__link:hover {
+  transform: rotate(8deg) scale(1.03);
 }
 </style>

@@ -4,6 +4,14 @@ All notable changes to music.pivi.dev. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 [Semantic Versioning](https://semver.org/). Data syncs are not listed.
 
+## [Unreleased]
+
+### Added
+
+- Glyphs: every playlist drawn as its own fingerprint, one ray per track (length for duration,
+  colour for release year, a dot for explicit). The cover wall can show glyphs instead of
+  covers, and each playlist page shows its glyph.
+
 ## [1.4.0] - 2026-11-02
 
 ### Added

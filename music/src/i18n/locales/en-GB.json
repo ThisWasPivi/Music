@@ -234,6 +234,13 @@
     "title": "Covers",
     "orderBy": "Order by",
     "byColor": "Colour",
-    "byName": "Name"
+    "byName": "Name",
+    "show": "Show",
+    "showCovers": "Covers",
+    "showGlyphs": "Glyphs",
+    "glyphTitle": "How to read a glyph",
+    "glyphInfo": "Each playlist drawn from its tracks: one ray per track, clockwise from the top. The longer the ray, the longer the track; the colour says when it came out, from violet (old) to pink (recent). A dot at the tip marks explicit tracks, and the disc in the middle takes the cover's colour.",
+    "glyphOf": "The glyph",
+    "glyphWall": "See every glyph"
   }
 }
