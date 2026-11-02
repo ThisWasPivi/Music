@@ -74,7 +74,10 @@ const routes: RouteRecordRaw[] = [
     component: () => import("./views/YearView.vue"),
     props: true,
     meta: {
-      title: (year: string) => i18n.global.t("years.docTitle", { year }),
+      title: (year: string) =>
+        releaseYears(playlistRepository.all()).includes(Number(year))
+          ? i18n.global.t("years.docTitle", { year })
+          : i18n.global.t("notFound.title"),
     },
   },
   {

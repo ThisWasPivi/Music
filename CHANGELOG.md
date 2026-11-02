@@ -6,6 +6,12 @@ All notable changes to music.pivi.dev. The format follows
 
 ## [Unreleased]
 
+### Fixed
+
+- Tooltips are measured and kept inside the screen on phones (the glyph legend used to spill
+  over the edge), and a tap elsewhere closes them.
+- A year without releases shows the "missing" page title.
+
 ### Added
 
 - Glyphs: every playlist drawn as its own fingerprint, one ray per track (length for duration,

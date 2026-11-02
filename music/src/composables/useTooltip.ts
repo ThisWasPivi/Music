@@ -125,6 +125,15 @@ if (typeof window !== "undefined") {
     "keydown",
     (event) => event.key === "Escape" && hide(),
   );
+  /* On touch screens the pointer never "leaves": a tap elsewhere closes it. */
+  window.addEventListener(
+    "pointerdown",
+    (event) => {
+      if (anchor && !anchor.contains(event.target as Node)) hide();
+    },
+    { capture: true, passive: true },
+  );
+  window.addEventListener("resize", () => hide(), { passive: true });
 }
 
 /**
