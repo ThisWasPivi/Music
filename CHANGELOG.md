@@ -21,6 +21,10 @@ All notable changes to music.pivi.dev. The format follows
 
 ### Fixed
 
+- Two moderate advisories in dev-only tooling (minimatch via ESLint, glob via the test utils)
+  are listed as documented audit exceptions in `pnpm-workspace.yaml` until their parents accept
+  the fixed versions; neither reaches the published site.
+
 - Long figures such as "78 h 47 min" shrink to fit their tile instead of being cut.
 - Hover zoom and glow are no longer clipped in the "On rotation" and album strips.
 - Every credited artist now gets a picture from the sync (it used to be only the 30 most
