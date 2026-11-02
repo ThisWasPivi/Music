@@ -9,17 +9,49 @@
 import { site } from "@site";
 import { useI18n } from "vue-i18n";
 
-import AppIcon from "./AppIcon.vue";
+import { usePalette } from "@/composables/usePalette.ts";
+import { useSurprise } from "@/composables/useSurprise.ts";
+
+import AppIcon, { type IconName } from "./AppIcon.vue";
 import BrandMark from "./BrandMark.vue";
 import LanguageSwitcher from "./LanguageSwitcher.vue";
 import ThemeToggle from "./ThemeToggle.vue";
 
 const { t } = useI18n();
-const LINKS = [
+const palette = usePalette();
+const surprise = useSurprise();
+/* The shortcut shown in the search tooltip, by platform. */
+const shortcut =
+  typeof navigator !== "undefined" && /Mac|iP(hone|ad)/.test(navigator.platform)
+    ? "⌘K"
+    : "Ctrl K";
+
+/**
+ * One section in the navigation.
+ * @property to - Route
+ * @property key - Label
+ * @property short - Shorter label for the phone tab bar
+ * @property icon - Tab bar icon
+ */
+interface NavLink {
+  to: { name: string };
+  key: string;
+  short?: string;
+  icon: IconName;
+}
+
+const LINKS: readonly NavLink[] = [
   { to: { name: "home" }, key: "nav.playlists", icon: "grid" },
-  { to: { name: "stats" }, key: "nav.stats", icon: "chart" },
+  {
+    to: { name: "stats" },
+    key: "nav.stats",
+    short: "nav.statsShort",
+    icon: "chart",
+  },
   { to: { name: "series" }, key: "nav.series", icon: "timeline" },
-] as const;
+  { to: { name: "years" }, key: "nav.years", icon: "sparkle" },
+  { to: { name: "covers" }, key: "nav.covers", icon: "wall" },
+];
 </script>
 
 <template>
@@ -43,6 +75,24 @@ const LINKS = [
         </RouterLink>
       </nav>
       <div class="header__tools">
+        <button
+          v-tooltip="t('search.tooltip', { shortcut })"
+          type="button"
+          class="tool"
+          :aria-label="t('search.title')"
+          @click="palette.show()"
+        >
+          <AppIcon name="search" />
+        </button>
+        <button
+          v-tooltip="t('surprise.hint')"
+          type="button"
+          class="tool tool--dice"
+          :aria-label="t('surprise.label')"
+          @click="surprise()"
+        >
+          <AppIcon name="shuffle" />
+        </button>
         <LanguageSwitcher />
         <ThemeToggle />
       </div>
@@ -56,7 +106,7 @@ const LINKS = [
         class="tabs__link"
       >
         <AppIcon :name="link.icon" class="tabs__icon" />
-        <span>{{ t(link.key) }}</span>
+        <span>{{ t(link.short ?? link.key) }}</span>
       </RouterLink>
     </nav>
   </header>
@@ -120,6 +170,34 @@ const LINKS = [
   gap: 6px;
   flex: none;
 }
+.tool {
+  display: grid;
+  place-items: center;
+  inline-size: 40px;
+  block-size: 40px;
+  padding: 0;
+  border-radius: 999px;
+  border: 1px solid var(--glass-border);
+  background: var(--glass);
+  color: var(--text);
+  font-size: 17px;
+  transition:
+    background 160ms ease,
+    transform 220ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.tool:hover {
+  background: var(--glass-strong);
+  transform: translateY(-1px);
+}
+.tool--dice:active {
+  transform: rotate(-20deg) scale(0.92);
+}
+/* The narrowest phones keep the dice in the search palette only. */
+@media (max-width: 380px) {
+  .tool--dice {
+    display: none;
+  }
+}
 .tabs {
   display: none;
 }
@@ -172,6 +250,16 @@ const LINKS = [
   }
   .tabs__icon {
     font-size: 19px;
+  }
+}
+@media (max-width: 360px) {
+  .tabs {
+    inset-inline: 8px;
+    gap: 2px;
+  }
+  .tabs__link {
+    padding-inline: 2px;
+    font-size: 10.5px;
   }
   .tabs__link.router-link-active .tabs__icon {
     color: var(--accent);

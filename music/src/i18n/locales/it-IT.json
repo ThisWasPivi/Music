@@ -9,7 +9,10 @@
     "main": "Navigazione principale",
     "playlists": "Playlist",
     "stats": "Statistiche",
-    "series": "Serie"
+    "series": "Serie",
+    "years": "Anni",
+    "covers": "Copertine",
+    "statsShort": "Stats"
   },
   "theme": {
     "toLight": "Passa al tema chiaro",
@@ -185,5 +188,52 @@
     "title": "Questo disco non c'è",
     "text": "La pagina che cerchi non esiste, oppure la playlist non è pubblicata qui.",
     "back": "Torna alle playlist"
+  },
+  "search": {
+    "title": "Cerca ovunque",
+    "tooltip": "Cerca ovunque ({shortcut})",
+    "placeholder": "Playlist, artisti, album, brani…",
+    "shortcuts": "Scorciatoie",
+    "inPlaylist": "in {name}",
+    "empty": "Niente per “{query}”.",
+    "move": "per muoverti",
+    "open": "per aprire",
+    "yearsHint": "Com'è andato ogni anno",
+    "coversHint": "Tutte le copertine insieme",
+    "kinds": {
+      "playlist": "Playlist",
+      "artist": "Artisti",
+      "album": "Album",
+      "track": "Brani"
+    }
+  },
+  "surprise": {
+    "label": "Sorprendimi",
+    "hint": "Apri una playlist a caso"
+  },
+  "years": {
+    "eyebrow": "L'anno in playlist",
+    "docTitle": "{year} in playlist",
+    "pick": "Scegli l'anno",
+    "playlists": "Playlist",
+    "sameAsBefore": "come l'anno prima",
+    "moreThanBefore": "{n} in più dell'anno prima | {n} in più dell'anno prima",
+    "fewerThanBefore": "{n} in meno dell'anno prima | {n} in meno dell'anno prima",
+    "newArtists": "Artisti nuovi",
+    "ofArtists": "su {n} in tutto",
+    "busiestMonth": "Il mese più pieno",
+    "playlistsTitle": "Le playlist dell'anno",
+    "playlistsInfo": "Tutte le playlist uscite quest'anno, in ordine di uscita. Le etichette segnano la più lunga e la più corta.",
+    "longest": "La più lunga",
+    "shortest": "La più corta",
+    "newArtistsTitle": "Le scoperte",
+    "newArtistsInfo": "Gli artisti comparsi per la prima volta quest'anno, nell'ordine in cui sono arrivati.",
+    "andMore": "e altri {n}"
+  },
+  "covers": {
+    "title": "Copertine",
+    "orderBy": "Ordina per",
+    "byColor": "Colore",
+    "byName": "Nome"
   }
 }

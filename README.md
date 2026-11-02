@@ -42,6 +42,8 @@ complete setup and release workflow.
 
 ### A showcase of the series
 
+- Search everything from any page (⌘K / Ctrl+K or "/"), and a dice button for a random playlist.
+- A cover wall with every cover, sorted by colour or by name.
 - Every issue as a cover card, with fuzzy search across playlists, tracks, albums and artists.
 - Sorting by number, name, track count, duration and cover colour.
 - Filters by artist and release decade (themed dropdowns with fuzzy search) and by mood tag.
@@ -59,6 +61,7 @@ complete setup and release workflow.
 - A per-year calendar of when tracks were added and the distribution of release years.
 - A real-time release timeline with average, shortest and longest gaps and missing numbers.
 - The discovery index (new artists per issue), recurring artists and repeated tracks.
+- A year in review for every year: playlists, top artists and albums, discoveries and calendar.
 - A page per artist: album shelf and a timeline of every issue they appear in.
 
 Everything works on mobile and desktop, in light and dark themes, in English and Italian, with

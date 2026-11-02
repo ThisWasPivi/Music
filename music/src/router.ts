@@ -8,6 +8,7 @@ import {
 
 import { i18n } from "./i18n/index.ts";
 import { playlistRepository } from "./repositories/PlaylistRepository.ts";
+import { releaseYears } from "./services/stats/years.ts";
 import HomeView from "./views/HomeView.vue";
 
 /**
@@ -23,6 +24,14 @@ function artistName(id: string): string | undefined {
     }
   }
   return undefined;
+}
+
+/**
+ * The most recent year with a release, for the /years shortcut.
+ * @returns The year, or undefined without any dated playlist
+ */
+function latestYear(): number | undefined {
+  return releaseYears(playlistRepository.all())[0];
 }
 
 const routes: RouteRecordRaw[] = [
@@ -52,6 +61,29 @@ const routes: RouteRecordRaw[] = [
     meta: { title: () => i18n.global.t("nav.series") },
   },
   {
+    path: "/years",
+    name: "years",
+    redirect: () => ({
+      name: "year",
+      params: { year: String(latestYear() ?? new Date().getFullYear()) },
+    }),
+  },
+  {
+    path: "/years/:year",
+    name: "year",
+    component: () => import("./views/YearView.vue"),
+    props: true,
+    meta: {
+      title: (year: string) => i18n.global.t("years.docTitle", { year }),
+    },
+  },
+  {
+    path: "/covers",
+    name: "covers",
+    component: () => import("./views/CoversView.vue"),
+    meta: { title: () => i18n.global.t("covers.title") },
+  },
+  {
     path: "/artist/:id",
     name: "artist",
     component: () => import("./views/ArtistView.vue"),
@@ -79,7 +111,9 @@ export const router = createRouter({
  */
 function updateTitle(): void {
   const route = router.currentRoute.value;
-  const id = typeof route.params.id === "string" ? route.params.id : "";
+  /* The route's one parameter: a playlist or artist id, or a year. */
+  const param = route.params.id ?? route.params.year;
+  const id = typeof param === "string" ? param : "";
   const title = route.meta.title?.(id);
   if (!title) document.title = `${site.series} · ${site.domain}`;
   else

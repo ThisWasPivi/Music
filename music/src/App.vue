@@ -12,6 +12,7 @@ import AppTooltip from "@/components/ui/AppTooltip.vue";
 import AuroraBackdrop from "@/components/ui/AuroraBackdrop.vue";
 import RouteProgress from "@/components/ui/RouteProgress.vue";
 import SampleDataNotice from "@/components/ui/SampleDataNotice.vue";
+import SearchPalette from "@/components/ui/SearchPalette.vue";
 import { useThemeStore } from "@/stores/theme.ts";
 
 useThemeStore();
@@ -33,6 +34,7 @@ const { t } = useI18n();
   </main>
   <AppFooter />
   <AppTooltip />
+  <SearchPalette />
 </template>
 
 <style scoped>

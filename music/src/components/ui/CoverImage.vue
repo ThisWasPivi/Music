@@ -11,7 +11,9 @@
  * placeholder show around the edge, and many Spotify covers carry a 1px
  * dark border from being resized.
  */
-import { ref, watch } from "vue";
+import { computed, ref, watch } from "vue";
+
+import { auroraTint } from "@/utils/color.ts";
 
 const props = withDefaults(
   defineProps<{
@@ -34,6 +36,30 @@ const props = withDefaults(
 );
 
 const loaded = ref(false);
+/*
+ * Placeholder colours: the cover's own palette, or, for a named picture
+ * without one, two aurora tints picked from the name so every artist gets
+ * a colour of their own.
+ */
+const colours = computed(() => {
+  if (props.palette.length > 0)
+    return [props.palette[0], props.palette[1] ?? props.palette[0]];
+  if (!props.name) return ["var(--c1)", "var(--c2)"];
+  let hash = 0;
+  for (const char of props.name) hash = (hash * 31 + char.charCodeAt(0)) >>> 0;
+  const position = (hash % 1000) / 1000;
+  return [auroraTint(position), auroraTint((position + 0.3) % 1)];
+});
+
+/* The initial of the name, skipping a leading article ("The Cure" → C). */
+const initial = computed(() =>
+  props.name
+    .trim()
+    .replace(/^(the|il|lo|la|i|gli|le|l'|a|an)\s+/i, "")
+    .charAt(0)
+    .toUpperCase(),
+);
+
 /* The image failed to load: the placeholder and initial stay instead. */
 const failed = ref(false);
 watch(
@@ -53,8 +79,8 @@ watch(
       'cover--loaded': loaded && !failed,
     }"
     :style="{
-      '--from': palette[0] ?? 'var(--c1)',
-      '--to': palette[1] ?? 'var(--c2)',
+      '--from': colours[0],
+      '--to': colours[1],
     }"
   >
     <img
@@ -70,7 +96,7 @@ watch(
       @error="failed = true"
     />
     <span v-else-if="name" class="cover__initial" aria-hidden="true">{{
-      name.trim().charAt(0).toUpperCase()
+      initial
     }}</span>
   </div>
 </template>

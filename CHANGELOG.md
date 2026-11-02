@@ -4,7 +4,18 @@ All notable changes to music.pivi.dev. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 [Semantic Versioning](https://semver.org/). Data syncs are not listed.
 
-## [Unreleased]
+## [1.4.0] - 2026-11-02
+
+### Added
+
+- Year in review (`/years`): playlists, tracks, total length, new artists and the busiest month
+  of each year, with the year's covers, top artists and albums, its discoveries and calendar.
+- Search everything: one box over playlists, artists, albums and tracks, opened from the header,
+  with ⌘K / Ctrl+K or "/", fully usable from the keyboard.
+- Surprise me: a dice button in the header (and in the search) opens a random playlist.
+- Cover wall (`/covers`): every cover in one mosaic, sorted by colour or by name, sliding into
+  place when the order changes.
+- Artists without a picture get their own colour and the initial of their name, skipping "The".
 
 ### Changed
 

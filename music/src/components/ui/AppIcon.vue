@@ -22,7 +22,13 @@ export type IconName =
   | "grid"
   | "chart"
   | "timeline"
-  | "calendar";
+  | "calendar"
+  | "search"
+  | "shuffle"
+  | "wall"
+  | "sparkle"
+  | "album"
+  | "user";
 
 defineProps<{
   /** Which icon to draw. */
@@ -68,6 +74,35 @@ const PATHS: Record<IconName, string[]> = {
     "M8 3v4",
     "M16 3v4",
   ],
+  search: ["M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14Z", "m20 20-4-4"],
+  shuffle: [
+    "M3 7h3c4 0 6 10 10 10h5",
+    "M3 17h3c1.6 0 2.8-1.5 4-3.4",
+    "M14 9.4C15.2 8 16.4 7 18 7h3",
+    "m18 4 3 3-3 3",
+    "m18 14 3 3-3 3",
+  ],
+  wall: [
+    "M4 4h4v4H4Z",
+    "M10 4h4v4h-4Z",
+    "M16 4h4v4h-4Z",
+    "M4 10h4v4H4Z",
+    "M10 10h4v4h-4Z",
+    "M16 10h4v4h-4Z",
+    "M4 16h4v4H4Z",
+    "M10 16h4v4h-4Z",
+    "M16 16h4v4h-4Z",
+  ],
+  sparkle: [
+    "M12 3c.6 4.4 2.6 6.4 7 7-4.4.6-6.4 2.6-7 7-.6-4.4-2.6-6.4-7-7 4.4-.6 6.4-2.6 7-7Z",
+    "M19 16v4",
+    "M17 18h4",
+  ],
+  album: [
+    "M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Z",
+    "M12 14a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z",
+  ],
+  user: ["M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z", "M4 21c0-4 3.6-6 8-6s8 2 8 6"],
   external: [
     "M14 4h6v6",
     "M20 4 11 13",

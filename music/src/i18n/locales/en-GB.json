@@ -9,7 +9,10 @@
     "main": "Main navigation",
     "playlists": "Playlists",
     "stats": "Stats",
-    "series": "Series"
+    "series": "Series",
+    "years": "Years",
+    "covers": "Covers",
+    "statsShort": "Stats"
   },
   "theme": {
     "toLight": "Switch to light theme",
@@ -185,5 +188,52 @@
     "title": "This record is missing",
     "text": "The page you're looking for doesn't exist, or the playlist isn't published here.",
     "back": "Back to the playlists"
+  },
+  "search": {
+    "title": "Search everything",
+    "tooltip": "Search everything ({shortcut})",
+    "placeholder": "Playlists, artists, albums, tracks…",
+    "shortcuts": "Shortcuts",
+    "inPlaylist": "in {name}",
+    "empty": "Nothing for “{query}”.",
+    "move": "to move",
+    "open": "to open",
+    "yearsHint": "How each year went",
+    "coversHint": "Every cover in one place",
+    "kinds": {
+      "playlist": "Playlists",
+      "artist": "Artists",
+      "album": "Albums",
+      "track": "Tracks"
+    }
+  },
+  "surprise": {
+    "label": "Surprise me",
+    "hint": "Open a random playlist"
+  },
+  "years": {
+    "eyebrow": "The year in playlists",
+    "docTitle": "{year} in playlists",
+    "pick": "Pick a year",
+    "playlists": "Playlists",
+    "sameAsBefore": "same as the year before",
+    "moreThanBefore": "{n} more than the year before | {n} more than the year before",
+    "fewerThanBefore": "{n} fewer than the year before | {n} fewer than the year before",
+    "newArtists": "New artists",
+    "ofArtists": "out of {n} in all",
+    "busiestMonth": "Busiest month",
+    "playlistsTitle": "This year's playlists",
+    "playlistsInfo": "Every playlist that came out this year, in release order. The labels mark the longest and the shortest.",
+    "longest": "Longest",
+    "shortest": "Shortest",
+    "newArtistsTitle": "Discoveries",
+    "newArtistsInfo": "Artists who showed up for the first time this year, in the order they arrived.",
+    "andMore": "and {n} more"
+  },
+  "covers": {
+    "title": "Covers",
+    "orderBy": "Order by",
+    "byColor": "Colour",
+    "byName": "Name"
   }
 }
