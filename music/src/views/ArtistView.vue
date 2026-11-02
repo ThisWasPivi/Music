@@ -392,8 +392,10 @@ useBackdrop(() => profile.value?.imageUrl ?? last.value?.coverUrl);
 }
 .shelf {
   list-style: none;
-  margin: 0;
-  padding: 0 0 6px;
+  /* Room inside the scroller for the hover lift and shadow, which it would clip. */
+  margin: -10px -8px 0;
+  padding: 10px 8px 12px;
+  scroll-padding-inline: 8px;
   display: grid;
   grid-auto-flow: column;
   grid-auto-columns: minmax(130px, 150px);

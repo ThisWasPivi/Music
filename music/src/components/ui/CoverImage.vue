@@ -3,7 +3,8 @@
  * CoverImage component
  * Square cover art. While the image loads, a shimmering skeleton tinted
  * with the cover's colours holds its place; the image then fades and
- * sharpens in. Missing covers keep a palette gradient.
+ * sharpens in. Missing covers keep a palette gradient, with the initial of
+ * `name` on it when given (artists without a picture).
  *
  * Once loaded, the placeholder colour is dropped and the image is zoomed by
  * 2%: otherwise the rounded clip lets a hairline of the (often dark)
@@ -25,28 +26,39 @@ const props = withDefaults(
 
     /** Loads immediately instead of lazily. */
     eager?: boolean;
+
+    /** Name whose initial stands in for a missing picture. */
+    name?: string;
   }>(),
-  { alt: "", palette: () => [], eager: false },
+  { alt: "", palette: () => [], eager: false, name: "" },
 );
 
 const loaded = ref(false);
+/* The image failed to load: the placeholder and initial stay instead. */
+const failed = ref(false);
 watch(
   () => props.src,
-  () => (loaded.value = false),
+  () => {
+    loaded.value = false;
+    failed.value = false;
+  },
 );
 </script>
 
 <template>
   <div
     class="cover"
-    :class="{ 'cover--loading': src && !loaded, 'cover--loaded': loaded }"
+    :class="{
+      'cover--loading': src && !loaded && !failed,
+      'cover--loaded': loaded && !failed,
+    }"
     :style="{
       '--from': palette[0] ?? 'var(--c1)',
       '--to': palette[1] ?? 'var(--c2)',
     }"
   >
     <img
-      v-if="src"
+      v-if="src && !failed"
       :src="src"
       :alt="alt"
       :loading="eager ? 'eager' : 'lazy'"
@@ -55,8 +67,11 @@ watch(
       height="640"
       :class="{ 'cover__img--in': loaded }"
       @load="loaded = true"
-      @error="loaded = true"
+      @error="failed = true"
     />
+    <span v-else-if="name" class="cover__initial" aria-hidden="true">{{
+      name.trim().charAt(0).toUpperCase()
+    }}</span>
   </div>
 </template>
 
@@ -69,6 +84,7 @@ watch(
   border-radius: var(--cover-radius, 14px);
   /* Clips the zoomed image on its own layer, without a fringe at the corners. */
   isolation: isolate;
+  container-type: inline-size;
   transition:
     transform 260ms cubic-bezier(0.34, 1.56, 0.64, 1),
     box-shadow 260ms ease;
@@ -108,6 +124,16 @@ watch(
     opacity 500ms ease,
     filter 600ms ease,
     transform 700ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+/* Sized from the cover's own width, so it fits a 32px avatar and a hero alike. */
+.cover__initial {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  font: 750 45cqi / 1 var(--font-display);
+  text-shadow: 0 1px 6px rgb(0 0 0 / 0.3);
 }
 .cover--loaded {
   background: transparent;

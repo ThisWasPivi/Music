@@ -29,7 +29,9 @@ Constraints of the current Web API that the sync follows:
   and `items[].track` became `items[].item` (the old name is still accepted);
 - audio-features, audio-analysis, recommendations, related-artists, artist top-tracks and the
   batch endpoints no longer exist, and `popularity`, `followers` and `label` are not used;
-- only the top 30 artists are fetched one by one (`GET /artists/{id}`), for their pictures.
+- artist pictures need one `GET /artists/{id}` per artist. Every credited artist is fetched by
+  default (`artistImages` in `sync/playlists.config.ts` can cap it); responses are cached for 30
+  days, so later syncs only ask for new artists.
 
 ## 2. First run
 

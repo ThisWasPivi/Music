@@ -17,7 +17,7 @@ export const DATA_DIR = fileURLToPath(
  * Everything the sync publishes.
  * @property meta - Sync metadata
  * @property playlists - Published playlists
- * @property artists - Profiles of the top artists
+ * @property artists - Profiles (with pictures) of the credited artists
  * @property rotation - Current listening, possibly empty
  */
 export interface PublishedData {

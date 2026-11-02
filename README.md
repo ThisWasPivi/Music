@@ -28,7 +28,7 @@ complete setup and release workflow.
   backoff on 429, disk cache), zod-validated responses and `sharp` for cover palettes.
 - **Shared model**: TypeScript domain types, zod schemas, series rules and security rules in the
   `@music/shared` workspace package.
-- **Data**: Portable JSON documents for playlists, top artists, rotation and sync metadata.
+- **Data**: Portable JSON documents for playlists, artist pictures, rotation and sync metadata.
 - **Styling**: Tailwind CSS v4 with native CSS tokens, the "Aurora" glass design, light and dark
   themes, Montserrat and Inter.
 - **Internationalization**: vue-i18n with English and Italian interfaces and round-flag

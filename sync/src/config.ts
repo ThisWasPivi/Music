@@ -6,7 +6,7 @@ const configSchema = z.object({
   include: z.array(z.string()).default([]),
   exclude: z.array(z.string()).default([]),
   tags: z.record(z.string(), z.array(z.string())).default({}),
-  topArtistCount: z.number().int().min(0).max(50).default(30),
+  artistImages: z.number().int().min(0).nullable().default(null),
   rotation: z.boolean().default(true),
 });
 
@@ -16,7 +16,8 @@ const configSchema = z.object({
  * @property include - Extra playlist ids to publish even if the name does not match
  * @property exclude - Playlist ids never to publish
  * @property tags - Optional moods per playlist id
- * @property topArtistCount - Artists to enrich with an image via GET /artists/{id}
+ * @property artistImages - How many artists, most credited first, get a picture via
+ *   GET /artists/{id}; null fetches every credited artist (cached for 30 days)
  * @property rotation - Whether to fetch the "in rotation" top artists and tracks
  */
 export type SyncConfig = z.infer<typeof configSchema>;

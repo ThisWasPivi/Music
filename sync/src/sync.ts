@@ -111,11 +111,22 @@ export async function runSync(deps: SyncDeps): Promise<PublishedData> {
   }
 
   const artists: ArtistProfile[] = [];
-  for (const id of rankArtistIds(playlists).slice(0, config.topArtistCount)) {
+  /*
+   * One request per artist: Spotify removed the batch endpoint. Every
+   * credited artist gets a picture by default; the responses are cached for
+   * 30 days, so only new artists cost a request on later syncs.
+   */
+  const ranked = rankArtistIds(playlists);
+  const wanted =
+    config.artistImages === null
+      ? ranked
+      : ranked.slice(0, config.artistImages);
+  if (wanted.length > 0) log(`Fetching pictures for ${wanted.length} artists…`);
+  for (const id of wanted) {
     const artist = await client.get(
       `/artists/${encodeURIComponent(id)}`,
       artistSchema,
-      { maxAgeMs: 14 * DAY_MS },
+      { maxAgeMs: 30 * DAY_MS },
     );
     const profile = adaptArtist(artist);
     if (profile) artists.push(profile);

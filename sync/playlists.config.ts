@@ -21,6 +21,7 @@ export default defineConfig({
   /* Optional moods per playlist id, e.g. { "37i9dQZF1DX...": ["chill", "night"] }. */
   tags: {},
 
-  topArtistCount: 30,
+  /* Artists that get a picture, most credited first; null means all of them. */
+  artistImages: null,
   rotation: true,
 });

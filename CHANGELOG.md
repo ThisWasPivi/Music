@@ -21,6 +21,12 @@ All notable changes to music.pivi.dev. The format follows
 
 ### Fixed
 
+- Long figures such as "78 h 47 min" shrink to fit their tile instead of being cut.
+- Hover zoom and glow are no longer clipped in the "On rotation" and album strips.
+- Every credited artist now gets a picture from the sync (it used to be only the 30 most
+  credited); artists Spotify has no picture for, or whose picture fails to load, show their
+  initial.
+
 - Message files now hot-reload in development, so new texts never show up as raw keys.
 
 - Repeated tracks were squeezed on phones when a track appeared in many issues: each track is

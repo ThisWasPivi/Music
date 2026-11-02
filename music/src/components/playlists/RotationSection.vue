@@ -33,7 +33,11 @@ const rotation = playlistRepository.rotation();
           rel="noopener"
           class="rotation__artist"
         >
-          <CoverImage :src="artist.imageUrl" class="rotation__avatar" />
+          <CoverImage
+            :src="artist.imageUrl"
+            :name="artist.name"
+            class="rotation__avatar"
+          />
           <span>{{ artist.name }}</span>
         </a>
       </li>
@@ -62,11 +66,12 @@ const rotation = playlistRepository.rotation();
 <style scoped>
 .rotation__artists {
   list-style: none;
-  margin: 0 0 18px;
-  padding: 0;
   display: flex;
   gap: 16px;
   overflow-x: auto;
+  /* Room inside the scroller for the hover zoom and glow, which it would clip. */
+  padding: 10px 8px;
+  margin: -10px -8px 8px;
 }
 .rotation__artist {
   display: grid;

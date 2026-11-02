@@ -170,6 +170,7 @@ function days(value: number | null | undefined): string {
                   >
                     <CoverImage
                       :src="profile(row.artist.id)?.imageUrl ?? null"
+                      :name="row.artist.name"
                       class="who__image"
                     />
                     {{ row.artist.name }}

@@ -55,6 +55,9 @@ const entered = useEntered();
         :class="{ 'ranking__image--round': row.round }"
       >
         <img v-if="row.image" :src="row.image" alt="" loading="lazy" />
+        <span v-else class="ranking__initial" aria-hidden="true">{{
+          row.label.trim().charAt(0).toUpperCase()
+        }}</span>
       </span>
       <span class="ranking__text">
         <RouterLink
@@ -115,6 +118,13 @@ const entered = useEntered();
 }
 .ranking__image--round {
   border-radius: 50%;
+}
+.ranking__initial {
+  display: grid;
+  place-items: center;
+  block-size: 100%;
+  color: #fff;
+  font: 750 15px / 1 var(--font-display);
 }
 .ranking__image img {
   display: block;

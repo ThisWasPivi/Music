@@ -69,7 +69,7 @@ onBeforeUnmount(() => cancelAnimationFrame(frame));
     <p class="tile__label muted">{{ label }}</p>
     <p
       class="tile__value tabular"
-      :class="{ 'tile__value--long': value.length > 7 }"
+      :style="{ '--chars': Math.max(4, value.length) }"
       :aria-label="value"
     >
       {{ shown }}
@@ -82,6 +82,7 @@ onBeforeUnmount(() => cancelAnimationFrame(frame));
 .tile {
   padding: 16px 18px;
   min-width: 0;
+  container-type: inline-size;
 }
 .tile p {
   margin: 0;
@@ -89,17 +90,19 @@ onBeforeUnmount(() => cancelAnimationFrame(frame));
 .tile__label {
   font-size: 13px;
 }
+/*
+ * The figure stays on one line and shrinks to the tile's width when it is
+ * long ("78 h 47 min"), so it is never cut.
+ */
 .tile__value {
   font: 750 clamp(24px, 2.6vw, 32px) / 1.15 var(--font-display);
+  font-size: min(clamp(24px, 2.6vw, 32px), calc(100cqi / (var(--chars) * 0.6)));
+  white-space: nowrap;
   letter-spacing: -0.02em;
   background: linear-gradient(90deg, var(--text), var(--accent));
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-}
-.tile__value--long {
-  font-size: clamp(20px, 1.9vw, 26px);
-  white-space: nowrap;
 }
 /* Details wrap to two lines before they are cut. */
 .tile__detail {
